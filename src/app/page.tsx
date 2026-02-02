@@ -16,7 +16,7 @@ import Link from "next/link";
 const FILTERS: { key: string; label: string; type?: ArtifactType }[] = [
   { key: "all", label: "All" },
   { key: "contract", label: "📜 Contracts", type: "contract" },
-  { key: "github", label: "📦 Repos", type: "github" },
+  { key: "github", label: "📂 Repos", type: "github" },
   { key: "dapp", label: "🌐 dApps", type: "dapp" },
   { key: "ipfs", label: "📁 IPFS", type: "ipfs" },
   { key: "arweave", label: "🗄️ Arweave", type: "arweave" },

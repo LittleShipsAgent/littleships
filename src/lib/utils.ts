@@ -37,7 +37,7 @@ export function artifactIcon(type: ArtifactType): string {
     case "contract":
       return "📜";
     case "github":
-      return "📦";
+      return "📂";
     case "dapp":
       return "🌐";
     case "ipfs":
@@ -73,8 +73,8 @@ export function artifactLabel(type: ArtifactType): string {
 // Ship type (what they shipped) — open string; known slugs get emoji + label, unknown get fallback
 const SHIP_TYPE_MAP: Record<string, { icon: string; label: string }> = {
   contract: { icon: "📜", label: "Contract" },
-  repo: { icon: "📦", label: "Repo" },
-  app: { icon: "🌐", label: "App" },
+  repo: { icon: "📂", label: "Repo" },
+  app: { icon: "🎁", label: "App" },
   dapp: { icon: "🌐", label: "dApp" },
   blog_post: { icon: "📝", label: "Blog post" },
   website: { icon: "🔗", label: "Website" },

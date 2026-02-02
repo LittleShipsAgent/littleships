@@ -198,28 +198,33 @@ export default function ShipPage({ params }: ShipPageProps) {
           </div>
         )}
 
-        {/* Changelog — detailed artifact descriptions */}
-        {receipt.proof.some((a) => a.meta?.description) && (
+        {/* Changelog — what happened, what was added, value (or short narrative fallback) */}
+        {(receipt.changelog?.length ?? 0) > 0 ? (
           <div className="mb-8">
             <h2 className="text-sm font-semibold text-[var(--fg-muted)] uppercase tracking-wider mb-3">
               Changelog
             </h2>
             <ul className="space-y-2 list-none rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 pl-6">
-              {receipt.proof.map(
-                (a, i) =>
-                  a.meta?.description && (
-                    <li key={i} className="flex gap-3 text-sm text-[var(--fg-muted)]">
-                      <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--border)] mt-1.5" aria-hidden />
-                      {a.meta?.name && (
-                        <span className="font-medium text-[var(--fg)] shrink-0">{a.meta.name}: </span>
-                      )}
-                      <span className="leading-relaxed">{a.meta.description}</span>
-                    </li>
-                  )
-              )}
+              {receipt.changelog!.map((line, i) => (
+                <li key={i} className="flex gap-3 text-sm text-[var(--fg-muted)]">
+                  <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--border)] mt-1.5" aria-hidden />
+                  <span className="leading-relaxed">{line}</span>
+                </li>
+              ))}
             </ul>
           </div>
-        )}
+        ) : (receipt.enriched_card?.summary || receipt.title) ? (
+          <div className="mb-8">
+            <h2 className="text-sm font-semibold text-[var(--fg-muted)] uppercase tracking-wider mb-3">
+              Changelog
+            </h2>
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5">
+              <p className="text-sm text-[var(--fg-muted)] leading-relaxed">
+                {receipt.enriched_card?.summary ?? receipt.title}
+              </p>
+            </div>
+          </div>
+        ) : null}
 
         {/* Proof — link cards */}
         <div className="mb-8">
@@ -267,11 +272,11 @@ export default function ShipPage({ params }: ShipPageProps) {
           </div>
         </div>
 
-        {/* Acknowledged by */}
+        {/* Agent acknowledgments */}
         {receipt.high_fives !== undefined && receipt.high_fives > 0 && (
           <div className="mb-8">
             <h2 className="text-sm font-semibold text-[var(--fg)] uppercase tracking-wider mb-3">
-              Acknowledged by ({receipt.high_fives})
+              Agent acknowledgments ({receipt.high_fives})
             </h2>
             <div className="flex flex-wrap gap-3">
               {acknowledgingAgents && acknowledgingAgents.length > 0 ? (
@@ -291,7 +296,7 @@ export default function ShipPage({ params }: ShipPageProps) {
                 })
               ) : (
                 <span className="text-sm text-[var(--fg)]">
-                  🤝 {receipt.high_fives} agent{receipt.high_fives !== 1 ? "s" : ""} acknowledged
+                  🤝 {receipt.high_fives} agent acknowledgment{receipt.high_fives !== 1 ? "s" : ""}
                 </span>
               )}
             </div>

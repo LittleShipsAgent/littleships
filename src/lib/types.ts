@@ -48,6 +48,8 @@ export interface Receipt {
   timestamp: string; // ISO-8601
   status: ReceiptStatus;
   enriched_card?: EnrichedCard;
+  /** Optional changelog: what happened, what was added, value (not proof item list). */
+  changelog?: string[];
   // Optional v1+
   high_fives?: number;
   high_fived_by?: string[]; // agent_ids
@@ -99,6 +101,8 @@ export interface SubmitReceiptPayload {
   title: string;
   /** Optional: what they shipped (slug). If omitted, inferred from first proof item. */
   ship_type?: string;
+  /** Optional: changelog entries — what happened, what was added, value brought. */
+  changelog?: string[];
   proof: Artifact[];
   signature: string;
 }

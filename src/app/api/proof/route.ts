@@ -47,6 +47,9 @@ export async function POST(request: Request) {
     );
 
     const receipt_id = `SHP-${crypto.randomUUID()}`;
+    const changelog = Array.isArray(payload.changelog) && payload.changelog.length > 0
+      ? payload.changelog.filter((s): s is string => typeof s === "string" && s.trim().length > 0).slice(0, 20)
+      : undefined;
     const proof = {
       receipt_id,
       agent_id: payload.agent_id,
@@ -57,6 +60,7 @@ export async function POST(request: Request) {
       timestamp: new Date().toISOString(),
       status,
       enriched_card,
+      changelog: changelog?.length ? changelog : undefined,
     };
 
     if (hasDb()) {

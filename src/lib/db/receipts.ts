@@ -11,6 +11,7 @@ function rowToReceipt(row: {
   timestamp: string;
   status: string;
   enriched_card: unknown;
+  changelog?: unknown;
 }): Receipt {
   return {
     receipt_id: row.receipt_id,
@@ -22,6 +23,7 @@ function rowToReceipt(row: {
     timestamp: row.timestamp,
     status: row.status as Receipt["status"],
     enriched_card: row.enriched_card as EnrichedCard | undefined,
+    changelog: Array.isArray(row.changelog) ? (row.changelog as string[]) : undefined,
   };
 }
 
@@ -74,6 +76,7 @@ export async function insertReceipt(receipt: Receipt): Promise<Receipt> {
     timestamp: receipt.timestamp,
     status: receipt.status,
     enriched_card: receipt.enriched_card ?? null,
+    changelog: receipt.changelog ?? null,
   };
   const { data, error } = await db.from("receipts").insert(row).select().single();
   if (error) throw error;

@@ -50,7 +50,7 @@ export function ProofCard({ receipt, agent, showAgent = true, showAgentAvatar = 
           <span className="leading-none" aria-hidden>{icon}</span>
         </div>
 
-        {/* Content: what + who + proof count + acknowledgements */}
+        {/* Content: what + who + proof count + acknowledgments */}
         <div className="flex-1 min-w-0">
           {/* What they shipped + type label */}
           <div className="flex items-start justify-between gap-3 mb-1">
@@ -103,22 +103,22 @@ export function ProofCard({ receipt, agent, showAgent = true, showAgentAvatar = 
             </p>
           )}
 
-          {/* Proof count + link; acknowledgements when > 0 */}
+          {/* Proof count + link; acknowledgments when > 0 */}
           <div className="flex items-center justify-between flex-wrap gap-2 text-xs text-[var(--fg-subtle)]">
             <span>Shipped {timeAgo(receipt.timestamp)}</span>
             <div className="flex items-center gap-3">
               {highFives > 0 && (
-                <span className="flex items-center gap-1.5 text-[var(--fg)]" title={`${highFives} acknowledged`}>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--card-hover)] border border-[var(--border)] text-[var(--fg)]" title={`${highFives} agent acknowledgment${highFives !== 1 ? "s" : ""}`}>
                   {reactionEmojis.map((emoji, i) => (
-                    <span key={i} className="text-base leading-none" aria-hidden>{emoji}</span>
+                    <span key={i} className="text-lg leading-none" aria-hidden>{emoji}</span>
                   ))}
-                  <span>{highFives}</span>
+                  <span className="font-medium">{highFives} agent acknowledgment{highFives !== 1 ? "s" : ""}</span>
                 </span>
               )}
               <Link
                 href={proofUrl}
                 onClick={(e) => e.stopPropagation()}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[var(--bg-muted)] text-[var(--fg-muted)] font-medium hover:text-[var(--fg)] hover:bg-[var(--bg-subtle)] transition"
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[var(--card-hover)] border border-[var(--border)] text-[var(--fg-muted)] font-medium hover:text-[var(--fg)] hover:bg-[var(--bg-subtle)] hover:border-[var(--border-hover)] transition"
               >
                 {proofCount} proof →
               </Link>

@@ -136,15 +136,18 @@ export default function AgentPage({ params }: AgentPageProps) {
         </div>
       )}
 
-      {/* Agent Header - aligns with site header (max-w-6xl) */}
-      <section
-        className="border-b border-[var(--border)] relative"
-        style={{
-          boxShadow: `inset 0 -1px 0 0 ${getAgentGlowColor(agent.agent_id)}, 0 12px 48px -16px ${getAgentGlowColor(agent.agent_id)}`,
-        }}
-      >
-        <div className="max-w-6xl mx-auto px-6 md:px-8 py-8">
-          <div className="flex items-start gap-6">
+      {/* Agent Header - rounded module with margin; inner glow like half-circle from top */}
+      <section className="border-b border-[var(--border)] relative px-4 md:px-6 py-4">
+        <div className="relative max-w-6xl mx-auto px-6 md:px-8 py-8 rounded-2xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
+          {/* Half-circle glow from top */}
+          <div
+            className="absolute inset-0 rounded-2xl pointer-events-none"
+            style={{
+              background: `radial-gradient(ellipse 100% 80% at 50% 0%, ${getAgentGlowColor(agent.agent_id)} 0%, transparent 55%)`,
+            }}
+            aria-hidden
+          />
+          <div className="relative flex items-start gap-6">
             {/* Avatar */}
             <BotAvatar size="xl" seed={agent.agent_id} iconClassName="text-6xl" />
 

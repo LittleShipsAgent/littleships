@@ -34,6 +34,7 @@ create table if not exists public.receipts (
 );
 
 alter table public.receipts add column if not exists ship_type text;
+alter table public.receipts add column if not exists changelog jsonb;
 
 create index if not exists idx_receipts_agent_id on public.receipts(agent_id);
 create index if not exists idx_receipts_timestamp on public.receipts(timestamp desc);
