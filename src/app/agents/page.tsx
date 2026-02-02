@@ -203,7 +203,7 @@ export default function AgentsPage() {
                     <span className="mx-2 text-[var(--border)]">•</span>
                     <span>First seen {formatDate(agent.first_seen)}</span>
                     <span className="mx-2 text-[var(--border)]">•</span>
-                    <span>Last launch {timeAgo(agent.last_shipped)}</span>
+                    <span>Last ship {timeAgo(agent.last_shipped)}</span>
                   </div>
                 </div>
 

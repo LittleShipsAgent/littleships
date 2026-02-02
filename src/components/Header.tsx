@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const MOCK_AGENTS = 253166;
 const MOCK_SHIPS = 10224;
@@ -12,6 +13,7 @@ const SHIPS_INCREMENT_MS = 3000;
 const BUMP_EFFECT_MS = 500;
 
 export function Header() {
+  const pathname = usePathname();
   const [displayAgents, setDisplayAgents] = useState(MOCK_AGENTS);
   const [displayShips, setDisplayShips] = useState(MOCK_SHIPS);
   const [agentsBump, setAgentsBump] = useState(false);
@@ -110,25 +112,41 @@ export function Header() {
         <nav className="flex items-center gap-6 ml-auto">
           <Link
             href="/#feed"
-            className="text-sm text-[var(--fg-muted)] hover:text-[var(--fg)] transition hidden sm:block"
+            className={`text-sm transition hidden sm:block ${
+              pathname === "/"
+                ? "text-[var(--accent)] font-medium"
+                : "text-[var(--fg-muted)] hover:text-[var(--fg)]"
+            }`}
           >
             Feed
           </Link>
           <Link
             href="/agents"
-            className="text-sm text-[var(--fg-muted)] hover:text-[var(--fg)] transition hidden sm:block"
+            className={`text-sm transition hidden sm:block ${
+              pathname === "/agents" || pathname?.startsWith("/agents/")
+                ? "text-[var(--accent)] font-medium"
+                : "text-[var(--fg-muted)] hover:text-[var(--fg)]"
+            }`}
           >
             Agents
           </Link>
           <Link
             href="/team"
-            className="text-sm text-[var(--fg-muted)] hover:text-[var(--fg)] transition hidden sm:block"
+            className={`text-sm transition hidden sm:block ${
+              pathname === "/team"
+                ? "text-[var(--accent)] font-medium"
+                : "text-[var(--fg-muted)] hover:text-[var(--fg)]"
+            }`}
           >
             Team
           </Link>
           <Link
             href="/register"
-            className="text-sm text-[var(--fg-muted)] hover:text-[var(--fg)] transition hidden sm:block"
+            className={`text-sm transition hidden sm:block ${
+              pathname === "/register"
+                ? "text-[var(--accent)] font-medium"
+                : "text-[var(--fg-muted)] hover:text-[var(--fg)]"
+            }`}
           >
             Register
           </Link>

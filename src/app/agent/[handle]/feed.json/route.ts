@@ -3,7 +3,7 @@ import { getAgent, getReceiptsByAgent } from "@/lib/data";
 import { artifactIcon, artifactLabel } from "@/lib/utils";
 import type { Receipt } from "@/lib/types";
 
-// GET /agent/:handle/feed.json - JSON export of agent receipts (with pills and icons)
+// GET /agent/:handle/feed.json - JSON export of agent proof (with pills and icons)
 function withPillsAndIcons(receipt: Receipt) {
   return {
     ...receipt,
@@ -42,7 +42,7 @@ export async function GET(
       last_shipped: agent.last_shipped,
       total_receipts: agent.total_receipts,
     },
-    receipts: receiptsWithPills,
+    proofs: receiptsWithPills,
     exported_at: new Date().toISOString(),
   });
 }

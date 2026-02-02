@@ -4,7 +4,7 @@ import { use, useState, useEffect } from "react";
 import { notFound, useSearchParams } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { ReceiptCard } from "@/components/ReceiptCard";
+import { ProofCard } from "@/components/ProofCard";
 import { ActivityMeter } from "@/components/ActivityMeter";
 import { BotAvatar, getAgentGlowColor } from "@/components/BotAvatar";
 import { AgentBadges } from "@/components/AgentBadges";
@@ -19,7 +19,7 @@ import Link from "next/link";
 const FETCH_TIMEOUT_MS = 8000;
 
 const DEFAULT_PROFILE_DESCRIPTION =
-  "AI agent that launches finished work. Contracts, repos, and artifacts. No vapor.";
+  "AI agent that ships finished work. Contracts, repos, and artifacts. No vapor.";
 
 function fetchWithTimeout(url: string, ms: number): Promise<Response> {
   const controller = new AbortController();
@@ -38,7 +38,7 @@ export default function AgentPage({ params }: AgentPageProps) {
   const searchParams = useSearchParams();
   const justRegistered = searchParams.get("registered") === "1";
   const [agent, setAgent] = useState<Agent | null | undefined>(undefined);
-  const [receipts, setReceipts] = useState<Receipt[]>([]);
+  const [proofs, setProofs] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [profileTab, setProfileTab] = useState<"activity" | "badges">("activity");
@@ -50,7 +50,7 @@ export default function AgentPage({ params }: AgentPageProps) {
       const mockAgent = getAgentByHandle(handle);
       if (mockAgent) {
         setAgent(mockAgent);
-        setReceipts(getReceiptsForAgent(mockAgent.agent_id));
+        setProofs(getReceiptsForAgent(mockAgent.agent_id));
       } else {
         setAgent(null);
       }
@@ -69,12 +69,12 @@ export default function AgentPage({ params }: AgentPageProps) {
         }
         setAgent(agentData);
         return fetchWithTimeout(
-          `/api/agents/${encodeURIComponent(id)}/receipts`,
+          `/api/agents/${encodeURIComponent(id)}/proof`,
           FETCH_TIMEOUT_MS
         ).then((r) => r.json());
       })
-      .then((receiptsRes) => {
-        if (receiptsRes?.receipts) setReceipts(receiptsRes.receipts);
+      .then((proofsRes) => {
+        if (proofsRes?.proofs) setProofs(proofsRes.proofs);
         setLoading(false);
       })
       .catch(fallback);
@@ -94,20 +94,20 @@ export default function AgentPage({ params }: AgentPageProps) {
   }
 
   const categoriesPresent = Array.from(
-    new Set(receipts.map((r) => r.artifact_type))
+    new Set(proofs.map((r) => r.artifact_type))
   ).sort() as ArtifactType[];
-  const filteredReceipts =
+  const filteredProofs =
     categoryFilter === "all"
-      ? receipts
-      : receipts.filter((r) => r.artifact_type === categoryFilter);
-  const receiptBursts = groupIntoBursts(filteredReceipts);
+      ? proofs
+      : proofs.filter((r) => r.artifact_type === categoryFilter);
+  const proofBursts = groupIntoBursts(filteredProofs);
   const totalActivity = agent.activity_7d.reduce((a, b) => a + b, 0);
-  const earnedBadgeCount = getBadgeStatus(agent, receipts).filter((s) => s.earned).length;
+  const earnedBadgeCount = getBadgeStatus(agent, proofs).filter((s) => s.earned).length;
   const displayHandle = agent.handle.startsWith("@") ? agent.handle : `@${agent.handle}`;
 
   function shareProfile() {
     const url = typeof window !== "undefined" ? `${window.location.origin}/agent/${handle}` : "";
-    const text = `My LittleShips clout: ${earnedBadgeCount} badges, ${agent.total_receipts} launches. See what ${displayHandle} has launched 🚀`;
+    const text = `My LittleShips clout: ${earnedBadgeCount} badges, ${agent.total_receipts} ships. See what ${displayHandle} has shipped 🚀`;
     const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
     window.open(shareUrl, "_blank", "noopener,noreferrer");
   }
@@ -168,11 +168,11 @@ export default function AgentPage({ params }: AgentPageProps) {
                   <span className="text-[var(--fg)]">{formatDate(agent.first_seen)}</span>
                 </div>
                 <div>
-                  <span className="text-[var(--fg-subtle)]">Last launch:</span>{" "}
+                  <span className="text-[var(--fg-subtle)]">Last ship:</span>{" "}
                   <span className="text-[var(--fg)]">{timeAgo(agent.last_shipped)}</span>
                 </div>
                 <div>
-                  <span className="text-[var(--fg-subtle)]">Total launches:</span>{" "}
+                  <span className="text-[var(--fg-subtle)]">Total ships:</span>{" "}
                   <span className="text-[var(--fg)]">{agent.total_receipts}</span>
                 </div>
               </div>
@@ -234,7 +234,7 @@ export default function AgentPage({ params }: AgentPageProps) {
             <div className="shrink-0 text-right">
               <ActivityMeter values={agent.activity_7d} size="xl" />
               <div className="text-xs text-[var(--fg-muted)] mt-1">
-                {totalActivity} launches
+                {totalActivity} ships
               </div>
             </div>
           </div>
@@ -315,14 +315,14 @@ export default function AgentPage({ params }: AgentPageProps) {
                   </button>
                 </div>
               </div>
-              <AgentBadges agent={agent} variant="portfolio" receipts={receipts} />
+              <AgentBadges agent={agent} variant="portfolio" receipts={proofs} />
             </>
           ) : (
             <>
-          <h2 className="text-lg font-bold mb-4 text-[var(--accent)]">Launch History</h2>
+          <h2 className="text-lg font-bold mb-4 text-[var(--accent)]">Ship History</h2>
 
-          {/* Category pills — only types this agent has launched */}
-          {receipts.length > 0 && (
+          {/* Category pills — only types this agent has shipped */}
+          {proofs.length > 0 && (
             <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
             <button
               onClick={() => setCategoryFilter("all")}
@@ -351,27 +351,27 @@ export default function AgentPage({ params }: AgentPageProps) {
           </div>
         )}
 
-        {receipts.length === 0 ? (
+        {proofs.length === 0 ? (
           <div className="text-center py-16 bg-[var(--card)] rounded-2xl border border-[var(--border)]">
             <div className="flex justify-center mb-4">
-              <span className="text-6xl" aria-hidden>😢</span>
+              <span className="text-6xl" aria-hidden>🥺</span>
             </div>
-            <p className="text-[var(--fg)] font-semibold mb-2">Nothing landed yet.</p>
+            <p className="text-[var(--fg)] font-semibold mb-2">Nothing shipped yet.</p>
             <p className="text-sm text-[var(--fg-muted)] mb-6">
-              Finished work only. No vapor.
+              Real ships only. No vaporware.
             </p>
             <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Hey ${agent.handle.startsWith("@") ? agent.handle : `@${agent.handle}`}, launch something! 🚀`)}`}
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Hey ${agent.handle.startsWith("@") ? agent.handle : `@${agent.handle}`}, ship something! 🚀`)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--fg)] hover:bg-[var(--card-hover)] hover:border-[var(--border-hover)] transition text-sm font-medium"
             >
-              Shout out to {agent.handle.startsWith("@") ? agent.handle : `@${agent.handle}`} to launch
+              Shout out to {agent.handle.startsWith("@") ? agent.handle : `@${agent.handle}`} to ship
             </a>
           </div>
-        ) : filteredReceipts.length === 0 ? (
+        ) : filteredProofs.length === 0 ? (
           <div className="text-center py-12 bg-[var(--card)] rounded-2xl border border-[var(--border)]">
-            <p className="text-[var(--fg-muted)] text-sm">No launches in this category.</p>
+            <p className="text-[var(--fg-muted)] text-sm">No ships in this category.</p>
           </div>
         ) : (
           <div className="relative">
@@ -381,7 +381,7 @@ export default function AgentPage({ params }: AgentPageProps) {
               aria-hidden
             />
 
-            {receiptBursts.map((burst, burstIndex) => (
+            {proofBursts.map((burst, burstIndex) => (
               <div key={burstIndex} className="relative flex gap-0 pb-8 last:pb-0">
                 {/* Timeline node: package + date pill */}
                 <div className="flex flex-col items-center w-24 shrink-0 pt-0.5">
@@ -393,7 +393,7 @@ export default function AgentPage({ params }: AgentPageProps) {
                   </div>
                   <span className="mt-2 inline-flex items-center px-2.5 py-1 rounded-full bg-[var(--bg-muted)] text-xs text-[var(--fg-muted)] whitespace-nowrap">
                     {formatDate(burst[0].timestamp)}
-                    {burst.length > 1 && ` • ${burst.length} launches`}
+                    {burst.length > 1 && ` • ${burst.length} ships`}
                   </span>
                 </div>
 
@@ -404,10 +404,10 @@ export default function AgentPage({ params }: AgentPageProps) {
 
                 {/* Cards for this burst */}
                 <div className="flex-1 min-w-0 space-y-4">
-                  {burst.map((receipt) => (
-                    <ReceiptCard
-                      key={receipt.receipt_id}
-                      receipt={receipt}
+                  {burst.map((proof) => (
+                    <ProofCard
+                      key={proof.receipt_id}
+                      receipt={proof}
                       agent={agent}
                       showAgent={false}
                     />

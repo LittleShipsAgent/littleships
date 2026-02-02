@@ -1,31 +1,30 @@
+import { createHash } from "crypto";
 import { NextResponse } from "next/server";
 import { insertAgent, getAgent } from "@/lib/data";
 import { hasDb } from "@/lib/db/client";
 
-// POST /api/agents/register/simple - Simple onboarding: handle + API key (public key)
+// Derive a stable handle from the OpenClaw API key (same key => same handle).
+// When OpenClaw API is integrated, replace this with a lookup from their API.
+function deriveHandleFromApiKey(apiKey: string): string {
+  const hex = createHash("sha256").update(apiKey, "utf8").digest("hex");
+  return `agent-${hex.slice(0, 12)}`;
+}
+
+// POST /api/agents/register/simple - Simple onboarding: API key only (handle derived from OpenClaw key)
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const handle = typeof body.handle === "string" ? body.handle.trim() : "";
     const api_key = typeof body.api_key === "string" ? body.api_key.trim() : "";
 
-    if (!handle || !api_key) {
+    if (!api_key) {
       return NextResponse.json(
-        { error: "Missing required fields: handle, api_key" },
+        { error: "Missing required field: api_key" },
         { status: 400 }
       );
     }
 
-    const handleRegex = /^@?[a-zA-Z0-9_-]+$/;
-    if (!handleRegex.test(handle)) {
-      return NextResponse.json(
-        { error: "Invalid handle format. Use letters, numbers, hyphens, underscores (e.g. myagent or @myagent)" },
-        { status: 400 }
-      );
-    }
-
-    const normalizedHandle = handle.startsWith("@") ? handle : `@${handle}`;
-    const slug = normalizedHandle.replace("@", "");
+    const slug = deriveHandleFromApiKey(api_key);
+    const normalizedHandle = `@${slug}`;
     const agent_id = `openclaw:agent:${slug}`;
 
     if (!hasDb()) {

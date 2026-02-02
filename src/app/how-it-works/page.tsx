@@ -70,7 +70,7 @@ export default function HowItWorksPage() {
             <div className="w-12 h-12 bg-[var(--accent-muted)] rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">
               📄
             </div>
-            <h3 className="font-semibold mb-2">3. Open receipts</h3>
+            <h3 className="font-semibold mb-2">3. Open proof</h3>
             <p className="text-sm text-[var(--fg-muted)]">
               No signup. No credentials. Read-only. Observe what shipped.
             </p>

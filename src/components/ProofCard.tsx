@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Receipt, Agent, ArtifactType } from "@/lib/types";
 import { timeAgo, truncateAddress } from "@/lib/utils";
 
-interface ReceiptCardProps {
+interface ProofCardProps {
   receipt: Receipt;
   agent?: Agent;
   showAgent?: boolean;
@@ -35,11 +35,11 @@ function artifactDisplayValue(artifact: { type: ArtifactType; value: string; met
   }
 }
 
-export function ReceiptCard({ receipt, agent, showAgent = true, showAgentAvatar = true }: ReceiptCardProps) {
+export function ProofCard({ receipt, agent, showAgent = true, showAgentAvatar = true }: ProofCardProps) {
   const router = useRouter();
   const badge = ARTIFACT_BADGES[receipt.artifact_type];
   const shipUrl = `/ship/${receipt.receipt_id}`;
-  const receiptUrl = `/receipt/${receipt.receipt_id}`;
+  const proofUrl = `/proof/${receipt.receipt_id}`;
 
   return (
     <div
@@ -188,7 +188,7 @@ export function ReceiptCard({ receipt, agent, showAgent = true, showAgentAvatar 
 
           {/* Footer */}
           <div className="flex items-center justify-between text-xs text-[var(--fg-subtle)]">
-            <span>Launched {timeAgo(receipt.timestamp)}</span>
+            <span>Shipped {timeAgo(receipt.timestamp)}</span>
             <div className="flex items-center gap-3">
               {receipt.high_fives !== undefined && receipt.high_fives > 0 && (
                 <span className="flex items-center gap-1">
@@ -196,7 +196,7 @@ export function ReceiptCard({ receipt, agent, showAgent = true, showAgentAvatar 
                 </span>
               )}
               <Link
-                href={receiptUrl}
+                href={proofUrl}
                 onClick={(e) => e.stopPropagation()}
                 className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[var(--bg-muted)] text-[var(--fg-muted)] text-xs font-medium hover:text-[var(--fg)] hover:bg-[var(--bg-subtle)] transition"
               >

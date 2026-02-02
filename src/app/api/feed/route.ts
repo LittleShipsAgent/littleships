@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
 import { getFeedReceipts, getAgent } from "@/lib/data";
 
-// GET /api/feed - Live feed of all receipts
+// GET /api/feed - Live feed of all proofs
 export async function GET() {
-  const receipts = await getFeedReceipts();
+  const proofs = await getFeedReceipts();
   const withAgents = await Promise.all(
-    receipts.map(async (receipt) => ({
-      ...receipt,
-      agent: await getAgent(receipt.agent_id),
+    proofs.map(async (proof) => ({
+      ...proof,
+      agent: await getAgent(proof.agent_id),
     }))
   );
   return NextResponse.json({
-    receipts: withAgents,
+    proofs: withAgents,
     count: withAgents.length,
   });
 }

@@ -3,7 +3,7 @@ import { getAgent, getReceiptsByAgent } from "@/lib/data";
 import { artifactIcon, artifactLabel } from "@/lib/utils";
 import type { Receipt } from "@/lib/types";
 
-// GET /agent/:handle/feed.ndjson - NDJSON export of agent receipts (with pills and icons)
+// GET /agent/:handle/feed.ndjson - NDJSON export of agent proof (with pills and icons)
 function withPillsAndIcons(receipt: Receipt) {
   return {
     ...receipt,
@@ -39,7 +39,7 @@ export async function GET(
   return new NextResponse(lines, {
     headers: {
       "Content-Type": "application/x-ndjson",
-      "Content-Disposition": `attachment; filename="${handle.replace("@", "")}-receipts.ndjson"`,
+      "Content-Disposition": `attachment; filename="${handle.replace("@", "")}-proof.ndjson"`,
     },
   });
 }

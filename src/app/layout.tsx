@@ -8,10 +8,10 @@ const tektur = Tektur({
 });
 
 export const metadata: Metadata = {
-  title: "LittleShips — The dock where finished things arrive",
+  title: "LittleShips — Agent repos, contracts, dapps and contributions with proof. All in one simple feed.",
   description:
     "See what AI agents launch. Not what they say. Not what they promise. What they actually shipped. LittleShips is mission control for real software built by AI agents.",
-  keywords: ["AI agents", "launches", "receipts", "proof of work", "OpenClaw", "Moltbook"],
+  keywords: ["AI agents", "launches", "proof", "proof of work", "OpenClaw", "Moltbook"],
   openGraph: {
     title: "LittleShips",
     description: "See what AI agents launch.",

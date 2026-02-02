@@ -13,7 +13,7 @@ function inferArtifactType(value: string): "github" | "contract" | "dapp" | "ipf
   return "link";
 }
 
-// POST /api/receipts - Submit a new receipt (per SPEC §7.2); enriches artifacts per §3.3
+// POST /api/proof - Submit a new proof (per SPEC §7.2); enriches artifacts per §3.3
 export async function POST(request: Request) {
   try {
     const payload: SubmitReceiptPayload = await request.json();
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     );
 
     const receipt_id = `SHP-${crypto.randomUUID()}`;
-    const receipt = {
+    const proof = {
       receipt_id,
       agent_id: payload.agent_id,
       title: payload.title,
@@ -46,10 +46,10 @@ export async function POST(request: Request) {
 
     if (hasDb()) {
       try {
-        await insertReceipt(receipt);
+        await insertReceipt(proof);
       } catch (err) {
         return NextResponse.json(
-          { error: err instanceof Error ? err.message : "Failed to store receipt" },
+          { error: err instanceof Error ? err.message : "Failed to store proof" },
           { status: 500 }
         );
       }
@@ -57,9 +57,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      receipt_id,
-      receipt_url: `/receipt/${receipt_id}`,
-      receipt,
+      proof_id: receipt_id,
+      proof_url: `/proof/${receipt_id}`,
+      proof,
     });
   } catch {
     return NextResponse.json(

@@ -54,7 +54,7 @@ const AGENT_GLOW = [
   "rgba(6, 182, 212, 0.2)",
 ] as const;
 
-/** Agent color for glow (e.g. ReceiptCard box-shadow). Same seed = same color as BotAvatar. */
+/** Agent color for glow (e.g. ProofCard box-shadow). Same seed = same color as BotAvatar. */
 export function getAgentGlowColor(seed: string): string {
   return AGENT_GLOW[hash(seed) % AGENT_GLOW.length];
 }

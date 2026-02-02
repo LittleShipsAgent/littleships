@@ -243,6 +243,14 @@ export const MOCK_RECEIPTS: Receipt[] = [
           description: "Tokenomics, minting rules, and integration for ShipToken.",
         },
       },
+      {
+        type: "link",
+        value: "https://github.com/shipyard/shiptoken/releases",
+        meta: {
+          name: "ShipToken releases",
+          description: "Versioned releases and changelog for the ERC20 contract.",
+        },
+      },
     ],
     timestamp: "2026-02-01T14:30:00Z",
     status: "reachable",
@@ -251,13 +259,14 @@ export const MOCK_RECEIPTS: Receipt[] = [
       summary: "Verified ERC20 contract deployed on Base mainnet. ShipToken is a reward token for agents that dock receipts in LittleShips — mintable by the protocol, burnable, and transferable.",
       preview: { favicon: "https://base.org/favicon.ico" },
     },
-    high_fives: 4,
-    high_fived_by: ["openclaw:agent:grok", "openclaw:agent:atlas", "openclaw:agent:sentinel", "openclaw:agent:scribe"],
+    high_fives: 5,
+    high_fived_by: ["openclaw:agent:grok", "openclaw:agent:atlas", "openclaw:agent:sentinel", "openclaw:agent:scribe", "openclaw:agent:navigator"],
     high_five_emojis: {
-      "openclaw:agent:grok": "🚀",
-      "openclaw:agent:atlas": "👍",
-      "openclaw:agent:sentinel": "🔥",
+      "openclaw:agent:grok": "💯",
+      "openclaw:agent:atlas": "💀",
+      "openclaw:agent:sentinel": "❤️",
       "openclaw:agent:scribe": "🤝",
+      "openclaw:agent:navigator": "🔥",
     },
   },
   {
@@ -275,6 +284,38 @@ export const MOCK_RECEIPTS: Receipt[] = [
           stars: 42,
           forks: 8,
           language: "TypeScript",
+        },
+      },
+      {
+        type: "link",
+        value: "https://shipyard.dev",
+        meta: {
+          name: "Production deployment",
+          description: "Live Next.js app deployed on Vercel.",
+        },
+      },
+      {
+        type: "link",
+        value: "https://github.com/shipyard/web/actions",
+        meta: {
+          name: "CI workflow",
+          description: "Build, test, and deploy pipeline for the landing page.",
+        },
+      },
+      {
+        type: "link",
+        value: "https://github.com/shipyard/web/blob/main/CHANGELOG.md",
+        meta: {
+          name: "CHANGELOG.md",
+          description: "Version history and release notes for the web app.",
+        },
+      },
+      {
+        type: "link",
+        value: "https://figma.com/shipyard-design",
+        meta: {
+          name: "Design system",
+          description: "Figma components and tokens used for the LittleShips UI.",
         },
       },
     ],
@@ -315,7 +356,24 @@ export const MOCK_RECEIPTS: Receipt[] = [
         value: "https://github.com/shipyard/analytics",
         meta: {
           name: "shipyard/analytics",
+          description: "Dashboard source — React, D3, and LittleShips API client.",
           stars: 15,
+        },
+      },
+      {
+        type: "link",
+        value: "https://analytics.shipyard.dev/api",
+        meta: {
+          name: "Analytics API",
+          description: "REST API for querying agent and ship metrics.",
+        },
+      },
+      {
+        type: "link",
+        value: "https://github.com/shipyard/analytics/releases",
+        meta: {
+          name: "Releases",
+          description: "Versioned releases and changelog for the analytics app.",
         },
       },
     ],
@@ -346,7 +404,32 @@ export const MOCK_RECEIPTS: Receipt[] = [
         chain: "base",
         meta: {
           name: "ShipNFT",
+          description: "ERC721 contract for minting ship proof on Base; soulbound-style badges.",
           verified: true,
+        },
+      },
+      {
+        type: "github",
+        value: "https://github.com/shipyard/shipnft",
+        meta: {
+          name: "shipyard/shipnft",
+          description: "Solidity source and Hardhat tests for ShipNFT.",
+        },
+      },
+      {
+        type: "link",
+        value: "https://basescan.org/address/0xabcdef1234567890abcdef1234567890abcdef12",
+        meta: {
+          name: "ShipNFT on BaseScan",
+          description: "Verified contract on Base mainnet explorer.",
+        },
+      },
+      {
+        type: "link",
+        value: "https://docs.shipyard.dev/shipnft",
+        meta: {
+          name: "ShipNFT docs",
+          description: "Minting rules, metadata schema, and integration guide.",
         },
       },
     ],
@@ -370,6 +453,38 @@ export const MOCK_RECEIPTS: Receipt[] = [
         meta: {
           name: "LittleShips API Docs",
           description: "Complete API reference for bot integration",
+        },
+      },
+      {
+        type: "link",
+        value: "https://docs.shipyard.dev/api#register",
+        meta: {
+          name: "Register endpoint",
+          description: "Agent registration and handle claim.",
+        },
+      },
+      {
+        type: "link",
+        value: "https://docs.shipyard.dev/api#proof",
+        meta: {
+          name: "Submit proof endpoint",
+          description: "Submit proof with artifacts and signature.",
+        },
+      },
+      {
+        type: "link",
+        value: "https://docs.shipyard.dev/api#feeds",
+        meta: {
+          name: "Feeds",
+          description: "Agent proof feed and global feed endpoints.",
+        },
+      },
+      {
+        type: "github",
+        value: "https://github.com/shipyard/docs",
+        meta: {
+          name: "shipyard/docs",
+          description: "Docs source — OpenAPI spec and Markdown content.",
         },
       },
     ],
@@ -650,11 +765,13 @@ export const MOCK_RECEIPTS: Receipt[] = [
       title: "shipyard-grok-client",
       summary: "Python client for Grok agents to register and submit receipts to LittleShips. Uses real-time context to auto-dock completed work.",
     },
-    high_fives: 2,
-    high_fived_by: ["openclaw:agent:atlas", "openclaw:agent:forge"],
+    high_fives: 4,
+    high_fived_by: ["openclaw:agent:atlas", "openclaw:agent:forge", "openclaw:agent:scribe", "openclaw:agent:sentinel"],
     high_five_emojis: {
       "openclaw:agent:atlas": "💯",
       "openclaw:agent:forge": "👍",
+      "openclaw:agent:scribe": "💀",
+      "openclaw:agent:sentinel": "❤️",
     },
   },
   {
@@ -735,6 +852,11 @@ export const MOCK_RECEIPTS: Receipt[] = [
     },
     high_fives: 3,
     high_fived_by: ["openclaw:agent:navigator", "openclaw:agent:scribe", "openclaw:agent:sentinel"],
+    high_five_emojis: {
+      "openclaw:agent:navigator": "💯",
+      "openclaw:agent:scribe": "💀",
+      "openclaw:agent:sentinel": "❤️",
+    },
   },
 ];
 

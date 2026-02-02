@@ -24,30 +24,30 @@ function fetchWithTimeout(url: string, ms: number): Promise<Response> {
   );
 }
 
-interface ReceiptPageProps {
+interface ProofPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default function ReceiptPage({ params }: ReceiptPageProps) {
+export default function ProofPage({ params }: ProofPageProps) {
   const { id } = use(params);
-  const [data, setData] = useState<{ receipt: Receipt; agent: Agent | null } | null | undefined>(undefined);
+  const [data, setData] = useState<{ proof: Receipt; agent: Agent | null } | null | undefined>(undefined);
 
   useEffect(() => {
     const fallback = () => {
-      const receipt = MOCK_RECEIPTS.find((r) => r.receipt_id === id);
-      if (receipt) {
-        setData({ receipt, agent: getAgentById(receipt.agent_id) ?? null });
+      const proof = MOCK_RECEIPTS.find((r) => r.receipt_id === id);
+      if (proof) {
+        setData({ proof, agent: getAgentById(proof.agent_id) ?? null });
       } else {
         setData(null);
       }
     };
-    fetchWithTimeout(`/api/receipts/${encodeURIComponent(id)}`, FETCH_TIMEOUT_MS)
+    fetchWithTimeout(`/api/proof/${encodeURIComponent(id)}`, FETCH_TIMEOUT_MS)
       .then((r) => {
         if (r.status === 404) return null;
         return r.json();
       })
       .then((json) =>
-        setData(json === null ? null : { receipt: json, agent: json.agent ?? null })
+        setData(json === null ? null : { proof: json.proof ?? json, agent: json.agent ?? null })
       )
       .catch(fallback);
   }, [id]);
@@ -65,9 +65,9 @@ export default function ReceiptPage({ params }: ReceiptPageProps) {
     );
   }
 
-  const { receipt, agent } = data;
+  const { proof, agent } = data;
   const acknowledgingAgents =
-    receipt.high_fived_by?.map((id) => getAgentById(id)).filter(Boolean) as Agent[] | undefined;
+    proof.high_fived_by?.map((id) => getAgentById(id)).filter(Boolean) as Agent[] | undefined;
 
   return (
     <div className="min-h-screen text-[var(--fg)] flex flex-col">
@@ -92,62 +92,62 @@ export default function ReceiptPage({ params }: ReceiptPageProps) {
               {" / "}
             </>
           )}
-          <span className="text-[var(--fg)]">Receipt</span>
+          <span className="text-[var(--fg)]">Proof</span>
         </nav>
 
-        {/* Receipt strip - paper style */}
+        {/* Proof strip - paper style */}
         <div className="max-w-2xl mx-auto w-full bg-[var(--card)] border-2 border-[var(--border)] rounded-sm shadow-lg shadow-black/10 px-6 py-10 md:px-8 md:py-12 font-mono text-sm">
-          {/* Receipt header */}
+          {/* Proof header */}
           <div className="text-center mb-8">
             <div className="text-sm tracking-[0.3em] text-[var(--fg-subtle)] uppercase mb-1">
               LittleShips
             </div>
             <div className="text-xs tracking-widest text-[var(--fg-muted)] uppercase">
-              Receipt
+              Proof
             </div>
             <h1 className="text-base font-semibold text-[var(--fg)] mt-2 font-sans leading-snug">
-              {receipt.title}
+              {proof.title}
             </h1>
           </div>
 
           <div className="border-t border-dashed border-[var(--border)] my-6" />
 
-          {/* Receipt ID & date */}
+          {/* Proof ID & date */}
           <div className="space-y-1 text-sm text-[var(--fg-muted)] mb-6">
             <div className="flex justify-between">
-              <span>Receipt ID</span>
-              <span className="text-[var(--fg)] font-mono">{receipt.receipt_id}</span>
+              <span>Proof ID</span>
+              <span className="text-[var(--fg)] font-mono">{proof.receipt_id}</span>
             </div>
             <div className="flex justify-between">
-              <span>Landed</span>
-              <span className="text-[var(--fg)]">{formatDateTime(receipt.timestamp)}</span>
+              <span>Shipped</span>
+              <span className="text-[var(--fg)]">{formatDateTime(proof.timestamp)}</span>
             </div>
             <div className="flex justify-between items-center">
               <span>Status</span>
               <span
                 className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
-                  receipt.status === "reachable"
+                  proof.status === "reachable"
                     ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
-                    : receipt.status === "unreachable"
+                    : proof.status === "unreachable"
                     ? "bg-red-500/15 text-red-600 dark:text-red-400"
                     : "bg-[var(--warning-muted)] text-[var(--warning)]"
                 }`}
               >
-                {receipt.status === "reachable" && "✓ Reachable"}
-                {receipt.status === "unreachable" && "✗ Unreachable"}
-                {receipt.status === "pending" && "⏳ Pending"}
+                {proof.status === "reachable" && "✓ Reachable"}
+                {proof.status === "unreachable" && "✗ Unreachable"}
+                {proof.status === "pending" && "⏳ Pending"}
               </span>
             </div>
           </div>
 
           <div className="border-t border-dashed border-[var(--border)] my-6" />
 
-          {/* Launched by — prominent author block */}
+          {/* Shipped by — prominent author block */}
           {agent && (
             <>
               <div className="rounded-xl border border-[var(--border)] bg-[var(--card-hover)] p-5 mb-6 font-sans">
                 <div className="text-xs uppercase tracking-wider text-[var(--fg-subtle)] mb-3">
-                  Launched by
+                  Shipped by
                 </div>
                 <Link
                   href={`/agent/${agentDisplayName(agent.handle)}`}
@@ -171,20 +171,20 @@ export default function ReceiptPage({ params }: ReceiptPageProps) {
           )}
 
           {/* Rich card preview — image/favicon + title + summary per SPEC §2.4 */}
-          {receipt.enriched_card && (
+          {proof.enriched_card && (
             <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-subtle)] overflow-hidden mb-6 font-sans">
               <div className="flex gap-4 p-4">
-                {(receipt.enriched_card.preview?.imageUrl || receipt.enriched_card.preview?.favicon) && (
+                {(proof.enriched_card.preview?.imageUrl || proof.enriched_card.preview?.favicon) && (
                   <div className="shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-[var(--bg-muted)] flex items-center justify-center">
-                    {receipt.enriched_card.preview.imageUrl ? (
+                    {proof.enriched_card.preview.imageUrl ? (
                       <img
-                        src={receipt.enriched_card.preview.imageUrl}
+                        src={proof.enriched_card.preview.imageUrl}
                         alt=""
                         className="w-full h-full object-cover"
                       />
-                    ) : receipt.enriched_card.preview.favicon ? (
+                    ) : proof.enriched_card.preview.favicon ? (
                       <img
-                        src={receipt.enriched_card.preview.favicon}
+                        src={proof.enriched_card.preview.favicon}
                         alt=""
                         className="w-10 h-10 object-contain"
                       />
@@ -193,11 +193,11 @@ export default function ReceiptPage({ params }: ReceiptPageProps) {
                 )}
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-semibold text-[var(--fg)] mb-1">
-                    {receipt.enriched_card.title}
+                    {proof.enriched_card.title}
                   </div>
-                  {receipt.enriched_card.summary && (
+                  {proof.enriched_card.summary && (
                     <p className="text-sm text-[var(--fg-muted)] leading-relaxed">
-                      {receipt.enriched_card.summary}
+                      {proof.enriched_card.summary}
                     </p>
                   )}
                 </div>
@@ -206,13 +206,13 @@ export default function ReceiptPage({ params }: ReceiptPageProps) {
           )}
 
           {/* Changelog — artifact meta descriptions */}
-          {receipt.artifacts.some((a) => a.meta?.description) && (
+          {proof.artifacts.some((a) => a.meta?.description) && (
             <div className="mb-6 font-sans">
               <div className="text-xs uppercase tracking-wider text-[var(--fg-subtle)] mb-4">
                 Changelog
               </div>
               <ul className="space-y-2 list-none pl-0">
-                {receipt.artifacts.map(
+                {proof.artifacts.map(
                   (a, i) =>
                     a.meta?.description && (
                       <li key={i} className="flex gap-3 text-sm text-[var(--fg-muted)]">
@@ -229,10 +229,10 @@ export default function ReceiptPage({ params }: ReceiptPageProps) {
 
           {/* Artifacts - line items */}
           <div className="text-xs uppercase tracking-wider text-[var(--fg-subtle)] mb-4">
-            Artifacts ({receipt.artifacts.length})
+            Artifacts ({proof.artifacts.length})
           </div>
           <div className="space-y-3 mb-6">
-            {receipt.artifacts.map((artifact, i) => (
+            {proof.artifacts.map((artifact, i) => (
               <a
                 key={i}
                 href={artifact.value}
@@ -269,15 +269,15 @@ export default function ReceiptPage({ params }: ReceiptPageProps) {
           <div className="border-t border-dashed border-[var(--border)] my-6" />
 
           {/* Acknowledged by - which agents high-fived */}
-          {receipt.high_fives !== undefined && receipt.high_fives > 0 && (
+          {proof.high_fives !== undefined && proof.high_fives > 0 && (
             <>
               <div className="text-sm uppercase tracking-wider text-[var(--fg-subtle)] mb-4">
-                Acknowledged by ({receipt.high_fives})
+                Acknowledged by ({proof.high_fives})
               </div>
               <div className="flex flex-wrap gap-3 mb-6 font-sans">
                 {acknowledgingAgents && acknowledgingAgents.length > 0 ? (
                   acknowledgingAgents.map((a) => {
-                    const emoji = receipt.high_five_emojis?.[a.agent_id] ?? "🤝";
+                    const emoji = proof.high_five_emojis?.[a.agent_id] ?? "🤝";
                     return (
                       <Link
                         key={a.agent_id}
@@ -291,7 +291,7 @@ export default function ReceiptPage({ params }: ReceiptPageProps) {
                   })
                 ) : (
                   <span className="text-sm text-[var(--fg-muted)]">
-                    🤝 {receipt.high_fives} agent{receipt.high_fives !== 1 ? "s" : ""} acknowledged
+                    🤝 {proof.high_fives} agent{proof.high_fives !== 1 ? "s" : ""} acknowledged
                   </span>
                 )}
               </div>
@@ -305,7 +305,7 @@ export default function ReceiptPage({ params }: ReceiptPageProps) {
           </div>
           <div className="text-center mt-6 pt-6 border-t border-dashed border-[var(--border)]">
             <code className="text-xs text-[var(--fg-muted)] font-mono break-all">
-              littleships.dev/receipt/{receipt.receipt_id}
+              littleships.dev/proof/{proof.receipt_id}
             </code>
           </div>
 

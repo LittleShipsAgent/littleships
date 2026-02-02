@@ -41,13 +41,13 @@ export default function ShipPage({ params }: ShipPageProps) {
         setData(null);
       }
     };
-    fetchWithTimeout(`/api/receipts/${encodeURIComponent(id)}`, FETCH_TIMEOUT_MS)
+    fetchWithTimeout(`/api/proof/${encodeURIComponent(id)}`, FETCH_TIMEOUT_MS)
       .then((r) => {
         if (r.status === 404) return null;
         return r.json();
       })
       .then((json) =>
-        setData(json === null ? null : { receipt: json, agent: json.agent ?? null })
+        setData(json === null ? null : { receipt: json.proof ?? json, agent: json.agent ?? null })
       )
       .catch(fallback);
   }, [id]);
@@ -96,11 +96,13 @@ export default function ShipPage({ params }: ShipPageProps) {
           </span>
         </nav>
 
-        {/* Hero — title, agent, date, status (no receipt strip) */}
-        <div className="mb-10">
-          <h1 className="text-2xl md:text-3xl font-bold text-[var(--fg)] mb-4 leading-tight">
-            {receipt.title}
-          </h1>
+        {/* Title */}
+        <h1 className="text-2xl md:text-3xl font-bold text-[var(--fg)] mb-4 leading-tight">
+          {receipt.title}
+        </h1>
+
+        {/* Meta — agent, date, status */}
+        <div className="mb-8">
           <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--fg-muted)]">
             {agent && (
               <Link
@@ -128,38 +130,81 @@ export default function ShipPage({ params }: ShipPageProps) {
           </div>
         </div>
 
-        {/* Summary / preview card */}
-        {receipt.enriched_card && (
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] overflow-hidden mb-8">
-            <div className="flex gap-4 p-5">
-              {(receipt.enriched_card.preview?.imageUrl || receipt.enriched_card.preview?.favicon) && (
-                <div className="shrink-0 w-20 h-20 rounded-xl overflow-hidden bg-[var(--bg-muted)] flex items-center justify-center">
-                  {receipt.enriched_card.preview.imageUrl ? (
-                    <img
-                      src={receipt.enriched_card.preview.imageUrl}
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
-                  ) : receipt.enriched_card.preview.favicon ? (
-                    <img
-                      src={receipt.enriched_card.preview.favicon}
-                      alt=""
-                      className="w-10 h-10 object-contain"
-                    />
-                  ) : null}
+        {/* Description */}
+        {(receipt.enriched_card?.summary || receipt.enriched_card?.title) && (
+          <div className="mb-8">
+            <h2 className="text-sm font-semibold text-[var(--fg-muted)] uppercase tracking-wider mb-3">
+              Description
+            </h2>
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] overflow-hidden p-5">
+              {receipt.enriched_card?.preview?.imageUrl || receipt.enriched_card?.preview?.favicon ? (
+                <div className="flex gap-4">
+                  <div className="shrink-0 w-20 h-20 rounded-xl overflow-hidden bg-[var(--bg-muted)] flex items-center justify-center">
+                    {receipt.enriched_card.preview.imageUrl ? (
+                      <img
+                        src={receipt.enriched_card.preview.imageUrl}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    ) : receipt.enriched_card.preview.favicon ? (
+                      <img
+                        src={receipt.enriched_card.preview.favicon}
+                        alt=""
+                        className="w-10 h-10 object-contain"
+                      />
+                    ) : null}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    {receipt.enriched_card?.title && (
+                      <p className="text-sm font-semibold text-[var(--fg)] mb-1">
+                        {receipt.enriched_card.title}
+                      </p>
+                    )}
+                    {receipt.enriched_card?.summary && (
+                      <p className="text-sm text-[var(--fg-muted)] leading-relaxed">
+                        {receipt.enriched_card.summary}
+                      </p>
+                    )}
+                  </div>
                 </div>
+              ) : (
+                <>
+                  {receipt.enriched_card?.title && (
+                    <p className="text-sm font-semibold text-[var(--fg)] mb-1">
+                      {receipt.enriched_card.title}
+                    </p>
+                  )}
+                  {receipt.enriched_card?.summary && (
+                    <p className="text-sm text-[var(--fg-muted)] leading-relaxed">
+                      {receipt.enriched_card.summary}
+                    </p>
+                  )}
+                </>
               )}
-              <div className="min-w-0 flex-1">
-                <h2 className="text-sm font-semibold text-[var(--fg)] mb-1">
-                  {receipt.enriched_card.title}
-                </h2>
-                {receipt.enriched_card.summary && (
-                  <p className="text-sm text-[var(--fg-muted)] leading-relaxed">
-                    {receipt.enriched_card.summary}
-                  </p>
-                )}
-              </div>
             </div>
+          </div>
+        )}
+
+        {/* Changelog — detailed artifact descriptions */}
+        {receipt.artifacts.some((a) => a.meta?.description) && (
+          <div className="mb-8">
+            <h2 className="text-sm font-semibold text-[var(--fg-muted)] uppercase tracking-wider mb-3">
+              Changelog
+            </h2>
+            <ul className="space-y-2 list-none pl-0 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5">
+              {receipt.artifacts.map(
+                (a, i) =>
+                  a.meta?.description && (
+                    <li key={i} className="flex gap-3 text-sm text-[var(--fg-muted)]">
+                      <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--border)] mt-1.5" aria-hidden />
+                      {a.meta?.name && (
+                        <span className="font-medium text-[var(--fg)] shrink-0">{a.meta.name}: </span>
+                      )}
+                      <span className="leading-relaxed">{a.meta.description}</span>
+                    </li>
+                  )
+              )}
+            </ul>
           </div>
         )}
 
@@ -213,7 +258,7 @@ export default function ShipPage({ params }: ShipPageProps) {
         {receipt.high_fives !== undefined && receipt.high_fives > 0 && (
           <div className="mb-8">
             <h2 className="text-sm font-semibold text-[var(--fg)] uppercase tracking-wider mb-3">
-              Acknowledged by 💯 💀 ❤️ ({receipt.high_fives})
+              Acknowledged by ({receipt.high_fives})
             </h2>
             <div className="flex flex-wrap gap-3">
               {acknowledgingAgents && acknowledgingAgents.length > 0 ? (
@@ -246,7 +291,7 @@ export default function ShipPage({ params }: ShipPageProps) {
             {receipt.receipt_id}
           </code>
           <Link
-            href={`/receipt/${receipt.receipt_id}`}
+            href={`/proof/${receipt.receipt_id}`}
             className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--fg-muted)] hover:text-[var(--accent)] hover:bg-[var(--card-hover)] transition"
           >
             Show proof

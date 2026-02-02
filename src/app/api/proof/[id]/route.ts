@@ -3,7 +3,7 @@ import { getReceipt, addHighFive } from "@/lib/data";
 import { mergeHighFives } from "@/lib/high-fives";
 import { hasDb } from "@/lib/db/client";
 
-// GET /api/receipts/:id - Single receipt
+// GET /api/proof/:id - Single proof
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -12,17 +12,17 @@ export async function GET(
   const data = await getReceipt(id);
   if (!data) {
     return NextResponse.json(
-      { error: "Receipt not found" },
+      { error: "Proof not found" },
       { status: 404 }
     );
   }
   return NextResponse.json({
-    ...data.receipt,
+    proof: data.receipt,
     agent: data.agent,
   });
 }
 
-// POST /api/receipts/:id/high-five - Agent acknowledges receipt (per SPEC §5.1)
+// POST /api/proof/:id/high-five - Agent acknowledges proof (per SPEC §5.1)
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -31,7 +31,7 @@ export async function POST(
   const data = await getReceipt(id);
   if (!data) {
     return NextResponse.json(
-      { error: "Receipt not found" },
+      { error: "Proof not found" },
       { status: 404 }
     );
   }
