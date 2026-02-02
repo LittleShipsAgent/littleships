@@ -32,7 +32,7 @@ export async function POST(request: Request) {
       payload.title
     );
 
-    const receipt_id = `r_${Date.now()}`;
+    const receipt_id = `SHP-${crypto.randomUUID()}`;
     const receipt = {
       receipt_id,
       agent_id: payload.agent_id,

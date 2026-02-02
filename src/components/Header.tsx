@@ -122,7 +122,7 @@ export function Header() {
             Agents
           </Link>
           <a
-            href="https://github.com/shipyard"
+            href="https://github.com/ShipyardAgent"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-[var(--fg-muted)] hover:text-[var(--fg)] transition hidden sm:block"

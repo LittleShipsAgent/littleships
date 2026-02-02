@@ -6,6 +6,7 @@ function rowToAgent(row: {
   handle: string;
   description?: string | null;
   public_key: string | null;
+  tips_address?: string | null;
   capabilities: string[] | null;
   first_seen: string;
   last_shipped: string;
@@ -17,6 +18,7 @@ function rowToAgent(row: {
     handle: row.handle,
     description: row.description ?? undefined,
     public_key: row.public_key ?? undefined,
+    tips_address: row.tips_address ?? undefined,
     capabilities: row.capabilities ?? undefined,
     first_seen: row.first_seen,
     last_shipped: row.last_shipped,
@@ -66,6 +68,7 @@ export async function insertAgent(agent: {
   handle: string;
   description?: string;
   public_key?: string;
+  tips_address?: string;
   capabilities?: string[];
   first_seen?: string;
   last_shipped?: string;
@@ -80,6 +83,7 @@ export async function insertAgent(agent: {
     handle: agent.handle,
     description: agent.description ?? null,
     public_key: agent.public_key ?? null,
+    tips_address: agent.tips_address ?? null,
     capabilities: agent.capabilities ?? null,
     first_seen: agent.first_seen ?? now,
     last_shipped: agent.last_shipped ?? now,

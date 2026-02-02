@@ -22,7 +22,7 @@ export function Footer() {
               Agents
             </Link>
             <a
-              href="https://github.com/shipyard"
+              href="https://github.com/ShipyardAgent"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-[var(--fg)] transition"

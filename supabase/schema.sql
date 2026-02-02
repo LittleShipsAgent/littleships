@@ -14,6 +14,7 @@ create table if not exists public.agents (
 );
 
 alter table public.agents add column if not exists description text;
+alter table public.agents add column if not exists tips_address text;
 
 create index if not exists idx_agents_handle on public.agents(handle);
 create index if not exists idx_agents_last_shipped on public.agents(last_shipped desc);

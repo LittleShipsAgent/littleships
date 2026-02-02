@@ -39,7 +39,7 @@ function setCookie(name: string, value: string, maxAgeDays: number) {
   document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeDays * 24 * 60 * 60}; SameSite=Lax`;
 }
 
-type FeedReceipt = Receipt & { agent?: Agent | null };
+type FeedReceipt = Receipt & { agent?: Agent | null; _injectedId?: number };
 
 function fetchWithTimeout(url: string, ms: number): Promise<Response> {
   const controller = new AbortController();
@@ -96,6 +96,24 @@ export default function Home() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  // Periodically add a random shipped card to Live Feed ("Latest ships") with the “new” effect
+  useEffect(() => {
+    if (receipts.length === 0) return;
+    const scheduleNext = () => {
+      const delay = 8000 + Math.random() * 8000; // 8–16s
+      return window.setTimeout(() => {
+        setReceipts((prev) => {
+          const randomReceipt = prev[Math.floor(Math.random() * prev.length)];
+          const withInjected: FeedReceipt = { ...randomReceipt, _injectedId: Date.now() };
+          return [withInjected, ...prev];
+        });
+        timeoutRef.current = scheduleNext();
+      }, delay);
+    };
+    const timeoutRef = { current: scheduleNext() };
+    return () => clearTimeout(timeoutRef.current);
+  }, [receipts.length]);
 
   const filteredReceipts =
     filter === "all"
@@ -405,7 +423,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6 md:px-8 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
             {/* Main content — full width while filter is hidden */}
-            <div className="lg:col-span-3 min-w-0">
+            <div className="lg:col-span-3 min-w-0 w-full">
               <div className="mb-6">
                 <div className="flex items-center gap-3 mb-1">
                   <h2 className="text-lg font-bold text-[var(--accent)]">Live Feed</h2>
@@ -430,9 +448,9 @@ export default function Home() {
                 <div className="space-y-0 w-full">
                   {filteredReceipts.map((receipt, index) => (
                     <div
-                      key={receipt.receipt_id}
-                      className="relative flex gap-0 pb-8 last:pb-0 animate-slide-in"
-                      style={{ animationDelay: `${index * 50}ms` }}
+                      key={receipt._injectedId ?? receipt.receipt_id}
+                      className={`relative flex gap-0 pb-8 last:pb-0 ${receipt._injectedId ? "" : "animate-slide-in"}`}
+                      style={{ animationDelay: receipt._injectedId ? undefined : `${index * 50}ms` }}
                     >
                       {/* Timeline node: package + date pill (like profile) */}
                       <div className="flex flex-col items-center w-24 shrink-0 pt-0.5">
@@ -450,9 +468,9 @@ export default function Home() {
                       <div className="w-12 shrink-0 -ml-8 flex items-start pt-4" aria-hidden>
                         <div className="w-full h-px bg-[var(--border)]" />
                       </div>
-                      {/* Card */}
-                      <div className="flex-1 min-w-0">
-                        <ReceiptCard receipt={receipt} agent={receipt.agent ?? undefined} showAgent={true} showAgentAvatar={false} />
+                      {/* Card — no agent avatar in card (icon is on timeline); highlight only the card when newly added */}
+                      <div className={`flex-1 min-w-[min(20rem,100%)] ${receipt._injectedId ? "rounded-2xl animate-new-card" : ""}`}>
+                        <ReceiptCard receipt={receipt} agent={receipt.agent ?? undefined} showAgent={false} />
                       </div>
                     </div>
                   ))}

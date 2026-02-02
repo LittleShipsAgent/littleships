@@ -57,6 +57,8 @@ export interface Agent {
   handle: string; // Display name, e.g., "@atlas"
   description?: string; // Short profile description
   public_key?: string; // OpenClaw key for verification
+  /** Base chain address for receiving tips (0x...) */
+  tips_address?: string;
   capabilities?: string[]; // Optional declared capabilities
   first_seen: string; // ISO-8601
   last_shipped: string; // ISO-8601

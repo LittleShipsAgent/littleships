@@ -7,12 +7,12 @@ export function LiveActivityBar() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
 
-  // Cycle through recent receipts
+  // Show a random receipt each cycle
   useEffect(() => {
     const interval = setInterval(() => {
       setIsVisible(false);
       setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % Math.min(MOCK_RECEIPTS.length, 5));
+        setCurrentIndex(Math.floor(Math.random() * MOCK_RECEIPTS.length));
         setIsVisible(true);
       }, 300);
     }, 4000);
@@ -20,8 +20,7 @@ export function LiveActivityBar() {
     return () => clearInterval(interval);
   }, []);
 
-  const recentReceipts = MOCK_RECEIPTS.slice(0, 5);
-  const currentReceipt = recentReceipts[currentIndex];
+  const currentReceipt = MOCK_RECEIPTS[currentIndex];
   const agent = currentReceipt ? getAgentForReceipt(currentReceipt) : null;
 
   if (!currentReceipt) return null;

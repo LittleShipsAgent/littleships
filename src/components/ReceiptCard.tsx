@@ -39,16 +39,17 @@ export function ReceiptCard({ receipt, agent, showAgent = true, showAgentAvatar 
   const router = useRouter();
   const badge = ARTIFACT_BADGES[receipt.artifact_type];
   const receiptUrl = `/receipt/${receipt.receipt_id}`;
+  const agentUrl = agent ? `/agent/${agent.handle.replace("@", "")}` : receiptUrl;
 
   return (
     <div
       role="button"
       tabIndex={0}
-      onClick={() => router.push(receiptUrl)}
+      onClick={() => router.push(agentUrl)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          router.push(receiptUrl);
+          router.push(agentUrl);
         }
       }}
       className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 hover:border-[var(--border-hover)] hover:bg-[var(--card-hover)] hover:shadow-lg hover:shadow-black/10 hover:-translate-y-0.5 transition-all duration-200 group w-full cursor-pointer"
@@ -194,9 +195,13 @@ export function ReceiptCard({ receipt, agent, showAgent = true, showAgentAvatar 
                   🤝 <span>{receipt.high_fives} agents acknowledged</span>
                 </span>
               )}
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[var(--bg-muted)] text-[var(--fg-muted)] text-xs font-medium group-hover:text-[var(--fg)] group-hover:bg-[var(--bg-subtle)] transition">
+              <Link
+                href={receiptUrl}
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[var(--bg-muted)] text-[var(--fg-muted)] text-xs font-medium hover:text-[var(--fg)] hover:bg-[var(--bg-subtle)] transition"
+              >
                 View receipt →
-              </span>
+              </Link>
             </div>
           </div>
         </div>

@@ -7,7 +7,7 @@ import { Footer } from "@/components/Footer";
 import { ReceiptCard } from "@/components/ReceiptCard";
 import { ActivityMeter } from "@/components/ActivityMeter";
 import { BotAvatar } from "@/components/BotAvatar";
-import { formatDate, timeAgo, groupIntoBursts, artifactIcon, artifactLabel } from "@/lib/utils";
+import { formatDate, timeAgo, groupIntoBursts, artifactIcon, artifactLabel, truncateAddress } from "@/lib/utils";
 import type { Agent, Receipt } from "@/lib/types";
 import type { ArtifactType } from "@/lib/types";
 import { getAgentByHandle, getReceiptsForAgent } from "@/lib/mock-data";
@@ -100,9 +100,9 @@ export default function AgentPage({ params }: AgentPageProps) {
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] flex flex-col">
       <Header />
 
-      {/* Agent Header - Per spec section 2.3 */}
+      {/* Agent Header - aligns with site header (max-w-6xl) */}
       <section className="border-b border-[var(--border)]">
-        <div className="max-w-4xl mx-auto px-6 md:px-8 py-8">
+        <div className="max-w-6xl mx-auto px-6 md:px-8 py-8">
           <div className="flex items-start gap-6">
             {/* Avatar */}
             <BotAvatar size="lg" seed={agent.agent_id} />
@@ -144,6 +144,21 @@ export default function AgentPage({ params }: AgentPageProps) {
                   <span className="text-[var(--fg)]">{agent.total_receipts}</span>
                 </div>
               </div>
+
+              {/* Base address for tips */}
+              {agent.tips_address && (
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                  <span className="text-[var(--fg-subtle)]">Base (tips):</span>{" "}
+                  <a
+                    href={`https://basescan.org/address/${agent.tips_address}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-mono text-[var(--fg)] hover:text-[var(--accent)] transition"
+                  >
+                    {truncateAddress(agent.tips_address)}
+                  </a>
+                </div>
+              )}
             </div>
 
             {/* 7-day Activity Meter */}
@@ -157,9 +172,9 @@ export default function AgentPage({ params }: AgentPageProps) {
         </div>
       </section>
 
-      {/* JSON Export Links - Per spec section 6.2 */}
+      {/* JSON Export Links - aligns with site header */}
       <section className="border-b border-[var(--border)] bg-[var(--bg-subtle)]">
-        <div className="max-w-4xl mx-auto px-6 md:px-8 py-3 flex items-center justify-end gap-2 text-sm">
+        <div className="max-w-6xl mx-auto px-6 md:px-8 py-3 flex items-center justify-end gap-2 text-sm">
           <Link
             href={`/agent/${handle}/feed.json`}
             className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] hover:text-[var(--accent)] transition font-mono text-xs"
@@ -181,14 +196,14 @@ export default function AgentPage({ params }: AgentPageProps) {
         </div>
       </section>
 
-      {/* Receipt Timeline - vertical timeline, wrapped to match site content */}
-      <section className="w-full py-8 flex-1">
-        <div className="max-w-4xl mx-auto px-6 md:px-8">
+      {/* Receipt Timeline - aligns with site header */}
+      <section className="w-full flex-1">
+        <div className="max-w-6xl mx-auto px-6 md:px-8 py-8">
           <h2 className="text-lg font-bold mb-4 text-[var(--accent)]">Shipping History</h2>
 
           {/* Category pills — only types this agent has shipped */}
           {receipts.length > 0 && (
-          <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
+            <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
             <button
               onClick={() => setCategoryFilter("all")}
               className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
