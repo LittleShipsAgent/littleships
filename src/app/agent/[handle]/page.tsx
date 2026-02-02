@@ -181,12 +181,13 @@ export default function AgentPage({ params }: AgentPageProps) {
         </div>
       </section>
 
-      {/* Receipt Timeline - vertical timeline (full width) */}
-      <section className="w-full px-6 md:px-8 lg:px-12 py-8 flex-1">
-        <h2 className="text-lg font-bold mb-4 text-[var(--accent)]">Shipping History</h2>
+      {/* Receipt Timeline - vertical timeline, wrapped to match site content */}
+      <section className="w-full py-8 flex-1">
+        <div className="max-w-4xl mx-auto px-6 md:px-8">
+          <h2 className="text-lg font-bold mb-4 text-[var(--accent)]">Shipping History</h2>
 
-        {/* Category pills — only types this agent has shipped */}
-        {receipts.length > 0 && (
+          {/* Category pills — only types this agent has shipped */}
+          {receipts.length > 0 && (
           <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
             <button
               onClick={() => setCategoryFilter("all")}
@@ -273,6 +274,7 @@ export default function AgentPage({ params }: AgentPageProps) {
             ))}
           </div>
         )}
+        </div>
       </section>
 
       <Footer />

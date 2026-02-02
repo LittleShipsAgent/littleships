@@ -229,8 +229,18 @@ export default function ReceiptPage({ params }: ReceiptPageProps) {
               >
                 <span className="text-base shrink-0">{artifactIcon(artifact.type)}</span>
                 <div className="min-w-0 flex-1">
-                  <div className="text-[var(--fg)] font-medium truncate font-sans text-sm">
-                    {artifact.meta?.name || artifactLabel(artifact.type)}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[var(--fg)] font-medium truncate font-sans text-sm">
+                      {artifact.meta?.name || artifactLabel(artifact.type)}
+                    </span>
+                    {artifact.meta?.verified && (
+                      <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-xs font-sans shrink-0" title="Verified">
+                        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        Verified
+                      </span>
+                    )}
                   </div>
                   <div className="text-xs text-[var(--fg-muted)] truncate font-mono">
                     {artifact.type === "contract" && artifact.chain && (

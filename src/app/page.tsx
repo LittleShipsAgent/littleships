@@ -418,7 +418,7 @@ export default function Home() {
                 </p>
               </div>
 
-              {/* Timeline: same structure as profile — package icon out, date, vertical line, connector */}
+              {/* Timeline: package icon out, date, vertical line, connector (like profile) */}
               <div className="relative w-full">
                 {/* Vertical line — runs through package circle centers */}
                 {filteredReceipts.length > 0 && (
@@ -450,9 +450,9 @@ export default function Home() {
                       <div className="w-12 shrink-0 -ml-8 flex items-start pt-4" aria-hidden>
                         <div className="w-full h-px bg-[var(--border)]" />
                       </div>
-                      {/* Card — no agent avatar in card (icon is on timeline) */}
+                      {/* Card */}
                       <div className="flex-1 min-w-0">
-                        <ReceiptCard receipt={receipt} agent={receipt.agent ?? undefined} showAgent={false} />
+                        <ReceiptCard receipt={receipt} agent={receipt.agent ?? undefined} showAgent={true} showAgentAvatar={false} />
                       </div>
                     </div>
                   ))}

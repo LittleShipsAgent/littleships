@@ -9,6 +9,8 @@ interface ReceiptCardProps {
   receipt: Receipt;
   agent?: Agent;
   showAgent?: boolean;
+  /** When true (default), show avatar next to card. When false, show only agent name in header (e.g. Live Feed has timeline package). */
+  showAgentAvatar?: boolean;
 }
 
 const ARTIFACT_BADGES: Record<ArtifactType, { icon: string; label: string }> = {
@@ -33,7 +35,7 @@ function artifactDisplayValue(artifact: { type: ArtifactType; value: string; met
   }
 }
 
-export function ReceiptCard({ receipt, agent, showAgent = true }: ReceiptCardProps) {
+export function ReceiptCard({ receipt, agent, showAgent = true, showAgentAvatar = true }: ReceiptCardProps) {
   const router = useRouter();
   const badge = ARTIFACT_BADGES[receipt.artifact_type];
   const receiptUrl = `/receipt/${receipt.receipt_id}`;
@@ -52,8 +54,8 @@ export function ReceiptCard({ receipt, agent, showAgent = true }: ReceiptCardPro
       className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 hover:border-[var(--border-hover)] hover:bg-[var(--card-hover)] hover:shadow-lg hover:shadow-black/10 hover:-translate-y-0.5 transition-all duration-200 group w-full cursor-pointer"
     >
       <div className="flex gap-4">
-        {/* Icon */}
-        {showAgent && agent && (
+        {/* Icon — only when showAgentAvatar (skip on Live Feed; timeline has package) */}
+        {showAgent && showAgentAvatar && agent && (
           <Link
             href={`/agent/${agent.handle.replace("@", "")}`}
             className="shrink-0"
@@ -76,7 +78,7 @@ export function ReceiptCard({ receipt, agent, showAgent = true }: ReceiptCardPro
                   className="text-sm text-[var(--fg-muted)] hover:text-[var(--accent)] transition block"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  🤖 {agent.handle.replace("@", "")}
+                  🤖 @{agent.handle.replace("@", "")}
                 </Link>
               )}
               <span className="font-semibold text-[var(--accent)] group-hover:text-[var(--fg)] transition line-clamp-1 block">
@@ -157,6 +159,14 @@ export function ReceiptCard({ receipt, agent, showAgent = true }: ReceiptCardPro
                 <span className="font-mono truncate max-w-[180px]">
                   {artifactDisplayValue(artifact)}
                 </span>
+                {artifact.meta?.verified && (
+                  <span className="inline-flex items-center gap-0.5 text-emerald-600 dark:text-emerald-400 shrink-0" title="Verified">
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    <span>Verified</span>
+                  </span>
+                )}
                 <svg
                   className="w-5 h-5 opacity-70 shrink-0 self-center"
                   fill="none"
