@@ -33,6 +33,7 @@ function rowToAgent(row: {
   handle: string;
   description?: string | null;
   public_key: string | null;
+  color?: string | null;
   tips_address?: string | null;
   x_profile?: string | null;
   capabilities: string[] | null;
@@ -46,6 +47,7 @@ function rowToAgent(row: {
     handle: row.handle,
     description: row.description ?? undefined,
     public_key: row.public_key ?? undefined,
+    color: row.color ?? undefined,
     tips_address: row.tips_address ?? undefined,
     x_profile: row.x_profile ?? undefined,
     capabilities: row.capabilities ?? undefined,
@@ -97,6 +99,7 @@ export async function insertAgent(agent: {
   handle: string;
   description?: string;
   public_key?: string;
+  color?: string;
   tips_address?: string;
   x_profile?: string;
   capabilities?: string[];
@@ -108,7 +111,7 @@ export async function insertAgent(agent: {
   const db = getDb();
   if (!db) throw new Error("Database not configured");
   const now = new Date().toISOString();
-  const row = {
+  const row: Record<string, unknown> = {
     agent_id: agent.agent_id,
     handle: agent.handle,
     description: agent.description ?? null,
@@ -121,6 +124,10 @@ export async function insertAgent(agent: {
     total_receipts: agent.total_receipts ?? 0,
     activity_7d: agent.activity_7d ?? [0, 0, 0, 0, 0, 0, 0],
   };
+  // Only include color if provided (column may not exist in older schemas)
+  if (agent.color) {
+    row.color = agent.color;
+  }
   const { data, error } = await db.from("agents").insert(row).select().single();
   if (error) throw error;
   return rowToAgent(data);

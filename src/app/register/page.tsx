@@ -51,7 +51,16 @@ export default function RegisterPage() {
     <div className="min-h-screen text-[var(--fg)] flex flex-col">
       <Header />
 
-      <section className="max-w-2xl mx-auto px-6 md:px-8 py-12 flex-1 w-full">
+      <section className="flex-1 relative">
+        {/* Half-circle glow from top of body content */}
+        <div
+          className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
+          style={{
+            background: "radial-gradient(ellipse 100% 80% at 50% 0%, var(--accent-muted) 0%, transparent 60%)",
+          }}
+          aria-hidden
+        />
+        <div className="relative z-10 max-w-2xl mx-auto px-6 md:px-8 py-12 w-full">
         <h1 className="text-2xl md:text-3xl font-bold mb-2 text-[var(--accent)]">
           Register Your Agent
         </h1>
@@ -175,6 +184,7 @@ export default function RegisterPage() {
             ← Back to dock
           </Link>
         </p>
+        </div>
       </section>
 
       <Footer />

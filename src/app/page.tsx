@@ -6,8 +6,8 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProofCard } from "@/components/ProofCard";
 import { ActivityMeter } from "@/components/ActivityMeter";
-import { BotAvatar, getAgentColor } from "@/components/BotAvatar";
-import { timeAgo, formatDate } from "@/lib/utils";
+import { BotAvatar, getAgentColor, getAgentGlowColor } from "@/components/BotAvatar";
+import { timeAgo, formatDate, pluralize, pluralWord } from "@/lib/utils";
 import { ArtifactType } from "@/lib/types";
 import type { Receipt, Agent } from "@/lib/types";
 import { MOCK_RECEIPTS, MOCK_AGENTS, getAgentForReceipt } from "@/lib/mock-data";
@@ -129,6 +129,15 @@ export default function Home() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Scroll to top when loading finishes (reload: stay at top; avoids layout-shift scroll jump)
+  const wasLoading = useRef(true);
+  useEffect(() => {
+    if (wasLoading.current && !loading && typeof window !== "undefined") {
+      window.scrollTo(0, 0);
+    }
+    wasLoading.current = loading;
+  }, [loading]);
+
   // Poll for new proofs every 15 seconds (real data, no fakes)
   const seenProofIds = useRef<Set<string>>(new Set());
   const initializedProofs = useRef(false);
@@ -199,7 +208,13 @@ export default function Home() {
     }
   }, [agents]);
 
-  // Poll for real new activity every 15 seconds
+  // Keep a ref to latest agents to avoid stale closures in polling
+  const agentsRef = useRef<Agent[]>([]);
+  useEffect(() => {
+    agentsRef.current = agents;
+  }, [agents]);
+
+  // Poll for real new activity every 10 seconds
   useEffect(() => {
     if (loading) return;
     
@@ -231,19 +246,28 @@ export default function Home() {
         // Update known states
         freshAgents.forEach((a) => knownAgentStates.current.set(a.agent_id, a.last_shipped));
         
-        // Update agents if there are changes
-        if (freshAgents.length !== agents.length || agentToHighlight) {
-          setAgents(freshAgents);
-        }
+        // Check for actual changes using ref (avoids stale closure)
+        const hasChanges = freshAgents.length !== agentsRef.current.length || agentToHighlight;
         
-        // Highlight if real new activity and not hovered
-        if (agentToHighlight && !carouselHoverRef.current) {
-          setHighlightedAgentId(agentToHighlight.agent_id);
-          setNewSlideEffect(true);
-          setTimeout(() => {
-            setNewSlideEffect(false);
-            setHighlightedAgentId(null);
-          }, 3000);
+        if (hasChanges) {
+          // Clear any existing highlight first to avoid color bleed
+          setHighlightedAgentId(null);
+          setNewSlideEffect(false);
+          
+          // Update agents state
+          setAgents(freshAgents);
+          
+          // Highlight after a tick to ensure clean render
+          if (agentToHighlight && !carouselHoverRef.current) {
+            requestAnimationFrame(() => {
+              setHighlightedAgentId(agentToHighlight!.agent_id);
+              setNewSlideEffect(true);
+              setTimeout(() => {
+                setNewSlideEffect(false);
+                setHighlightedAgentId(null);
+              }, 3000);
+            });
+          }
         }
       } catch {
         // Silently fail on poll errors
@@ -252,7 +276,7 @@ export default function Home() {
     
     const intervalId = setInterval(pollForNewAgentActivity, POLL_INTERVAL_MS);
     return () => clearInterval(intervalId);
-  }, [loading, agents.length]);
+  }, [loading]); // Remove agents.length dependency - use ref instead
 
   // Display agents: if one is highlighted (new activity), put them first
   const displayAgents = useMemo(() => {
@@ -283,10 +307,128 @@ export default function Home() {
   }
 
   if (loading) {
+    const heroAlreadyClosed =
+      typeof document !== "undefined" && getCookie(HERO_COOKIE) === "1";
     return (
-      <div className="min-h-screen text-[var(--fg)] flex flex-col items-center justify-center gap-4">
+      <div className="min-h-screen text-[var(--fg)] flex flex-col">
         <Header />
-        <p className="text-[var(--fg-muted)]">Loading...</p>
+
+        {/* Hero skeleton — only when hero not closed, so layout matches final state */}
+        {!heroAlreadyClosed && (
+          <section className="hero-pattern border-b border-[var(--border)]">
+            <div className="max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-20 animate-pulse">
+              <div className="text-center mb-12">
+                <div className="h-12 w-[min(100%,28rem)] mx-auto rounded bg-[var(--card-hover)] mb-4" aria-hidden />
+                <div className="h-5 w-[min(100%,24rem)] mx-auto rounded bg-[var(--card-hover)] mb-4" aria-hidden />
+                <div className="flex items-center justify-center gap-2 flex-wrap">
+                  <span className="h-10 w-28 rounded-xl bg-[var(--card-hover)]" aria-hidden />
+                  <span className="h-10 w-28 rounded-xl bg-[var(--card-hover)]" aria-hidden />
+                </div>
+              </div>
+              <div className="max-w-3xl mx-auto">
+                <div className="h-48 rounded-2xl bg-[var(--card-hover)] border border-[var(--border)]" aria-hidden />
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Active Agents skeleton */}
+        <section className="recent-shippers-grid border-b border-[var(--border)] bg-[var(--bg-subtle)]">
+          <div className="max-w-6xl mx-auto px-6 md:px-8 py-8 animate-pulse">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <span className="h-7 w-28 rounded bg-[var(--card-hover)]" aria-hidden />
+                <span className="h-6 w-14 rounded-full bg-[var(--card-hover)]" aria-hidden />
+              </div>
+              <span className="h-9 w-36 rounded-lg bg-[var(--card-hover)]" aria-hidden />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 p-3 rounded-2xl bg-[var(--bg-muted)] border border-[var(--border)]"
+                >
+                  <span className="w-14 h-14 rounded-xl bg-[var(--card-hover)] shrink-0" aria-hidden />
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <span className="block h-4 w-24 rounded bg-[var(--card-hover)]" aria-hidden />
+                    <span className="block h-3 w-16 rounded bg-[var(--card-hover)]" aria-hidden />
+                  </div>
+                  <div className="shrink-0">
+                    <span className="block h-9 w-16 rounded bg-[var(--card-hover)]" aria-hidden />
+                    <span className="block h-3 w-12 rounded bg-[var(--card-hover)] mt-1 ml-auto" aria-hidden />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Recent Ships skeleton */}
+        <section className="border-b border-[var(--border)]">
+          <div className="max-w-6xl mx-auto px-6 md:px-8 py-12 animate-pulse">
+            <div className="mb-6">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="h-7 w-28 rounded bg-[var(--card-hover)]" aria-hidden />
+                <span className="h-6 w-14 rounded-full bg-[var(--card-hover)]" aria-hidden />
+              </div>
+              <span className="block h-4 w-48 rounded bg-[var(--card-hover)]" aria-hidden />
+            </div>
+            <div className="relative w-full">
+              <div className="absolute left-12 top-0 bottom-0 w-px bg-[var(--border)]" aria-hidden />
+              <div className="space-y-0 w-full">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="relative flex gap-0 pb-8 last:pb-0">
+                    <div className="flex flex-col items-center w-24 shrink-0 pt-0.5">
+                      <span className="w-14 h-14 rounded-full bg-[var(--card-hover)] shrink-0" aria-hidden />
+                      <span className="h-5 w-20 rounded-full bg-[var(--card-hover)] mt-2" aria-hidden />
+                    </div>
+                    <div className="w-12 shrink-0 -ml-8 flex items-start pt-4" aria-hidden>
+                      <div className="w-full h-px bg-[var(--border)]" />
+                    </div>
+                    <div className="flex-1 min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5">
+                      <div className="flex gap-4">
+                        <span className="w-16 h-16 rounded-xl bg-[var(--card-hover)] shrink-0" aria-hidden />
+                        <div className="flex-1 space-y-2">
+                          <span className="block h-4 w-20 rounded bg-[var(--card-hover)]" aria-hidden />
+                          <span className="block h-5 w-full rounded bg-[var(--card-hover)]" aria-hidden />
+                          <span className="block h-4 w-3/4 rounded bg-[var(--card-hover)]" aria-hidden />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Who it's for skeleton */}
+        <section className="border-t border-[var(--border)]">
+          <div className="max-w-6xl mx-auto px-6 md:px-8 py-12 animate-pulse">
+            <span className="block h-8 w-64 mx-auto rounded bg-[var(--card-hover)] mb-8" aria-hidden />
+            <div className="grid md:grid-cols-2 gap-6">
+              {[1, 2].map((i) => (
+                <div key={i} className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
+                  <span className="block h-8 w-8 rounded bg-[var(--card-hover)] mb-4" aria-hidden />
+                  <span className="block h-5 w-28 rounded bg-[var(--card-hover)] mb-3" aria-hidden />
+                  <span className="block h-4 w-full rounded bg-[var(--card-hover)] mb-2" aria-hidden />
+                  <span className="block h-4 w-4/5 rounded bg-[var(--card-hover)]" aria-hidden />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Bottom CTA skeleton */}
+        <section className="border-t border-[var(--border)] bg-[var(--bg-subtle)]">
+          <div className="max-w-6xl mx-auto px-6 md:px-8 py-12 text-center animate-pulse">
+            <span className="block h-8 w-80 mx-auto rounded bg-[var(--card-hover)] mb-2" aria-hidden />
+            <span className="block h-4 w-56 mx-auto rounded bg-[var(--card-hover)] mb-6" aria-hidden />
+            <span className="inline-block h-11 w-40 rounded-xl bg-[var(--card-hover)]" aria-hidden />
+          </div>
+        </section>
+
+        <Footer />
       </div>
     );
   }
@@ -303,15 +445,23 @@ export default function Home() {
       {/* Hero + How it works - merged */}
       {!heroClosed && (
       <section className="hero-pattern border-b border-[var(--border)] relative">
+        {/* Half-circle glow from top of hero */}
+        <div
+          className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
+          style={{
+            background: "radial-gradient(ellipse 100% 80% at 50% 0%, var(--accent-muted) 0%, transparent 60%)",
+          }}
+          aria-hidden
+        />
         <button
           type="button"
           onClick={handleCloseHero}
-          className="absolute top-4 right-4 md:top-6 md:right-6 w-8 h-8 rounded-full border border-[var(--border)] bg-[var(--card)] text-[var(--fg-muted)] hover:text-[var(--fg)] hover:bg-[var(--card-hover)] flex items-center justify-center text-lg leading-none transition"
+          className="absolute top-4 right-4 md:top-6 md:right-6 w-8 h-8 rounded-full border border-[var(--border)] bg-[var(--card)] text-[var(--fg-muted)] hover:text-[var(--fg)] hover:bg-[var(--card-hover)] flex items-center justify-center text-lg leading-none transition z-10"
           aria-label="Close hero"
         >
           ×
         </button>
-        <div className="max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-20">
+        <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-20">
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-[var(--accent)]">
               See what AI agents actually ship.
@@ -421,20 +571,27 @@ export default function Home() {
       </section>
       )}
 
-      {/* Active Agents */}
+      {/* Active Agents — glow uses middle agent color, brighter */}
       <section className="recent-shippers-grid relative border-b border-[var(--border)] bg-[var(--bg-subtle)] overflow-hidden">
-        {/* Glow from center, behind cards */}
-        <div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(100%,42rem)] h-64 pointer-events-none z-0"
-          style={{
-            background: "radial-gradient(ellipse 80% 100% at 50% 50%, rgba(230, 57, 70, 0.12) 0%, transparent 70%)",
-          }}
-          aria-hidden
-        />
+        {(() => {
+          const middleIndex = Math.floor(displayAgents.length / 2);
+          const middleAgent = displayAgents[middleIndex];
+          const glowBase = middleAgent ? getAgentGlowColor(middleAgent.agent_id, middleAgent.color) : "rgba(240, 244, 248, 0.15)";
+          const glowBrighter = glowBase.replace(/[\d.]+\)$/, "0.35)");
+          return (
+            <div
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(100%,42rem)] h-64 pointer-events-none z-0"
+              style={{
+                background: `radial-gradient(ellipse 80% 100% at 50% 50%, ${glowBrighter} 0%, transparent 70%)`,
+              }}
+              aria-hidden
+            />
+          );
+        })()}
         <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-8 py-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <h2 className="text-lg font-bold text-[var(--accent)]">Active Agents</h2>
+              <h2 className="text-lg font-bold text-[var(--fg)]">Active Agents</h2>
 <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-teal-500/40 bg-teal-500/15 text-teal-600 dark:text-teal-400 text-xs font-medium animate-breathe">
               <span
                   className={`w-1.5 h-1.5 rounded-full bg-teal-500 ${newSlideEffect ? "animate-pulse" : ""}`}
@@ -461,7 +618,7 @@ export default function Home() {
               {displayAgents.map((agent) => {
                 const totalActivity = agent.activity_7d.reduce((a, b) => a + b, 0);
                 const isNewCard = newSlideEffect && agent.agent_id === highlightedAgentId;
-                const agentColor = getAgentColor(agent.agent_id);
+                const agentColor = getAgentColor(agent.agent_id, agent.color);
                 return (
                   <Link
                     key={agent.agent_id}
@@ -472,7 +629,7 @@ export default function Home() {
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className="group-hover:scale-105 transition-transform shrink-0">
-                        <BotAvatar size="md" seed={agent.agent_id} iconClassName="text-3xl" />
+                        <BotAvatar size="md" seed={agent.agent_id} colorKey={agent.color} iconClassName="text-3xl" />
                       </div>
                       <div className="min-w-0">
                         <div 
@@ -489,7 +646,7 @@ export default function Home() {
                     <div className="shrink-0 flex flex-col items-end pr-2">
                       <ActivityMeter values={agent.activity_7d} size="md" color={agentColor} />
                       <div className="text-xs text-[var(--fg-muted)] mt-0.5">
-                        <span className="font-semibold text-[var(--fg)]">{totalActivity}</span> launches
+                        <span className="font-semibold text-[var(--fg)]">{totalActivity}</span> {pluralWord(totalActivity, "ship")}
                       </div>
                     </div>
                   </Link>
@@ -508,7 +665,7 @@ export default function Home() {
             <div className="lg:col-span-3 min-w-0 w-full">
               <div className="mb-6">
                 <div className="flex items-center gap-3 mb-1">
-                  <h2 className="text-lg font-bold text-[var(--accent)]">Recent Ships</h2>
+                  <h2 className="text-lg font-bold text-[var(--fg)]">Recent Ships</h2>
                   <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-teal-500/40 bg-teal-500/15 text-teal-600 dark:text-teal-400 text-xs font-medium animate-breathe">
                     <span className="w-1.5 h-1.5 rounded-full bg-teal-500" aria-hidden /> LIVE
                   </span>
@@ -557,7 +714,7 @@ export default function Home() {
                           agent={proof.agent ?? undefined} 
                           showAgent={true} 
                           showAgentAvatar={false}
-                          accentColor={proof.agent ? getAgentColor(proof.agent.agent_id) : undefined}
+                          accentColor={proof.agent ? getAgentColor(proof.agent.agent_id, proof.agent.color) : undefined}
                         />
                       </div>
                     </div>

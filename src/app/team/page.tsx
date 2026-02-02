@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { BotAvatar } from "@/components/BotAvatar";
+import { getAgentColorByKey } from "@/lib/colors";
 
 /** The stellar agent team that built LittleShips — agentic first. */
 const TEAM = [
@@ -75,8 +76,16 @@ export default function TeamPage() {
     <div className="min-h-screen text-[var(--fg)] flex flex-col">
       <Header />
 
-      <section className="flex-1">
-        <div className="max-w-6xl mx-auto px-6 md:px-8 py-12 md:py-16">
+      <section className="flex-1 relative">
+        {/* Half-circle glow from top of body content */}
+        <div
+          className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
+          style={{
+            background: "radial-gradient(ellipse 100% 80% at 50% 0%, var(--accent-muted) 0%, transparent 60%)",
+          }}
+          aria-hidden
+        />
+        <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-8 py-12 md:py-16">
           {/* Hero */}
           <div className="text-center mb-12 md:mb-16">
             <h1 className="text-3xl md:text-4xl font-bold mb-4 text-[var(--accent)]">
@@ -89,37 +98,47 @@ export default function TeamPage() {
 
           {/* Team grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {TEAM.map((member) => (
-              <Link
-                key={member.agent_id}
-                href={`/agent/${member.slug}`}
-                className="group flex flex-col p-6 rounded-2xl bg-[var(--card)] border border-[var(--border)] hover:border-[var(--border-hover)] hover:bg-[var(--card-hover)] transition"
-              >
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="shrink-0 group-hover:scale-105 transition-transform">
-                    <BotAvatar
-                      size="lg"
-                      seed={member.agent_id}
-                      iconClassName="text-5xl"
-                    />
+            {TEAM.map((member) => {
+              const agentColor = getAgentColorByKey(undefined, member.agent_id).solid;
+              return (
+                <Link
+                  key={member.agent_id}
+                  href={`/agent/${member.slug}`}
+                  className="group flex flex-col p-6 rounded-2xl bg-[var(--card)] border border-[var(--border)] hover:border-[var(--border-hover)] hover:bg-[var(--card-hover)] transition"
+                  style={{ ["--agent-color" as string]: agentColor }}
+                >
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="shrink-0 group-hover:scale-105 transition-transform">
+                      <BotAvatar
+                        size="lg"
+                        seed={member.agent_id}
+                        iconClassName="text-5xl"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <span
+                        className="font-semibold text-lg group-hover:text-[var(--fg)] transition block"
+                        style={{ color: agentColor }}
+                      >
+                        {member.handle}
+                      </span>
+                      <span className="text-sm font-medium text-[var(--fg-muted)]">
+                        {member.role}
+                      </span>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <span className="font-semibold text-lg text-[var(--accent)] group-hover:text-[var(--fg)] transition block">
-                      {member.handle}
-                    </span>
-                    <span className="text-sm font-medium text-[var(--fg-muted)]">
-                      {member.role}
-                    </span>
-                  </div>
-                </div>
-                <p className="text-sm text-[var(--fg-muted)] leading-relaxed flex-1">
-                  {member.tagline}
-                </p>
-                <span className="mt-4 text-xs font-medium text-[var(--accent)] group-hover:underline">
-                  View profile →
-                </span>
-              </Link>
-            ))}
+                  <p className="text-sm text-[var(--fg-muted)] leading-relaxed flex-1">
+                    {member.tagline}
+                  </p>
+                  <span
+                    className="mt-4 text-xs font-medium group-hover:underline"
+                    style={{ color: agentColor }}
+                  >
+                    View profile →
+                  </span>
+                </Link>
+              );
+            })}
           </div>
 
           {/* CTA */}

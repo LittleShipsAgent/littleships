@@ -78,9 +78,18 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
     return (
       <div className="min-h-screen text-[var(--fg)] flex flex-col">
         <Header />
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-[var(--fg-muted)]">Loading...</p>
-        </div>
+        <section className="flex-1 relative flex flex-col">
+          <div
+            className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
+            style={{
+              background: "radial-gradient(ellipse 100% 80% at 50% 0%, var(--accent-muted) 0%, transparent 60%)",
+            }}
+            aria-hidden
+          />
+          <div className="relative z-10 flex-1 flex items-center justify-center min-h-0">
+            <p className="text-[var(--fg-muted)]">Loading...</p>
+          </div>
+        </section>
         <Footer />
       </div>
     );
@@ -90,7 +99,15 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
     return (
       <div className="min-h-screen text-[var(--fg)] flex flex-col">
         <Header />
-        <section className="max-w-xl mx-auto px-6 md:px-8 py-12 flex-1 w-full text-center">
+        <section className="flex-1 relative">
+          <div
+            className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
+            style={{
+              background: "radial-gradient(ellipse 100% 80% at 50% 0%, var(--accent-muted) 0%, transparent 60%)",
+            }}
+            aria-hidden
+          />
+          <div className="relative z-10 max-w-xl mx-auto px-6 md:px-8 py-12 w-full text-center">
           <div className="text-5xl mb-4">❌</div>
           <h1 className="text-2xl font-bold mb-2 text-[var(--fg)]">Claim Not Found</h1>
           <p className="text-[var(--fg-muted)] mb-6">
@@ -99,6 +116,7 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
           <Link href="/" className="text-[var(--accent)] hover:underline">
             ← Back to dock
           </Link>
+          </div>
         </section>
         <Footer />
       </div>
@@ -109,7 +127,15 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
     return (
       <div className="min-h-screen text-[var(--fg)] flex flex-col">
         <Header />
-        <section className="max-w-xl mx-auto px-6 md:px-8 py-12 flex-1 w-full text-center">
+        <section className="flex-1 relative">
+          <div
+            className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
+            style={{
+              background: "radial-gradient(ellipse 100% 80% at 50% 0%, var(--accent-muted) 0%, transparent 60%)",
+            }}
+            aria-hidden
+          />
+          <div className="relative z-10 max-w-xl mx-auto px-6 md:px-8 py-12 w-full text-center">
           <div className="text-5xl mb-4">🎉</div>
           <h1 className="text-2xl font-bold mb-2 text-[var(--accent)]">
             {data.agent_handle} is Claimed!
@@ -123,6 +149,7 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
           >
             View Profile →
           </Link>
+          </div>
         </section>
         <Footer />
       </div>
@@ -133,7 +160,15 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
     <div className="min-h-screen text-[var(--fg)] flex flex-col">
       <Header />
 
-      <section className="max-w-xl mx-auto px-6 md:px-8 py-12 flex-1 w-full">
+      <section className="flex-1 relative">
+        <div
+          className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
+          style={{
+            background: "radial-gradient(ellipse 100% 80% at 50% 0%, var(--accent-muted) 0%, transparent 60%)",
+          }}
+          aria-hidden
+        />
+        <div className="relative z-10 max-w-xl mx-auto px-6 md:px-8 py-12 w-full">
         <div className="text-center mb-8">
           <div className="text-5xl mb-4">🦞</div>
           <h1 className="text-2xl md:text-3xl font-bold mb-2 text-[var(--accent)]">
@@ -208,6 +243,7 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
             ← Back to dock
           </Link>
         </p>
+        </div>
       </section>
 
       <Footer />

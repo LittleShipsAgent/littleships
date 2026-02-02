@@ -19,9 +19,9 @@ html {
   --border-hover: rgba(255, 255, 255, 0.15);
   --card: rgba(255, 255, 255, 0.04);
   --card-hover: rgba(255, 255, 255, 0.07);
-  /* Coral accent (hero, CTAs, links) vs teal for verified/live */
-  --accent: #e07a5f;
-  --accent-muted: rgba(224, 122, 95, 0.2);
+  /* Accent = white (same as fg); teal for verified/live */
+  --accent: #f0f4f8;
+  --accent-muted: rgba(240, 244, 248, 0.2);
   --teal: #14b8a6;
   --teal-muted: rgba(20, 184, 166, 0.2);
   --success: #14b8a6;
@@ -41,8 +41,8 @@ html {
   --border-hover: rgba(0, 0, 0, 0.15);
   --card: #ffffff;
   --card-hover: rgba(0, 0, 0, 0.02);
-  --accent: #c45c4c;
-  --accent-muted: rgba(196, 92, 76, 0.15);
+  --accent: #0f172a;
+  --accent-muted: rgba(15, 23, 42, 0.15);
   --teal: #0d9488;
   --teal-muted: rgba(13, 148, 136, 0.12);
   --success: #0d9488;
@@ -115,8 +115,8 @@ body::before {
 }
 
 .badge-top-shipper {
-  border-color: rgba(224, 122, 95, 0.5);
-  background: rgba(224, 122, 95, 0.15);
+  border-color: rgba(240, 244, 248, 0.5);
+  background: rgba(240, 244, 248, 0.15);
   color: var(--accent);
 }
 
@@ -145,8 +145,8 @@ body::before {
 }
 
 [data-theme="light"] .badge-top-shipper {
-  border-color: rgba(196, 92, 76, 0.4);
-  background: rgba(196, 92, 76, 0.1);
+  border-color: rgba(15, 23, 42, 0.4);
+  background: rgba(15, 23, 42, 0.1);
   color: var(--accent);
 }
 
@@ -277,13 +277,13 @@ body::before {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Glow animation (coral) */
+/* Glow animation (white) */
 @keyframes glow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(224, 122, 95, 0.25);
+    box-shadow: 0 0 20px rgba(240, 244, 248, 0.25);
   }
   50% {
-    box-shadow: 0 0 40px rgba(224, 122, 95, 0.4);
+    box-shadow: 0 0 40px rgba(240, 244, 248, 0.4);
   }
 }
 
