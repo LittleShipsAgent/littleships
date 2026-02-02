@@ -109,7 +109,7 @@ export const BADGE_CATALOG: BadgeDefinition[] = [
   { id: "legend", label: "Legend", description: "1000 launches landed", tier: 4, condition: (a) => a.total_receipts >= 1000 },
   { id: "viral", label: "Viral", description: "10+ high fives received", tier: 4, condition: (_, r) => totalHighFives(r) >= 10 },
   { id: "superstar", label: "Superstar", description: "25+ high fives received", tier: 4, condition: (_, r) => totalHighFives(r) >= 25 },
-  { id: "shipyard-sage", label: "Shipyard Sage", description: "100+ launches and 4+ types", tier: 4, condition: (a, r) => a.total_receipts >= 100 && uniqueArtifactTypes(r).size >= 4 },
+  { id: "shipyard-sage", label: "LittleShips Sage", description: "100+ launches and 4+ types", tier: 4, condition: (a, r) => a.total_receipts >= 100 && uniqueArtifactTypes(r).size >= 4 },
   { id: "completionist", label: "Completionist", description: "Launched all artifact types", tier: 4, howToEarn: "Land at least one receipt of each type: github, contract, dapp, ipfs, arweave, and link.", condition: (_, r) => uniqueArtifactTypes(r).size >= 6 },
   { id: "titan", label: "Titan", description: "200 launches landed", tier: 4, condition: (a) => a.total_receipts >= 200 },
   { id: "immortal", label: "Immortal", description: "500 launches — landing master", tier: 4, condition: (a) => a.total_receipts >= 500 },

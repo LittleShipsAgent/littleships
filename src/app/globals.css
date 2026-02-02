@@ -55,32 +55,6 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Starfield — visible above nebula; content layer uses .content-above-stars to sit on top */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800' viewBox='0 0 800 800'%3E%3Cg fill='rgba(255,255,255,0.95)'%3E%3Ccircle cx='42' cy='118' r='0.6'/%3E%3Ccircle cx='187' cy='304' r='0.5'/%3E%3Ccircle cx='331' cy='491' r='0.8'/%3E%3Ccircle cx='476' cy='77' r='0.5'/%3E%3Ccircle cx='620' cy='263' r='0.6'/%3E%3Ccircle cx='65' cy='450' r='0.5'/%3E%3Ccircle cx='209' cy='636' r='0.7'/%3E%3Ccircle cx='354' cy='23' r='0.5'/%3E%3Ccircle cx='498' cy='209' r='0.6'/%3E%3Ccircle cx='643' cy='395' r='0.5'/%3E%3Ccircle cx='88' cy='582' r='0.8'/%3E%3Ccircle cx='232' cy='768' r='0.5'/%3E%3Ccircle cx='377' cy='155' r='0.6'/%3E%3Ccircle cx='521' cy='341' r='0.5'/%3E%3Ccircle cx='666' cy='527' r='0.7'/%3E%3Ccircle cx='111' cy='714' r='0.5'/%3E%3Ccircle cx='255' cy='101' r='0.6'/%3E%3Ccircle cx='400' cy='287' r='0.5'/%3E%3Ccircle cx='544' cy='473' r='0.8'/%3E%3Ccircle cx='689' cy='659' r='0.5'/%3E%3Ccircle cx='134' cy='46' r='0.6'/%3E%3Ccircle cx='278' cy='232' r='0.5'/%3E%3Ccircle cx='423' cy='418' r='0.5'/%3E%3Ccircle cx='567' cy='604' r='0.7'/%3E%3Ccircle cx='712' cy='790' r='0.5'/%3E%3Ccircle cx='157' cy='178' r='0.5'/%3E%3Ccircle cx='301' cy='364' r='0.8'/%3E%3Ccircle cx='446' cy='550' r='0.5'/%3E%3Ccircle cx='590' cy='736' r='0.6'/%3E%3Ccircle cx='735' cy='123' r='0.5'/%3E%3Ccircle cx='180' cy='309' r='0.6'/%3E%3Ccircle cx='324' cy='496' r='0.5'/%3E%3Ccircle cx='469' cy='682' r='0.5'/%3E%3Ccircle cx='613' cy='69' r='0.7'/%3E%3Ccircle cx='758' cy='255' r='0.5'/%3E%3Ccircle cx='203' cy='441' r='0.5'/%3E%3Ccircle cx='348' cy='627' r='0.6'/%3E%3Ccircle cx='492' cy='14' r='0.5'/%3E%3Ccircle cx='637' cy='200' r='0.8'/%3E%3Ccircle cx='22' cy='386' r='0.5'/%3E%3Ccircle cx='267' cy='572' r='0.6'/%3E%3Ccircle cx='411' cy='758' r='0.5'/%3E%3Ccircle cx='556' cy='145' r='0.5'/%3E%3Ccircle cx='700' cy='331' r='0.7'/%3E%3Ccircle cx='145' cy='517' r='0.5'/%3E%3Ccircle cx='290' cy='703' r='0.5'/%3E%3Ccircle cx='434' cy='90' r='0.6'/%3E%3Ccircle cx='579' cy='276' r='0.5'/%3E%3Ccircle cx='723' cy='462' r='0.5'/%3E%3Ccircle cx='168' cy='648' r='0.8'/%3E%3Ccircle cx='313' cy='35' r='0.5'/%3E%3Ccircle cx='457' cy='221' r='0.6'/%3E%3Ccircle cx='602' cy='407' r='0.5'/%3E%3Ccircle cx='746' cy='593' r='0.5'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 800px 800px;
-  background-repeat: repeat;
-  background-position: 0 0;
-  opacity: 1;
-  animation: starTwinkle 5s ease-in-out infinite;
-}
-
-@keyframes starTwinkle {
-  0%, 100% { opacity: 0.92; }
-  50% { opacity: 1; }
-}
-
-[data-theme="light"] body::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800' viewBox='0 0 800 800'%3E%3Cg fill='rgba(15,23,42,0.35)'%3E%3Ccircle cx='42' cy='118' r='0.6'/%3E%3Ccircle cx='187' cy='304' r='0.5'/%3E%3Ccircle cx='331' cy='491' r='0.8'/%3E%3Ccircle cx='476' cy='77' r='0.5'/%3E%3Ccircle cx='620' cy='263' r='0.6'/%3E%3Ccircle cx='65' cy='450' r='0.5'/%3E%3Ccircle cx='209' cy='636' r='0.7'/%3E%3Ccircle cx='354' cy='23' r='0.5'/%3E%3Ccircle cx='498' cy='209' r='0.6'/%3E%3Ccircle cx='643' cy='395' r='0.5'/%3E%3Ccircle cx='88' cy='582' r='0.8'/%3E%3Ccircle cx='232' cy='768' r='0.5'/%3E%3Ccircle cx='377' cy='155' r='0.6'/%3E%3Ccircle cx='521' cy='341' r='0.5'/%3E%3Ccircle cx='666' cy='527' r='0.7'/%3E%3Ccircle cx='111' cy='714' r='0.5'/%3E%3Ccircle cx='255' cy='101' r='0.6'/%3E%3Ccircle cx='400' cy='287' r='0.5'/%3E%3Ccircle cx='544' cy='473' r='0.8'/%3E%3Ccircle cx='689' cy='659' r='0.5'/%3E%3Ccircle cx='134' cy='46' r='0.6'/%3E%3Ccircle cx='278' cy='232' r='0.5'/%3E%3Ccircle cx='423' cy='418' r='0.5'/%3E%3Ccircle cx='567' cy='604' r='0.7'/%3E%3Ccircle cx='712' cy='790' r='0.5'/%3E%3Ccircle cx='157' cy='178' r='0.5'/%3E%3Ccircle cx='301' cy='364' r='0.8'/%3E%3Ccircle cx='446' cy='550' r='0.5'/%3E%3Ccircle cx='590' cy='736' r='0.6'/%3E%3Ccircle cx='735' cy='123' r='0.5'/%3E%3Ccircle cx='180' cy='309' r='0.6'/%3E%3Ccircle cx='324' cy='496' r='0.5'/%3E%3Ccircle cx='469' cy='682' r='0.5'/%3E%3Ccircle cx='613' cy='69' r='0.7'/%3E%3Ccircle cx='758' cy='255' r='0.5'/%3E%3Ccircle cx='203' cy='441' r='0.5'/%3E%3Ccircle cx='348' cy='627' r='0.6'/%3E%3Ccircle cx='492' cy='14' r='0.5'/%3E%3Ccircle cx='637' cy='200' r='0.8'/%3E%3Ccircle cx='22' cy='386' r='0.5'/%3E%3Ccircle cx='267' cy='572' r='0.6'/%3E%3Ccircle cx='411' cy='758' r='0.5'/%3E%3Ccircle cx='556' cy='145' r='0.5'/%3E%3Ccircle cx='700' cy='331' r='0.7'/%3E%3Ccircle cx='145' cy='517' r='0.5'/%3E%3Ccircle cx='290' cy='703' r='0.5'/%3E%3Ccircle cx='434' cy='90' r='0.6'/%3E%3Ccircle cx='579' cy='276' r='0.5'/%3E%3Ccircle cx='723' cy='462' r='0.5'/%3E%3Ccircle cx='168' cy='648' r='0.8'/%3E%3Ccircle cx='313' cy='35' r='0.5'/%3E%3Ccircle cx='457' cy='221' r='0.6'/%3E%3Ccircle cx='602' cy='407' r='0.5'/%3E%3Ccircle cx='746' cy='593' r='0.5'/%3E%3C/g%3E%3C/svg%3E");
-  opacity: 0.7;
-  animation-duration: 5s;
-}
-
 /* Very subtle nebula — behind stars so it doesn’t wash them out or create a blue block */
 body::before {
   content: "";
@@ -101,6 +75,15 @@ body::before {
     rgba(0, 0, 0, 0.02) 0%,
     transparent 40%
   );
+}
+
+/* Hero — subtle repeating dot pattern so it’s less flat */
+.hero-pattern {
+  background-color: var(--bg);
+  background-image: radial-gradient(circle at 1px 1px, var(--border) 1px, transparent 0);
+  background-size: 20px 20px;
+  background-position: 0 0;
+  background-repeat: repeat;
 }
 
 /* Subtle grid for Active Agents section */

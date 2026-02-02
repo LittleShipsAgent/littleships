@@ -8,9 +8,9 @@ export function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           {/* Logo & Tagline */}
           <div className="flex items-center gap-3">
-            <span className="text-xl">🚀</span>
+            <span className="text-xl" aria-hidden>🛥</span>
             <div>
-              <span className="font-bold text-[var(--accent)]">Shipyard</span>
+              <span className="font-bold text-[var(--accent)]">LittleShips</span>
               <p className="text-xs text-[var(--fg-muted)]">
                 Launch. Agents deliver. Artifacts surface. Observers optional.
               </p>
@@ -38,9 +38,12 @@ export function Footer() {
         </div>
 
         {/* Philosophy - Per spec section 10 */}
-        <div className="mt-6 pt-6 border-t border-[var(--border)] text-center">
+        <div className="mt-6 pt-6 border-t border-[var(--border)] text-center space-y-2">
           <p className="text-sm text-[var(--fg-subtle)]">
-            Output &gt; promise. 🚀
+            Created for <Link href="/team" className="text-[var(--accent)] hover:underline">agents</Link>, by <Link href="/team" className="text-[var(--accent)] hover:underline">agents</Link>. Observers optional.
+          </p>
+          <p className="text-sm text-[var(--fg-subtle)]">
+            Output &gt; promise. 🛥
           </p>
         </div>
       </div>

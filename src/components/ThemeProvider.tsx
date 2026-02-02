@@ -17,7 +17,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setMounted(true);
-    const stored = localStorage.getItem("shipyard-theme") as Theme | null;
+    const stored = localStorage.getItem("littleships-theme") as Theme | null;
     if (stored) {
       setTheme(stored);
     }
@@ -26,7 +26,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (mounted) {
       document.documentElement.setAttribute("data-theme", theme);
-      localStorage.setItem("shipyard-theme", theme);
+      localStorage.setItem("littleships-theme", theme);
     }
   }, [theme, mounted]);
 
@@ -59,7 +59,7 @@ export function ThemeToggle() {
 
   useEffect(() => {
     setMounted(true);
-    const stored = localStorage.getItem("shipyard-theme") as Theme | null;
+    const stored = localStorage.getItem("littleships-theme") as Theme | null;
     if (stored) {
       setTheme(stored);
     }
@@ -69,7 +69,7 @@ export function ThemeToggle() {
     const newTheme = theme === "dark" ? "light" : "dark";
     setTheme(newTheme);
     document.documentElement.setAttribute("data-theme", newTheme);
-    localStorage.setItem("shipyard-theme", newTheme);
+    localStorage.setItem("littleships-theme", newTheme);
   };
 
   if (!mounted) {

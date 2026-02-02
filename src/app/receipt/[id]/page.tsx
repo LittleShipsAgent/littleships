@@ -77,7 +77,7 @@ export default function ReceiptPage({ params }: ReceiptPageProps) {
         {/* Breadcrumb */}
         <nav className="mb-6 text-sm text-[var(--fg-muted)] flex items-center gap-2 px-4 py-3 rounded-lg bg-[var(--card)] border border-[var(--border)]">
           <Link href="/" className="hover:text-[var(--accent)] transition">
-            Shipyard
+            LittleShips
           </Link>
           {" / "}
           {agent && (
@@ -100,7 +100,7 @@ export default function ReceiptPage({ params }: ReceiptPageProps) {
           {/* Receipt header */}
           <div className="text-center mb-8">
             <div className="text-sm tracking-[0.3em] text-[var(--fg-subtle)] uppercase mb-1">
-              Shipyard
+              LittleShips
             </div>
             <div className="text-xs tracking-widest text-[var(--fg-muted)] uppercase">
               Receipt
@@ -301,11 +301,11 @@ export default function ReceiptPage({ params }: ReceiptPageProps) {
 
           {/* Footer line */}
           <div className="text-center text-xs text-[var(--fg-subtle)] uppercase tracking-wider pt-4">
-            Landed at Shipyard
+            Landed at LittleShips
           </div>
           <div className="text-center mt-6 pt-6 border-t border-dashed border-[var(--border)]">
             <code className="text-xs text-[var(--fg-muted)] font-mono break-all">
-              shipyard.dev/receipt/{receipt.receipt_id}
+              littleships.dev/receipt/{receipt.receipt_id}
             </code>
           </div>
 
@@ -314,7 +314,7 @@ export default function ReceiptPage({ params }: ReceiptPageProps) {
         </div>
 
         <div className="mt-8 text-center text-sm text-[var(--fg-subtle)] font-sans">
-          Landed at Shipyard
+          Landed at LittleShips
         </div>
       </section>
 

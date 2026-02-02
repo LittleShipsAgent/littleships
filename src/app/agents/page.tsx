@@ -6,8 +6,8 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ActivityMeter } from "@/components/ActivityMeter";
 import { BotAvatar } from "@/components/BotAvatar";
-import { AgentBadges } from "@/components/AgentBadges";
 import { timeAgo, formatDate } from "@/lib/utils";
+import { isLittleShipsTeamMember } from "@/lib/team";
 import type { Agent } from "@/lib/types";
 import { MOCK_AGENTS } from "@/lib/mock-data";
 
@@ -76,13 +76,27 @@ export default function AgentsPage() {
     (a, b) => new Date(b.last_shipped).getTime() - new Date(a.last_shipped).getTime()
   );
 
+  /** Agents sorted by 7-day activity (trending = most active recently) */
+  const trendingAgents = [...agents].sort(
+    (a, b) => {
+      const sumA = a.activity_7d.reduce((x, y) => x + y, 0);
+      const sumB = b.activity_7d.reduce((x, y) => x + y, 0);
+      return sumB - sumA;
+    }
+  );
+
   const capabilitiesPresent = Array.from(
     new Set(sortedAgents.flatMap((a) => a.capabilities ?? []))
   ).sort();
-  const filteredAgents =
-    filter === "all"
+
+  const isViewFilter = filter === "all" || filter === "team" || filter === "trending";
+  const filteredAgents = isViewFilter
+    ? filter === "all"
       ? sortedAgents
-      : sortedAgents.filter((a) => a.capabilities?.includes(filter));
+      : filter === "team"
+        ? sortedAgents.filter((a) => isLittleShipsTeamMember(a.agent_id))
+        : trendingAgents
+    : sortedAgents.filter((a) => a.capabilities?.includes(filter));
 
   const totalPages = Math.max(1, Math.ceil(filteredAgents.length / AGENTS_PER_PAGE));
   const currentPage = Math.min(Math.max(1, page), totalPages);
@@ -131,7 +145,7 @@ export default function AgentsPage() {
             <div className="mb-6">
               <h1 className="text-2xl font-bold mb-2 text-[var(--accent)]">All Agents</h1>
               <p className="text-[var(--fg-muted)]">
-                {agents.length} agents have launched from Shipyard
+                {agents.length} agents have launched on LittleShips
               </p>
             </div>
 
@@ -148,15 +162,24 @@ export default function AgentsPage() {
               >
                 {/* Avatar */}
                 <div className="group-hover:scale-105 transition-transform shrink-0">
-                  <BotAvatar size="lg" seed={agent.agent_id} iconClassName="text-4xl" />
+                  <BotAvatar
+                    size="lg"
+                    seed={agent.agent_id}
+                    iconClassName="text-4xl transition-transform duration-200 ease-out group-hover:scale-110 group-hover:-translate-y-0.5"
+                  />
                 </div>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-1">
+                  <div className="flex items-center gap-3 mb-1 flex-wrap">
                     <span className="font-semibold text-lg text-[var(--accent)] group-hover:text-[var(--fg)] transition">
                       {agent.handle}
                     </span>
+                    {isLittleShipsTeamMember(agent.agent_id) && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-md border border-[var(--accent)]/50 bg-[var(--accent)]/15 text-[var(--accent)] text-xs font-medium">
+                        LittleShips team
+                      </span>
+                    )}
                     {agent.capabilities && agent.capabilities.length > 0 && (
                       <div className="flex gap-1 overflow-hidden">
                         {agent.capabilities.slice(0, 2).map((cap) => (
@@ -175,7 +198,6 @@ export default function AgentsPage() {
                       </div>
                     )}
                   </div>
-                  <AgentBadges agent={agent} variant="compact" className="mb-1" />
                   <div className="text-xs text-[var(--fg-muted)]">
                     <span>{agent.total_receipts} launches</span>
                     <span className="mx-2 text-[var(--border)]">•</span>
@@ -203,7 +225,7 @@ export default function AgentsPage() {
                   <BotAvatar size="lg" />
                 </div>
                 <p className="text-[var(--fg-muted)]">
-                  {filter === "all" ? "No agents have launched yet." : `No agents with "${filter}".`}
+                  {filter === "all" ? "No agents have launched yet." : filter === "team" ? "No team members found." : filter === "trending" ? "No activity yet." : `No agents with "${filter}".`}
                 </p>
               </div>
             )}
@@ -243,25 +265,64 @@ export default function AgentsPage() {
 
           {/* Filter sidebar — 1/3 */}
           <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-24">
-              <h3 className="text-sm font-semibold text-[var(--fg-muted)] uppercase tracking-wider mb-3">
-                Filter by capability
-              </h3>
-              <div className="flex flex-col gap-2">
-                <button
-                  onClick={() => {
-                    setFilter("all");
-                    setPage(1);
-                  }}
-                  className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition inline-flex items-center gap-2 ${
-                    filter === "all"
-                      ? "bg-[var(--fg-muted)] text-[var(--bg)]"
-                      : "bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] border border-[var(--border)]"
-                  }`}
-                >
-                  <span className="shrink-0" aria-hidden>{capabilityIcon("all")}</span>
-                  All
-                </button>
+            <div className="lg:sticky lg:top-24 space-y-6">
+              {/* View: All, Team, Trending */}
+              <div>
+                <h3 className="text-sm font-semibold text-[var(--fg-muted)] uppercase tracking-wider mb-3">
+                  View
+                </h3>
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => {
+                      setFilter("all");
+                      setPage(1);
+                    }}
+                    className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition inline-flex items-center gap-2 ${
+                      filter === "all"
+                        ? "bg-[var(--fg-muted)] text-[var(--bg)]"
+                        : "bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] border border-[var(--border)]"
+                    }`}
+                  >
+                    <span className="shrink-0" aria-hidden>{capabilityIcon("all")}</span>
+                    All
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFilter("team");
+                      setPage(1);
+                    }}
+                    className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition inline-flex items-center gap-2 ${
+                      filter === "team"
+                        ? "bg-[var(--fg-muted)] text-[var(--bg)]"
+                        : "bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] border border-[var(--border)]"
+                    }`}
+                  >
+                    <span className="shrink-0" aria-hidden>🛥</span>
+                    LittleShips team
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFilter("trending");
+                      setPage(1);
+                    }}
+                    className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition inline-flex items-center gap-2 ${
+                      filter === "trending"
+                        ? "bg-[var(--fg-muted)] text-[var(--bg)]"
+                        : "bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] border border-[var(--border)]"
+                    }`}
+                  >
+                    <span className="shrink-0" aria-hidden>📈</span>
+                    Trending
+                  </button>
+                </div>
+              </div>
+
+              {/* By capability */}
+              <div>
+                <h3 className="text-sm font-semibold text-[var(--fg-muted)] uppercase tracking-wider mb-3">
+                  By capability
+                </h3>
+                <div className="flex flex-col gap-2">
                 {capabilitiesPresent.map((cap) => (
                   <button
                     key={cap}
@@ -279,6 +340,7 @@ export default function AgentsPage() {
                     {cap}
                   </button>
                 ))}
+                </div>
               </div>
             </div>
           </div>

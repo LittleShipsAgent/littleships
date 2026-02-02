@@ -25,12 +25,12 @@ const iconClasses = {
 
 /** Varying tint backgrounds (bitmap-style dot grid overlays these) */
 const AGENT_BG = [
-  "rgba(16, 185, 129, 0.28)",
-  "rgba(59, 130, 246, 0.28)",
-  "rgba(245, 158, 11, 0.28)",
-  "rgba(139, 92, 246, 0.28)",
-  "rgba(244, 63, 94, 0.28)",
-  "rgba(6, 182, 212, 0.28)",
+  "rgba(16, 185, 129, 0.45)",
+  "rgba(59, 130, 246, 0.45)",
+  "rgba(245, 158, 11, 0.45)",
+  "rgba(139, 92, 246, 0.45)",
+  "rgba(244, 63, 94, 0.45)",
+  "rgba(6, 182, 212, 0.45)",
 ] as const;
 
 function hash(str: string): number {

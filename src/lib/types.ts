@@ -1,4 +1,4 @@
-// Shipyard v1 — Types aligned with SPEC.md
+// LittleShips v1 — Types aligned with SPEC.md
 
 // Artifact types per spec section 3.2
 export type ArtifactType = "github" | "contract" | "dapp" | "ipfs" | "arweave" | "link";

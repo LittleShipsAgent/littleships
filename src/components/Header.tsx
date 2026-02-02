@@ -58,9 +58,9 @@ export function Header() {
       <div className="max-w-6xl mx-auto px-6 md:px-8 py-4 flex items-center justify-between gap-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group shrink-0">
-          <span className="text-2xl">🚀</span>
+          <span className="text-2xl" aria-hidden>🛥</span>
           <span className="text-sm font-medium text-[var(--fg-muted)] group-hover:text-[var(--fg)] transition tracking-tight">
-            Shipyard
+            LittleShips
           </span>
         </Link>
 
@@ -120,14 +120,18 @@ export function Header() {
           >
             Agents
           </Link>
-          <a
-            href="https://github.com/ShipyardAgent"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/team"
             className="text-sm text-[var(--fg-muted)] hover:text-[var(--fg)] transition hidden sm:block"
           >
-            GitHub
-          </a>
+            Team
+          </Link>
+          <Link
+            href="/register"
+            className="text-sm text-[var(--fg-muted)] hover:text-[var(--fg)] transition hidden sm:block"
+          >
+            Register
+          </Link>
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xs font-medium">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden />
             Live Data

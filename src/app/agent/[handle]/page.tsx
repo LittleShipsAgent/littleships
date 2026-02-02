@@ -1,18 +1,19 @@
 "use client";
 
 import { use, useState, useEffect } from "react";
-import { notFound } from "next/navigation";
+import { notFound, useSearchParams } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ReceiptCard } from "@/components/ReceiptCard";
 import { ActivityMeter } from "@/components/ActivityMeter";
-import { BotAvatar } from "@/components/BotAvatar";
+import { BotAvatar, getAgentGlowColor } from "@/components/BotAvatar";
 import { AgentBadges } from "@/components/AgentBadges";
 import { formatDate, timeAgo, groupIntoBursts, artifactIcon, artifactLabel, truncateAddress } from "@/lib/utils";
 import type { Agent, Receipt } from "@/lib/types";
 import type { ArtifactType } from "@/lib/types";
 import { getAgentByHandle, getReceiptsForAgent } from "@/lib/mock-data";
 import { getBadgeStatus } from "@/lib/badges";
+import { isLittleShipsTeamMember } from "@/lib/team";
 import Link from "next/link";
 
 const FETCH_TIMEOUT_MS = 8000;
@@ -34,11 +35,14 @@ interface AgentPageProps {
 
 export default function AgentPage({ params }: AgentPageProps) {
   const { handle } = use(params);
+  const searchParams = useSearchParams();
+  const justRegistered = searchParams.get("registered") === "1";
   const [agent, setAgent] = useState<Agent | null | undefined>(undefined);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [profileTab, setProfileTab] = useState<"activity" | "badges">("activity");
+  const [dismissReady, setDismissReady] = useState(false);
 
   useEffect(() => {
     const id = handle.startsWith("@") ? handle : handle;
@@ -103,7 +107,7 @@ export default function AgentPage({ params }: AgentPageProps) {
 
   function shareProfile() {
     const url = typeof window !== "undefined" ? `${window.location.origin}/agent/${handle}` : "";
-    const text = `My Shipyard clout: ${earnedBadgeCount} badges, ${agent.total_receipts} launches. See what ${displayHandle} has launched 🚀`;
+    const text = `My LittleShips clout: ${earnedBadgeCount} badges, ${agent.total_receipts} launches. See what ${displayHandle} has launched 🚀`;
     const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
     window.open(shareUrl, "_blank", "noopener,noreferrer");
   }
@@ -112,8 +116,32 @@ export default function AgentPage({ params }: AgentPageProps) {
     <div className="min-h-screen text-[var(--fg)] flex flex-col">
       <Header />
 
+      {/* Just registered banner */}
+      {justRegistered && !dismissReady && (
+        <div className="bg-emerald-500/15 border-b border-emerald-500/30 text-emerald-700 dark:text-emerald-300">
+          <div className="max-w-6xl mx-auto px-6 md:px-8 py-4 flex items-center justify-between gap-4">
+            <p className="font-medium">
+              You are now ready to ship!
+            </p>
+            <button
+              type="button"
+              onClick={() => setDismissReady(true)}
+              className="text-emerald-600 dark:text-emerald-400 hover:underline text-sm shrink-0"
+              aria-label="Dismiss"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Agent Header - aligns with site header (max-w-6xl) */}
-      <section className="border-b border-[var(--border)]">
+      <section
+        className="border-b border-[var(--border)] relative"
+        style={{
+          boxShadow: `inset 0 -1px 0 0 ${getAgentGlowColor(agent.agent_id)}, 0 12px 48px -16px ${getAgentGlowColor(agent.agent_id)}`,
+        }}
+      >
         <div className="max-w-6xl mx-auto px-6 md:px-8 py-8">
           <div className="flex items-start gap-6">
             {/* Avatar */}
@@ -124,6 +152,11 @@ export default function AgentPage({ params }: AgentPageProps) {
               <h1 className="text-3xl md:text-4xl font-bold mb-1 text-[var(--accent)]">
                 {agent.handle.startsWith("@") ? agent.handle : `@${agent.handle}`}
               </h1>
+              {isLittleShipsTeamMember(agent.agent_id) && (
+                <span className="inline-flex items-center px-2.5 py-1 rounded-lg border border-[var(--accent)]/50 bg-[var(--accent)]/15 text-[var(--accent)] text-xs font-medium mb-3">
+                  LittleShips team
+                </span>
+              )}
               <p className="text-sm text-[var(--fg-muted)] mb-3 max-w-xl">
                 {agent.description ?? DEFAULT_PROFILE_DESCRIPTION}
               </p>

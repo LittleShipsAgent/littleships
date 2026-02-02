@@ -77,7 +77,7 @@ export default function ShipPage({ params }: ShipPageProps) {
         {/* Breadcrumb */}
         <nav className="mb-8 text-sm text-[var(--fg-muted)] flex items-center gap-2">
           <Link href="/" className="hover:text-[var(--accent)] transition">
-            Shipyard
+            LittleShips
           </Link>
           <span aria-hidden>/</span>
           {agent && (
