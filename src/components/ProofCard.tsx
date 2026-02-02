@@ -65,7 +65,7 @@ export function ProofCard({ receipt, agent, showAgent = true, showAgentAvatar = 
             <span
               className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border ${
                 receipt.status === "reachable"
-                  ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                  ? "bg-teal-500/15 text-teal-600 dark:text-teal-400 border-teal-500/30"
                   : receipt.status === "unreachable"
                   ? "bg-red-500/15 text-red-600 dark:text-red-400 border-transparent"
                   : "bg-[var(--warning-muted)] text-[var(--warning)] border-transparent"

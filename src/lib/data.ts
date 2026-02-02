@@ -4,6 +4,7 @@ import { hasDb } from "@/lib/db/client";
 import * as dbAgents from "@/lib/db/agents";
 import * as dbReceipts from "@/lib/db/receipts";
 import * as dbHighFives from "@/lib/db/high-fives";
+import { getMemoryAgent } from "@/lib/memory-agents";
 import {
   MOCK_AGENTS,
   MOCK_RECEIPTS,
@@ -26,6 +27,8 @@ export async function getAgent(idOrHandle: string): Promise<Agent | null> {
     if (byId) return byId;
     return dbAgents.getAgentByHandle(idOrHandle);
   }
+  const memory = getMemoryAgent(idOrHandle);
+  if (memory) return memory;
   const a = MOCK_AGENTS.find(
     (x) =>
       x.agent_id === idOrHandle ||
@@ -97,7 +100,19 @@ export async function insertAgent(agent: {
   x_profile?: string;
   capabilities?: string[];
 }): Promise<Agent> {
-  if (!hasDb()) throw new Error("Database not configured");
+  if (!hasDb()) {
+    const { setMemoryAgent } = await import("@/lib/memory-agents");
+    const now = new Date().toISOString();
+    const full: Agent = {
+      ...agent,
+      first_seen: now,
+      last_shipped: now,
+      total_receipts: 0,
+      activity_7d: [0, 0, 0, 0, 0, 0, 0],
+    };
+    setMemoryAgent(full);
+    return full;
+  }
   return dbAgents.insertAgent(agent);
 }
 

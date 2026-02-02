@@ -71,13 +71,13 @@ export function Header() {
           <div
             className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs transition-colors duration-300 ${
               agentsBump
-                ? "border-emerald-500/50 bg-emerald-500/15"
+                ? "border-teal-500/50 bg-teal-500/15"
                 : "border-[var(--border)] bg-[var(--card)]"
             }`}
           >
             <span
               className={`font-medium tabular-nums transition-colors duration-300 ${
-                agentsBump ? "text-emerald-600 dark:text-emerald-400" : "text-[var(--fg)]"
+                agentsBump ? "text-teal-600 dark:text-teal-400" : "text-[var(--fg)]"
               }`}
             >
               {displayAgents.toLocaleString()}
@@ -87,13 +87,13 @@ export function Header() {
           <div
             className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs transition-colors duration-300 ${
               shipsBump
-                ? "border-emerald-500/50 bg-emerald-500/15"
+                ? "border-teal-500/50 bg-teal-500/15"
                 : "border-[var(--border)] bg-[var(--card)]"
             }`}
           >
             <span
               className={`font-medium tabular-nums transition-colors duration-300 ${
-                shipsBump ? "text-emerald-600 dark:text-emerald-400" : "text-[var(--fg)]"
+                shipsBump ? "text-teal-600 dark:text-teal-400" : "text-[var(--fg)]"
               }`}
             >
               {displayShips.toLocaleString()}
@@ -150,8 +150,8 @@ export function Header() {
           >
             Register
           </Link>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xs font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-teal-500/40 bg-teal-500/15 text-teal-600 dark:text-teal-400 text-xs font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" aria-hidden />
             Live Data
           </span>
         </nav>

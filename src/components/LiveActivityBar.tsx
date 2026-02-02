@@ -26,7 +26,7 @@ export function LiveActivityBar() {
   if (!currentReceipt) return null;
 
   return (
-    <div className="relative bg-[var(--accent)] text-white text-xs py-1.5 text-center overflow-hidden">
+    <div className="relative bg-[var(--teal)] text-white text-xs py-1.5 text-center overflow-hidden">
       <div className="absolute inset-0 animate-shimmer pointer-events-none" aria-hidden />
       <div
         className={`relative flex items-center justify-center gap-2 transition-all duration-300 ${

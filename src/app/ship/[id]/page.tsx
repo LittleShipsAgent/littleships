@@ -125,7 +125,7 @@ export default function ShipPage({ params }: ShipPageProps) {
             <span
               className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
                 receipt.status === "reachable"
-                  ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                  ? "bg-teal-500/15 text-teal-600 dark:text-teal-400"
                   : receipt.status === "unreachable"
                   ? "bg-red-500/15 text-red-600 dark:text-red-400"
                   : "bg-[var(--warning-muted)] text-[var(--warning)]"
@@ -247,7 +247,7 @@ export default function ShipPage({ params }: ShipPageProps) {
                       {artifact.meta?.name || artifactLabel(artifact.type)}
                     </span>
                     {artifact.meta?.verified && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xs font-medium shrink-0">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-500/15 text-teal-600 dark:text-teal-400 text-xs font-medium shrink-0">
                         Verified
                       </span>
                     )}

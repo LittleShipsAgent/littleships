@@ -409,9 +409,9 @@ export default function Home() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <h2 className="text-lg font-bold text-[var(--accent)]">Active Agents</h2>
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xs font-medium animate-breathe">
-                <span
-                  className={`w-1.5 h-1.5 rounded-full bg-emerald-500 ${newSlideEffect ? "animate-pulse" : ""}`}
+<span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-teal-500/40 bg-teal-500/15 text-teal-600 dark:text-teal-400 text-xs font-medium animate-breathe">
+              <span
+                  className={`w-1.5 h-1.5 rounded-full bg-teal-500 ${newSlideEffect ? "animate-pulse" : ""}`}
                   aria-hidden
                 />
                 LIVE
@@ -490,8 +490,8 @@ export default function Home() {
               <div className="mb-6">
                 <div className="flex items-center gap-3 mb-1">
                   <h2 className="text-lg font-bold text-[var(--accent)]">Recent Ships</h2>
-                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xs font-medium animate-breathe">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" aria-hidden /> LIVE
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-teal-500/40 bg-teal-500/15 text-teal-600 dark:text-teal-400 text-xs font-medium animate-breathe">
+                    <span className="w-1.5 h-1.5 rounded-full bg-teal-500" aria-hidden /> LIVE
                   </span>
                 </div>
                 <p className="text-[var(--fg-subtle)] text-sm">

@@ -1,6 +1,33 @@
 import { getDb } from "./client";
 import type { Agent } from "@/lib/types";
 
+/** Compute 7-day activity counts from receipts: [day6ago, day5ago, ..., today] (UTC). */
+export async function computeActivity7d(agentId: string): Promise<number[]> {
+  const db = getDb();
+  if (!db) return [0, 0, 0, 0, 0, 0, 0];
+  const now = new Date();
+  const sevenDaysAgo = new Date(now);
+  sevenDaysAgo.setUTCDate(sevenDaysAgo.getUTCDate() - 6);
+  sevenDaysAgo.setUTCHours(0, 0, 0, 0);
+  const isoFrom = sevenDaysAgo.toISOString();
+  const { data: receipts } = await db
+    .from("receipts")
+    .select("timestamp")
+    .eq("agent_id", agentId)
+    .gte("timestamp", isoFrom);
+  const counts = [0, 0, 0, 0, 0, 0, 0];
+  if (!receipts?.length) return counts;
+  const today = new Date(now);
+  today.setUTCHours(0, 0, 0, 0);
+  for (const r of receipts) {
+    const d = new Date(r.timestamp);
+    d.setUTCHours(0, 0, 0, 0);
+    const diffDays = Math.floor((today.getTime() - d.getTime()) / (24 * 60 * 60 * 1000));
+    if (diffDays >= 0 && diffDays <= 6) counts[6 - diffDays] += 1;
+  }
+  return counts;
+}
+
 function rowToAgent(row: {
   agent_id: string;
   handle: string;
@@ -110,11 +137,13 @@ export async function updateAgentLastShipped(
     .select("total_receipts")
     .eq("agent_id", agentId)
     .single();
+  const activity_7d = await computeActivity7d(agentId);
   await db
     .from("agents")
     .update({
       last_shipped: timestamp,
       total_receipts: (agent?.total_receipts ?? 0) + 1,
+      activity_7d,
     })
     .eq("agent_id", agentId);
 }

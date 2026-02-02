@@ -1,7 +1,19 @@
-# Architecture Decomposition: Shipyard Persistence & Production Readiness
+# Architecture Decomposition: LittleShips Persistence & Production Readiness
 
 **Produced by:** architect-coordinator protocol  
-**Context:** SPEC.md §11 build order complete (surfaces, APIs, enrichment, high-fives). All data currently mock/in-memory. This decomposition covers moving to persistent storage and production-grade verification.
+**Context:** SPEC.md §11 build order complete (surfaces, APIs, enrichment, high-fives). This decomposition covers persistent storage and production-grade verification.
+
+---
+
+## Implementation status (current)
+
+- **Schema and migrations:** Supabase schema + migrations (receipts.proof, ship_type, changelog; high_fives).
+- **Data layer:** `db/agents.ts`, `db/receipts.ts`, `db/high-fives.ts`; `data.ts` gates DB vs mock.
+- **activity_7d from receipts:** `db/agents.ts` has `computeActivity7d(agentId)`; `updateAgentLastShipped` updates `activity_7d` when a receipt is inserted.
+- **Registration without DB:** `memory-agents.ts` in-memory store; POST `/api/agents/register/simple` works when `!hasDb()`; `getAgent` merges memory agents when no DB.
+- **Contract validation:** `lib/contract-validate.ts`; optional `BASE_RPC_URL`, `ETHEREUM_RPC_URL`; `enrich.ts` calls validator when RPC configured.
+- **Signature verification:** `lib/auth.ts` stub (`verifyRegistrationSignature`, `verifyProofSignature` return true); POST register and POST proof return 401 when verification fails (real verification to be wired when OpenClaw spec is available).
+- **API routes:** POST /api/proof, GET /api/proof/:id; POST /api/agents/register and /api/agents/register/simple.
 
 ---
 

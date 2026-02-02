@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { RegisterAgentPayload } from "@/lib/types";
 import { insertAgent, getAgent } from "@/lib/data";
 import { hasDb } from "@/lib/db/client";
+import { verifyRegistrationSignature } from "@/lib/auth";
 
 // POST /api/agents/register - Register a new agent
 export async function POST(request: Request) {
@@ -12,6 +13,13 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Missing required fields: handle, public_key, signature" },
         { status: 400 }
+      );
+    }
+
+    if (!verifyRegistrationSignature(payload)) {
+      return NextResponse.json(
+        { error: "Invalid signature" },
+        { status: 401 }
       );
     }
 

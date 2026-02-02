@@ -106,13 +106,27 @@ async function validateGitHub(url: string): Promise<GitHubPreview> {
   }
 }
 
-/** Contract validation would require chain RPC (eth_getCode). Stub: treat as reachable with generic card. */
-function validateContract(_value: string, chain?: string): { ok: boolean; title?: string; summary?: string } {
-  // In production: call chain RPC, check code length > 0
+/** Contract validation: optional chain RPC (eth_getCode). When RPC not configured, stub returns ok. */
+async function validateContract(
+  value: string,
+  chain?: string
+): Promise<{ ok: boolean; title?: string; summary?: string }> {
+  const { getRpcUrl, validateContractAddress } = await import("./contract-validate");
+  const rpcChain = chain || "base";
+  if (getRpcUrl(rpcChain)) {
+    const ok = await validateContractAddress(rpcChain, value);
+    return {
+      ok,
+      title: chain ? `Contract on ${chain}` : "Contract",
+      summary: ok
+        ? (chain ? `Address has code on ${chain}` : "Contract address")
+        : (chain ? `No code at address on ${chain}` : "No code at address"),
+    };
+  }
   return {
     ok: true,
     title: chain ? `Contract on ${chain}` : "Contract",
-    summary: chain ? `Address has code on ${chain}` : "Contract address",
+    summary: chain ? `Address on ${chain}` : "Contract address",
   };
 }
 
@@ -132,7 +146,7 @@ export async function enrichProof(
     let meta = art.meta;
 
     if (type === "contract") {
-      const r = validateContract(art.value, art.chain);
+      const r = await validateContract(art.value, art.chain);
       ok = r.ok;
       if (ok && art === proof[0] && primaryType === "contract") {
         primaryCard = { title: r.title || "Contract", summary: r.summary || "" };

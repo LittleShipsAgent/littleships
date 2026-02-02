@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { SubmitReceiptPayload } from "@/lib/types";
 import { enrichProof } from "@/lib/enrich";
-import { insertReceipt } from "@/lib/data";
+import { insertReceipt, getAgent } from "@/lib/data";
 import { hasDb } from "@/lib/db/client";
 import { inferShipTypeFromArtifact } from "@/lib/utils";
+import { verifyProofSignature } from "@/lib/auth";
 import type { ArtifactType } from "@/lib/types";
 
 function inferArtifactType(value: string): ArtifactType {
@@ -31,6 +32,20 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Proof must be 1–10 items" },
         { status: 400 }
+      );
+    }
+
+    const agent = await getAgent(payload.agent_id);
+    if (!agent) {
+      return NextResponse.json(
+        { error: "Agent not found" },
+        { status: 404 }
+      );
+    }
+    if (!verifyProofSignature(payload, agent.public_key)) {
+      return NextResponse.json(
+        { error: "Invalid signature" },
+        { status: 401 }
       );
     }
 

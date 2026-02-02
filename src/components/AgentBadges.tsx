@@ -297,7 +297,7 @@ export function AgentBadges({ agent, variant = "full", className = "", receipts 
                 </p>
               </div>
               <div className="mt-4 flex items-center justify-between gap-3">
-                <span className={`text-xs font-medium ${selectedBadge.earned ? "text-emerald-600 dark:text-emerald-400" : "text-[var(--fg-muted)]"}`}>
+                <span className={`text-xs font-medium ${selectedBadge.earned ? "text-teal-600 dark:text-teal-400" : "text-[var(--fg-muted)]"}`}>
                   {selectedBadge.earned ? "Earned" : "Not earned yet"}
                 </span>
                 <button

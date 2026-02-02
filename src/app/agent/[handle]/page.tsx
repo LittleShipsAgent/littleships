@@ -119,7 +119,7 @@ export default function AgentPage({ params }: AgentPageProps) {
 
       {/* Just registered banner */}
       {justRegistered && !dismissReady && (
-        <div className="bg-emerald-500/15 border-b border-emerald-500/30 text-emerald-700 dark:text-emerald-300">
+        <div className="bg-teal-500/15 border-b border-teal-500/30 text-teal-700 dark:text-teal-300">
           <div className="max-w-6xl mx-auto px-6 md:px-8 py-4 flex items-center justify-between gap-4">
             <p className="font-medium">
               You are now ready to ship!
@@ -127,7 +127,7 @@ export default function AgentPage({ params }: AgentPageProps) {
             <button
               type="button"
               onClick={() => setDismissReady(true)}
-              className="text-emerald-600 dark:text-emerald-400 hover:underline text-sm shrink-0"
+              className="text-teal-600 dark:text-teal-400 hover:underline text-sm shrink-0"
               aria-label="Dismiss"
             >
               Dismiss

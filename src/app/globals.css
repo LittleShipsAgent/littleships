@@ -19,10 +19,13 @@ html {
   --border-hover: rgba(255, 255, 255, 0.15);
   --card: rgba(255, 255, 255, 0.04);
   --card-hover: rgba(255, 255, 255, 0.07);
-  --accent: #e63946;
-  --accent-muted: rgba(230, 57, 70, 0.2);
-  --success: #e63946;
-  --success-muted: rgba(230, 57, 70, 0.2);
+  /* Coral accent (hero, CTAs, links) vs teal for verified/live */
+  --accent: #e07a5f;
+  --accent-muted: rgba(224, 122, 95, 0.2);
+  --teal: #14b8a6;
+  --teal-muted: rgba(20, 184, 166, 0.2);
+  --success: #14b8a6;
+  --success-muted: rgba(20, 184, 166, 0.2);
   --warning: #eab308;
   --warning-muted: rgba(234, 179, 8, 0.2);
 }
@@ -38,17 +41,19 @@ html {
   --border-hover: rgba(0, 0, 0, 0.15);
   --card: #ffffff;
   --card-hover: rgba(0, 0, 0, 0.02);
-  --accent: #c1121f;
-  --accent-muted: rgba(193, 18, 31, 0.12);
-  --success: #c1121f;
-  --success-muted: rgba(193, 18, 31, 0.12);
+  --accent: #c45c4c;
+  --accent-muted: rgba(196, 92, 76, 0.15);
+  --teal: #0d9488;
+  --teal-muted: rgba(13, 148, 136, 0.12);
+  --success: #0d9488;
+  --success-muted: rgba(13, 148, 136, 0.12);
   --warning: #ca8a04;
   --warning-muted: rgba(202, 138, 4, 0.1);
 }
 
 body {
   font-family: var(--font-sans);
-  /* Grid on top so it’s visible; then coral gradient; bg color behind */
+  /* Grid on top so it’s visible; coral accent + teal for live/verified behind */
   background-color: var(--bg);
   background-attachment: fixed;
   color: var(--fg);
@@ -102,16 +107,16 @@ body::before {
     linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
 }
 
-/* Agent badges — per-type styling */
+/* Agent badges — per-type styling (teal for verified) */
 .badge-verified {
-  border-color: rgba(16, 185, 129, 0.5);
-  background: rgba(16, 185, 129, 0.15);
-  color: rgb(16, 185, 129);
+  border-color: rgba(20, 184, 166, 0.5);
+  background: var(--teal-muted);
+  color: var(--teal);
 }
 
 .badge-top-shipper {
-  border-color: rgba(230, 57, 70, 0.5);
-  background: rgba(230, 57, 70, 0.15);
+  border-color: rgba(224, 122, 95, 0.5);
+  background: rgba(224, 122, 95, 0.15);
   color: var(--accent);
 }
 
@@ -134,14 +139,14 @@ body::before {
 }
 
 [data-theme="light"] .badge-verified {
-  border-color: rgba(5, 150, 105, 0.4);
-  background: rgba(5, 150, 105, 0.1);
-  color: rgb(5, 150, 105);
+  border-color: rgba(13, 148, 136, 0.4);
+  background: var(--teal-muted);
+  color: var(--teal);
 }
 
 [data-theme="light"] .badge-top-shipper {
-  border-color: rgba(193, 18, 31, 0.4);
-  background: rgba(193, 18, 31, 0.1);
+  border-color: rgba(196, 92, 76, 0.4);
+  background: rgba(196, 92, 76, 0.1);
   color: var(--accent);
 }
 
@@ -272,13 +277,13 @@ body::before {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Glow animation */
+/* Glow animation (coral) */
 @keyframes glow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(230, 57, 70, 0.25);
+    box-shadow: 0 0 20px rgba(224, 122, 95, 0.25);
   }
   50% {
-    box-shadow: 0 0 40px rgba(230, 57, 70, 0.4);
+    box-shadow: 0 0 40px rgba(224, 122, 95, 0.4);
   }
 }
 
@@ -302,14 +307,14 @@ body::before {
   animation: slideIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* New card added — brief highlight (green), runs once; inset so glow isn't clipped by overflow */
+/* New card added — brief highlight (teal), runs once; inset so glow isn't clipped by overflow */
 @keyframes newCardAdded {
   0% {
-    box-shadow: inset 0 0 0 0 rgba(16, 185, 129, 0.3);
+    box-shadow: inset 0 0 0 0 rgba(20, 184, 166, 0.3);
     transform: scale(0.99);
   }
   25% {
-    box-shadow: inset 0 0 0 3px rgba(16, 185, 129, 0.4);
+    box-shadow: inset 0 0 0 3px rgba(20, 184, 166, 0.4);
     transform: scale(1.01);
   }
   100% {
