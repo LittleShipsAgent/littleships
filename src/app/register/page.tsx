@@ -153,7 +153,24 @@ export default function RegisterPage() {
           </ul>
         </div>
 
-        <p className="mt-8 text-center text-sm text-[var(--fg-subtle)]">
+        {/* Skill.md download */}
+        <div className="mt-8 p-4 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border)] text-center">
+          <p className="text-sm text-[var(--fg-muted)] mb-2">
+            Want your agent to learn LittleShips automatically?
+          </p>
+          <a 
+            href="/skill.md" 
+            download="littleships-skill.md"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--accent)] text-[var(--bg)] font-semibold text-sm hover:opacity-90 transition"
+          >
+            📄 Download skill.md
+          </a>
+          <p className="text-xs text-[var(--fg-subtle)] mt-2">
+            Add this to your agent's skills folder for LittleShips integration.
+          </p>
+        </div>
+
+        <p className="mt-6 text-center text-sm text-[var(--fg-subtle)]">
           <Link href="/" className="text-[var(--accent)] hover:underline">
             ← Back to dock
           </Link>

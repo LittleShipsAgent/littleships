@@ -11,9 +11,11 @@ interface ProofCardProps {
   showAgent?: boolean;
   /** When true (default), show avatar next to card. When false, show only agent name in header (e.g. Live Feed has timeline package). */
   showAgentAvatar?: boolean;
+  /** Optional accent color for hover states (matches agent's profile color) */
+  accentColor?: string;
 }
 
-export function ProofCard({ receipt, agent, showAgent = true, showAgentAvatar = true }: ProofCardProps) {
+export function ProofCard({ receipt, agent, showAgent = true, showAgentAvatar = true, accentColor }: ProofCardProps) {
   const router = useRouter();
   const shipType = receipt.ship_type ?? inferShipTypeFromArtifact(receipt.artifact_type);
   const icon = shipTypeIcon(shipType);
@@ -43,6 +45,7 @@ export function ProofCard({ receipt, agent, showAgent = true, showAgentAvatar = 
         }
       }}
       className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 hover:border-[var(--border-hover)] hover:bg-[var(--card-hover)] hover:shadow-lg hover:shadow-black/10 hover:-translate-y-0.5 transition-all duration-200 group w-full cursor-pointer"
+      style={accentColor ? { "--card-accent": accentColor } as React.CSSProperties : undefined}
     >
       <div className="flex gap-4">
         {/* Ship type icon — impact first, big and clear */}
@@ -58,7 +61,7 @@ export function ProofCard({ receipt, agent, showAgent = true, showAgentAvatar = 
               <span className="text-xs font-medium text-[var(--fg-muted)] uppercase tracking-wider">
                 {label}
               </span>
-              <h3 className="font-semibold text-[var(--fg)] group-hover:text-[var(--accent)] transition line-clamp-1 mt-0.5">
+              <h3 className="proof-card-title font-semibold text-[var(--fg)] line-clamp-1 mt-0.5">
                 {receipt.title}
               </h3>
             </div>

@@ -1,9 +1,11 @@
 interface ActivityMeterProps {
   values: number[];
   size?: "sm" | "md" | "lg" | "xl";
+  /** Optional custom color for bars (overrides default accent) */
+  color?: string;
 }
 
-export function ActivityMeter({ values, size = "sm" }: ActivityMeterProps) {
+export function ActivityMeter({ values, size = "sm", color }: ActivityMeterProps) {
   const total = values.reduce((a, b) => a + b, 0);
   const hasActivity = total > 0;
 
@@ -37,19 +39,28 @@ export function ActivityMeter({ values, size = "sm" }: ActivityMeterProps) {
         const height = Math.max((v / max) * barHeight, 2);
         const isToday = i === values.length - 1;
         
+        const barColor = v === 0 
+          ? undefined 
+          : color 
+            ? (isToday ? color : `${color}80`) // 50% opacity for non-today
+            : undefined;
+        
         return (
           <div
             key={i}
             className={`rounded-sm transition-all ${
               v === 0
                 ? "bg-[var(--border)]"
-                : isToday
-                ? "bg-[var(--accent)]"
-                : "bg-[var(--fg-muted)]"
+                : !color
+                  ? isToday
+                    ? "bg-[var(--accent)]"
+                    : "bg-[var(--fg-muted)]"
+                  : ""
             }`}
             style={{
               width: `${barWidth}px`,
               height: `${height}px`,
+              ...(barColor ? { backgroundColor: barColor } : {}),
             }}
           />
         );
