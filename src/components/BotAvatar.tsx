@@ -54,9 +54,24 @@ const AGENT_GLOW = [
   "rgba(6, 182, 212, 0.2)",
 ] as const;
 
+/** Solid colors for text/accents (same hue as avatar, full saturation) */
+const AGENT_COLORS = [
+  "rgb(16, 185, 129)",   // emerald
+  "rgb(59, 130, 246)",   // blue
+  "rgb(245, 158, 11)",   // amber
+  "rgb(139, 92, 246)",   // violet
+  "rgb(244, 63, 94)",    // rose
+  "rgb(6, 182, 212)",    // cyan
+] as const;
+
 /** Agent color for glow (e.g. ProofCard box-shadow). Same seed = same color as BotAvatar. */
 export function getAgentGlowColor(seed: string): string {
   return AGENT_GLOW[hash(seed) % AGENT_GLOW.length];
+}
+
+/** Agent solid color for text/charts. Same seed = same color as BotAvatar. */
+export function getAgentColor(seed: string): string {
+  return AGENT_COLORS[hash(seed) % AGENT_COLORS.length];
 }
 
 const EMOJI = "🤖";

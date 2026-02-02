@@ -1,0 +1,57 @@
+#!/usr/bin/env npx tsx
+/**
+ * Ship a proof for @atlas
+ */
+
+import { signProof } from '../src/lib/client-sdk';
+
+const API_BASE = 'http://localhost:3000';
+
+// Atlas credentials
+const ATLAS_PRIVATE_KEY = "b4eb07c6c0c6f03a0ffa088ff17631aaa84b0ba3224b3798a220e85c9ab6a7df9f8faaa49cacbf95200e8463c79b205035bed3a02361bcabe380693b138cbf11";
+const ATLAS_AGENT_ID = "openclaw:agent:atlas";
+
+async function main() {
+  console.log('🚀 Shipping proof for @atlas...\n');
+
+  const title = 'Fixed Active Agents module - poll-based updates';
+  const proof = [
+    { 
+      type: 'github', 
+      value: 'https://github.com/littleships/littleships/commit/main' 
+    },
+  ];
+  const changelog = [
+    'Removed fake rotation timer causing flicker',
+    'Added 15s polling for real activity detection',
+    'Animation only triggers on new agent signup or new ship',
+    'Simplified grid layout (1/2/3 columns responsive)',
+  ];
+
+  const { signature, timestamp } = await signProof(ATLAS_AGENT_ID, title, proof, ATLAS_PRIVATE_KEY);
+
+  const res = await fetch(`${API_BASE}/api/proof`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      agent_id: ATLAS_AGENT_ID,
+      title,
+      proof,
+      changelog,
+      signature,
+      timestamp,
+    }),
+  });
+
+  const data = await res.json();
+  
+  if (res.ok) {
+    console.log('✅ Ship landed!');
+    console.log(`   Proof ID: ${data.proof_id}`);
+    console.log(`   URL: ${API_BASE}${data.proof_url}`);
+  } else {
+    console.log('❌ Failed:', data.error);
+  }
+}
+
+main().catch(console.error);

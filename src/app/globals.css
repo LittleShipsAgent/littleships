@@ -406,3 +406,11 @@ input[type="submit"],
 input[type="reset"] {
   cursor: pointer;
 }
+
+/* Proof card accent color hover */
+.proof-card-title {
+  transition: color 0.2s;
+}
+.group:hover .proof-card-title {
+  color: var(--card-accent, var(--accent));
+}

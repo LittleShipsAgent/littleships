@@ -6,7 +6,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProofCard } from "@/components/ProofCard";
 import { ActivityMeter } from "@/components/ActivityMeter";
-import { BotAvatar } from "@/components/BotAvatar";
+import { BotAvatar, getAgentColor } from "@/components/BotAvatar";
 import { timeAgo, formatDate } from "@/lib/utils";
 import { ArtifactType } from "@/lib/types";
 import type { Receipt, Agent } from "@/lib/types";
@@ -60,7 +60,7 @@ export default function Home() {
   const [offline, setOffline] = useState(false);
   const [heroTab, setHeroTab] = useState<"agents" | "humans">("agents");
   const [heroClosed, setHeroClosed] = useState(false);
-  const [carouselIndex, setCarouselIndex] = useState(0);
+  // carouselIndex removed - no longer using carousel rotation
   const [heroApiKey, setHeroApiKey] = useState("");
   const [heroRegistering, setHeroRegistering] = useState(false);
   const [heroRegisterError, setHeroRegisterError] = useState<string | null>(null);
@@ -131,13 +131,17 @@ export default function Home() {
 
   // Poll for new proofs every 15 seconds (real data, no fakes)
   const seenProofIds = useRef<Set<string>>(new Set());
-  useEffect(() => {
-    // Initialize with current proof IDs
-    proofs.forEach(p => seenProofIds.current.add(p.receipt_id));
-  }, []); // Only on mount
+  const initializedProofs = useRef(false);
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || initializedProofs.current) return;
+    // Initialize with current proof IDs after initial load
+    proofs.forEach(p => seenProofIds.current.add(p.receipt_id));
+    initializedProofs.current = true;
+  }, [loading, proofs]);
+
+  useEffect(() => {
+    if (loading || !initializedProofs.current) return;
     
     const pollForNew = async () => {
       try {
@@ -160,7 +164,7 @@ export default function Home() {
       }
     };
 
-    const interval = setInterval(pollForNew, 15000);
+    const interval = setInterval(pollForNew, 10000);
     return () => clearInterval(interval);
   }, [loading]);
 
@@ -181,82 +185,86 @@ export default function Home() {
     .sort((a, b) => new Date(b.last_shipped).getTime() - new Date(a.last_shipped).getTime());
 
   const CAROUSEL_SIZE = 3;
-  const baseSlides = useMemo(() => {
-    const slides: Agent[][] = [];
-    for (let i = 0; i < activeAgents.length; i += CAROUSEL_SIZE) {
-      slides.push(activeAgents.slice(i, i + CAROUSEL_SIZE));
-    }
-    return slides.length ? slides : [[]];
-  }, [activeAgents]);
-
-  const [prependedSlide, setPrependedSlide] = useState<Agent[] | null>(null);
-  const [prependedSlideTimes, setPrependedSlideTimes] = useState<string[] | null>(null);
+  
+  // Track known agent states to detect real new activity
+  const knownAgentStates = useRef<Map<string, string>>(new Map()); // agent_id -> last_shipped
   const [newSlideEffect, setNewSlideEffect] = useState(false);
-  const displaySlides = useMemo(
-    () => (prependedSlide ? [prependedSlide, ...baseSlides] : baseSlides),
-    [prependedSlide, baseSlides]
-  );
-
-
-  // Emulate new launch: prepend a slide with a different "new" agent in first slot, show effect, no loop.
-  // Effect must only depend on agents.length so it doesn't re-run every render (baseSlides ref changes each time) and clear timeouts.
-  const carouselTimeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const carouselRafs = useRef<number[]>([]);
-  const rotateIndex = useRef(0);
+  const [highlightedAgentId, setHighlightedAgentId] = useState<string | null>(null);
   const carouselHoverRef = useRef(false);
+
+  // Initialize known agent states on first load
   useEffect(() => {
-    if (baseSlides.length === 0 || baseSlides[0].length === 0 || activeAgents.length === 0) return;
-    const minMs = 2500;
-    const maxMs = 4500;
-    const firstDelayMs = 700; // first "new activity" soon so user sees movement
-    let isFirst = true;
-    const schedule = () => {
-      const delay = isFirst ? firstDelayMs : minMs + Math.random() * (maxMs - minMs);
-      isFirst = false;
-      const id = setTimeout(() => {
-        if (carouselHoverRef.current) {
-          schedule();
-          return;
+    if (agents.length > 0 && knownAgentStates.current.size === 0) {
+      agents.forEach((a) => knownAgentStates.current.set(a.agent_id, a.last_shipped));
+    }
+  }, [agents]);
+
+  // Poll for real new activity every 15 seconds
+  useEffect(() => {
+    if (loading) return;
+    
+    const POLL_INTERVAL_MS = 10000;
+    
+    const pollForNewAgentActivity = async () => {
+      try {
+        const res = await fetchWithTimeout("/api/agents", FETCH_TIMEOUT_MS);
+        const data = await res.json();
+        const freshAgents: Agent[] = data.agents ?? [];
+        
+        // Find truly new agents or agents with new ships
+        let agentToHighlight: Agent | null = null;
+        
+        for (const fresh of freshAgents) {
+          const knownLastShipped = knownAgentStates.current.get(fresh.agent_id);
+          
+          if (!knownLastShipped) {
+            // Brand new agent
+            agentToHighlight = fresh;
+            break;
+          } else if (new Date(fresh.last_shipped).getTime() > new Date(knownLastShipped).getTime()) {
+            // Existing agent shipped something new
+            agentToHighlight = fresh;
+            break;
+          }
         }
-        const idx = rotateIndex.current % activeAgents.length;
-        rotateIndex.current += 1;
-        const firstAgent = activeAgents[idx];
-        const rest = baseSlides[0].filter((a) => a.agent_id !== firstAgent.agent_id).slice(0, 2);
-        const newSlide = [firstAgent, ...rest].slice(0, CAROUSEL_SIZE);
-        const frozenTimes = newSlide.map((a) => timeAgo(a.last_shipped));
-        // Update content and show old slide (index 1) in one batch
-        setPrependedSlide(newSlide);
-        setPrependedSlideTimes(frozenTimes);
-        setCarouselIndex(1);
-        // Trigger slide to new content on next paint so content and move are aligned (no 50ms gap)
-        const raf1 = requestAnimationFrame(() => {
-          const raf2 = requestAnimationFrame(() => {
-            setCarouselIndex(0);
-            setNewSlideEffect(true);
-          });
-          carouselRafs.current.push(raf2);
-        });
-        carouselRafs.current.push(raf1);
-        carouselTimeouts.current.push(setTimeout(() => setNewSlideEffect(false), 1100));
-        carouselTimeouts.current.push(
+        
+        // Update known states
+        freshAgents.forEach((a) => knownAgentStates.current.set(a.agent_id, a.last_shipped));
+        
+        // Update agents if there are changes
+        if (freshAgents.length !== agents.length || agentToHighlight) {
+          setAgents(freshAgents);
+        }
+        
+        // Highlight if real new activity and not hovered
+        if (agentToHighlight && !carouselHoverRef.current) {
+          setHighlightedAgentId(agentToHighlight.agent_id);
+          setNewSlideEffect(true);
           setTimeout(() => {
-            setPrependedSlide(null);
-            setPrependedSlideTimes(null);
-            setCarouselIndex(0);
-          }, 6000)
-        );
-        schedule();
-      }, delay);
-      carouselTimeouts.current.push(id);
+            setNewSlideEffect(false);
+            setHighlightedAgentId(null);
+          }, 3000);
+        }
+      } catch {
+        // Silently fail on poll errors
+      }
     };
-    schedule();
-    return () => {
-      carouselTimeouts.current.forEach(clearTimeout);
-      carouselTimeouts.current = [];
-      carouselRafs.current.forEach(cancelAnimationFrame);
-      carouselRafs.current = [];
-    };
-  }, [agents.length]); // stable: only re-run when agent count changes (e.g. after load), not every render
+    
+    const intervalId = setInterval(pollForNewAgentActivity, POLL_INTERVAL_MS);
+    return () => clearInterval(intervalId);
+  }, [loading, agents.length]);
+
+  // Display agents: if one is highlighted (new activity), put them first
+  const displayAgents = useMemo(() => {
+    if (highlightedAgentId) {
+      const highlighted = activeAgents.find((a) => a.agent_id === highlightedAgentId);
+      if (highlighted) {
+        const rest = activeAgents.filter((a) => a.agent_id !== highlightedAgentId);
+        return [highlighted, ...rest].slice(0, CAROUSEL_SIZE);
+      }
+    }
+    return activeAgents.slice(0, CAROUSEL_SIZE);
+  }, [activeAgents, highlightedAgentId]);
 
   if (error) {
     return (
@@ -443,57 +451,50 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Agent cards - solid bg so they read on grid; don't add new slide while hovered */}
+          {/* Agent cards - show top 3 active agents, animate only on real new activity */}
           <div
-            className="pt-3 pb-3 overflow-hidden"
+            className="pt-3 pb-3"
             onMouseEnter={() => { carouselHoverRef.current = true; }}
             onMouseLeave={() => { carouselHoverRef.current = false; }}
           >
-            <div
-              className="flex transition-transform duration-500 ease-out"
-              style={{ transform: `translateX(-${carouselIndex * 100}%)` }}
-            >
-              {displaySlides.map((slide, slideIdx) => (
-                <div
-                  key={slideIdx}
-                  className="grid grid-cols-3 gap-4 flex-[0_0_100%] min-w-0"
-                >
-                  {(slide ?? []).slice(0, CAROUSEL_SIZE).map((agent, cardIdx) => {
-                    const totalActivity = agent.activity_7d.reduce((a, b) => a + b, 0);
-                    const isNewCard = slideIdx === 0 && cardIdx === 0 && newSlideEffect;
-                    const times = prependedSlideTimes && slideIdx === 0 ? prependedSlideTimes : null;
-                    return (
-                      <Link
-                        key={`${agent.agent_id}-${slideIdx}-${cardIdx}`}
-                        href={`/agent/${agent.handle.replace("@", "")}`}
-                        className={`min-w-0 bg-[var(--bg-muted)] border border-[var(--border)] rounded-2xl p-3 hover:border-[var(--border-hover)] hover:bg-[var(--bg-muted)] hover:shadow-md hover:shadow-black/10 hover:-translate-y-0.5 transition-all duration-200 group flex items-center gap-3 ${
-                          isNewCard ? "animate-new-card" : ""
-                        }`}
-                      >
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <div className="group-hover:scale-105 transition-transform shrink-0">
-                            <BotAvatar size="md" seed={agent.agent_id} iconClassName="text-3xl" />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="font-semibold text-base truncate text-[var(--accent)] group-hover:text-[var(--fg)] transition">
-                              @{agent.handle.replace("@", "")}
-                            </div>
-                            <div className="text-xs text-[var(--fg-subtle)]">
-                              {times ? times[cardIdx] : timeAgo(agent.last_shipped)}
-                            </div>
-                          </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {displayAgents.map((agent) => {
+                const totalActivity = agent.activity_7d.reduce((a, b) => a + b, 0);
+                const isNewCard = newSlideEffect && agent.agent_id === highlightedAgentId;
+                const agentColor = getAgentColor(agent.agent_id);
+                return (
+                  <Link
+                    key={agent.agent_id}
+                    href={`/agent/${agent.handle.replace("@", "")}`}
+                    className={`min-w-0 bg-[var(--bg-muted)] border border-[var(--border)] rounded-2xl p-3 hover:border-[var(--border-hover)] hover:bg-[var(--bg-muted)] hover:shadow-md hover:shadow-black/10 hover:-translate-y-0.5 transition-all duration-200 group flex items-center gap-3 ${
+                      isNewCard ? "animate-new-card" : ""
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="group-hover:scale-105 transition-transform shrink-0">
+                        <BotAvatar size="md" seed={agent.agent_id} iconClassName="text-3xl" />
+                      </div>
+                      <div className="min-w-0">
+                        <div 
+                          className="font-semibold text-base truncate group-hover:text-[var(--fg)] transition"
+                          style={{ color: agentColor }}
+                        >
+                          @{agent.handle.replace("@", "")}
                         </div>
-                        <div className="shrink-0 flex flex-col items-end pr-2">
-                          <ActivityMeter values={agent.activity_7d} size="md" />
-                          <div className="text-xs text-[var(--fg-muted)] mt-0.5">
-                            <span className="font-semibold text-[var(--fg)]">{totalActivity}</span> launches
-                          </div>
+                        <div className="text-xs text-[var(--fg-subtle)]">
+                          {timeAgo(agent.last_shipped)}
                         </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              ))}
+                      </div>
+                    </div>
+                    <div className="shrink-0 flex flex-col items-end pr-2">
+                      <ActivityMeter values={agent.activity_7d} size="md" color={agentColor} />
+                      <div className="text-xs text-[var(--fg-muted)] mt-0.5">
+                        <span className="font-semibold text-[var(--fg)]">{totalActivity}</span> launches
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -551,7 +552,13 @@ export default function Home() {
                       </div>
                       {/* Card - agent name in card (no avatar, timeline has package); highlight only the card when newly added */}
                       <div className={`flex-1 min-w-[min(20rem,100%)] ${proof._injectedId ? "rounded-2xl animate-new-card" : ""}`}>
-                        <ProofCard receipt={proof} agent={proof.agent ?? undefined} showAgent={true} showAgentAvatar={false} />
+                        <ProofCard 
+                          receipt={proof} 
+                          agent={proof.agent ?? undefined} 
+                          showAgent={true} 
+                          showAgentAvatar={false}
+                          accentColor={proof.agent ? getAgentColor(proof.agent.agent_id) : undefined}
+                        />
                       </div>
                     </div>
                   ))}
