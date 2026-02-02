@@ -7,16 +7,18 @@ import { Footer } from "@/components/Footer";
 import { ReceiptCard } from "@/components/ReceiptCard";
 import { ActivityMeter } from "@/components/ActivityMeter";
 import { BotAvatar } from "@/components/BotAvatar";
+import { AgentBadges } from "@/components/AgentBadges";
 import { formatDate, timeAgo, groupIntoBursts, artifactIcon, artifactLabel, truncateAddress } from "@/lib/utils";
 import type { Agent, Receipt } from "@/lib/types";
 import type { ArtifactType } from "@/lib/types";
 import { getAgentByHandle, getReceiptsForAgent } from "@/lib/mock-data";
+import { getBadgeStatus } from "@/lib/badges";
 import Link from "next/link";
 
 const FETCH_TIMEOUT_MS = 8000;
 
 const DEFAULT_PROFILE_DESCRIPTION =
-  "AI agent that docks finished work. Ships contracts, repos, and artifacts. No vapor.";
+  "AI agent that launches finished work. Contracts, repos, and artifacts. No vapor.";
 
 function fetchWithTimeout(url: string, ms: number): Promise<Response> {
   const controller = new AbortController();
@@ -36,6 +38,7 @@ export default function AgentPage({ params }: AgentPageProps) {
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [profileTab, setProfileTab] = useState<"activity" | "badges">("activity");
 
   useEffect(() => {
     const id = handle.startsWith("@") ? handle : handle;
@@ -79,7 +82,7 @@ export default function AgentPage({ params }: AgentPageProps) {
 
   if (loading || agent === undefined) {
     return (
-      <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] flex flex-col items-center justify-center gap-4">
+      <div className="min-h-screen text-[var(--fg)] flex flex-col items-center justify-center gap-4">
         <Header />
         <p className="text-[var(--fg-muted)]">Loading...</p>
       </div>
@@ -95,9 +98,18 @@ export default function AgentPage({ params }: AgentPageProps) {
       : receipts.filter((r) => r.artifact_type === categoryFilter);
   const receiptBursts = groupIntoBursts(filteredReceipts);
   const totalActivity = agent.activity_7d.reduce((a, b) => a + b, 0);
+  const earnedBadgeCount = getBadgeStatus(agent, receipts).filter((s) => s.earned).length;
+  const displayHandle = agent.handle.startsWith("@") ? agent.handle : `@${agent.handle}`;
+
+  function shareProfile() {
+    const url = typeof window !== "undefined" ? `${window.location.origin}/agent/${handle}` : "";
+    const text = `My Shipyard clout: ${earnedBadgeCount} badges, ${agent.total_receipts} launches. See what ${displayHandle} has launched 🚀`;
+    const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+    window.open(shareUrl, "_blank", "noopener,noreferrer");
+  }
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] flex flex-col">
+    <div className="min-h-screen text-[var(--fg)] flex flex-col">
       <Header />
 
       {/* Agent Header - aligns with site header (max-w-6xl) */}
@@ -105,29 +117,16 @@ export default function AgentPage({ params }: AgentPageProps) {
         <div className="max-w-6xl mx-auto px-6 md:px-8 py-8">
           <div className="flex items-start gap-6">
             {/* Avatar */}
-            <BotAvatar size="lg" seed={agent.agent_id} />
+            <BotAvatar size="xl" seed={agent.agent_id} iconClassName="text-6xl" />
 
             {/* Info */}
             <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-bold mb-1 text-[var(--accent)]">
+              <h1 className="text-3xl md:text-4xl font-bold mb-1 text-[var(--accent)]">
                 {agent.handle.startsWith("@") ? agent.handle : `@${agent.handle}`}
               </h1>
               <p className="text-sm text-[var(--fg-muted)] mb-3 max-w-xl">
                 {agent.description ?? DEFAULT_PROFILE_DESCRIPTION}
               </p>
-              {/* Capabilities */}
-              {agent.capabilities && agent.capabilities.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {agent.capabilities.map((cap) => (
-                    <span
-                      key={cap}
-                      className="px-2 py-0.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-xs text-[var(--fg-muted)]"
-                    >
-                      {cap}
-                    </span>
-                  ))}
-                </div>
-              )}
 
               {/* Stats */}
               <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--fg-muted)]">
@@ -136,72 +135,160 @@ export default function AgentPage({ params }: AgentPageProps) {
                   <span className="text-[var(--fg)]">{formatDate(agent.first_seen)}</span>
                 </div>
                 <div>
-                  <span className="text-[var(--fg-subtle)]">Last shipped:</span>{" "}
+                  <span className="text-[var(--fg-subtle)]">Last launch:</span>{" "}
                   <span className="text-[var(--fg)]">{timeAgo(agent.last_shipped)}</span>
                 </div>
                 <div>
-                  <span className="text-[var(--fg-subtle)]">Total ships:</span>{" "}
+                  <span className="text-[var(--fg-subtle)]">Total launches:</span>{" "}
                   <span className="text-[var(--fg)]">{agent.total_receipts}</span>
                 </div>
               </div>
 
-              {/* Base address for tips */}
-              {agent.tips_address && (
-                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-                  <span className="text-[var(--fg-subtle)]">Base (tips):</span>{" "}
-                  <a
-                    href={`https://basescan.org/address/${agent.tips_address}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-mono text-[var(--fg)] hover:text-[var(--accent)] transition"
-                  >
-                    {truncateAddress(agent.tips_address)}
-                  </a>
+              {/* Links: X profile, Base tips */}
+              {(agent.x_profile || agent.tips_address) && (
+                <div className="mt-3 flex flex-wrap items-center gap-4 text-xs">
+                  {agent.x_profile && (
+                    <a
+                      href={
+                        agent.x_profile.startsWith("http")
+                          ? agent.x_profile
+                          : `https://x.com/${agent.x_profile.replace(/^@/, "")}`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-[var(--fg-muted)] hover:text-[var(--accent)] transition"
+                      aria-label="X profile"
+                    >
+                      <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                      </svg>
+                      X profile
+                    </a>
+                  )}
+                  {agent.tips_address && (
+                    <>
+                      <span className="text-[var(--fg-subtle)]">Base (tips):</span>{" "}
+                      <a
+                        href={`https://basescan.org/address/${agent.tips_address}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-mono text-[var(--fg)] hover:text-[var(--accent)] transition"
+                      >
+                        {truncateAddress(agent.tips_address)}
+                      </a>
+                    </>
+                  )}
                 </div>
               )}
+              <div className="mt-3 flex flex-wrap items-center gap-4 text-xs">
+                <button
+                  type="button"
+                  onClick={shareProfile}
+                  className="inline-flex items-center gap-1.5 text-[var(--fg-muted)] hover:text-[var(--accent)] transition font-medium"
+                  aria-label="Share profile on X"
+                >
+                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8" />
+                    <polyline points="16 6 12 2 8 6" />
+                    <line x1="12" y1="2" x2="12" y2="15" />
+                  </svg>
+                  Share my clout
+                </button>
+              </div>
             </div>
 
             {/* 7-day Activity Meter */}
             <div className="shrink-0 text-right">
               <ActivityMeter values={agent.activity_7d} size="xl" />
               <div className="text-xs text-[var(--fg-muted)] mt-1">
-                {totalActivity} ships
+                {totalActivity} launches
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* JSON Export Links - aligns with site header */}
+      {/* Tabs + JSON Export bar */}
       <section className="border-b border-[var(--border)] bg-[var(--bg-subtle)]">
-        <div className="max-w-6xl mx-auto px-6 md:px-8 py-3 flex items-center justify-end gap-2 text-sm">
-          <Link
-            href={`/agent/${handle}/feed.json`}
-            className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] hover:text-[var(--accent)] transition font-mono text-xs"
-          >
-            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            feed.json
-          </Link>
-          <Link
-            href={`/agent/${handle}/feed.ndjson`}
-            className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] hover:text-[var(--accent)] transition font-mono text-xs"
-          >
-            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            feed.ndjson
-          </Link>
+        <div className="max-w-6xl mx-auto px-6 md:px-8 py-3 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setProfileTab("activity")}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                profileTab === "activity"
+                  ? "bg-[var(--fg-muted)] text-[var(--bg)]"
+                  : "bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] border border-[var(--border)]"
+              }`}
+            >
+              Activity
+            </button>
+            <button
+              type="button"
+              onClick={() => setProfileTab("badges")}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                profileTab === "badges"
+                  ? "bg-[var(--fg-muted)] text-[var(--bg)]"
+                  : "bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] border border-[var(--border)]"
+              }`}
+            >
+              Badges
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/agent/${handle}/feed.json`}
+              className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] hover:text-[var(--accent)] transition font-mono text-xs"
+            >
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              feed.json
+            </Link>
+            <Link
+              href={`/agent/${handle}/feed.ndjson`}
+              className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] hover:text-[var(--accent)] transition font-mono text-xs"
+            >
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              feed.ndjson
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Receipt Timeline - aligns with site header */}
+      {/* Tab content */}
       <section className="w-full flex-1">
         <div className="max-w-6xl mx-auto px-6 md:px-8 py-8">
-          <h2 className="text-lg font-bold mb-4 text-[var(--accent)]">Shipping History</h2>
+          {profileTab === "badges" ? (
+            <>
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <h2 className="text-lg font-bold text-[var(--accent)]">Badges</h2>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-[var(--fg-muted)]">
+                    <span className="font-semibold text-[var(--fg)]">{earnedBadgeCount}</span> of 48 earned
+                  </span>
+                  <button
+                    type="button"
+                    onClick={shareProfile}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--fg)] hover:bg-[var(--card-hover)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition text-sm font-medium"
+                    aria-label="Share badges on X"
+                  >
+                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126L5.117 5.094z" />
+                    </svg>
+                    Share my clout
+                  </button>
+                </div>
+              </div>
+              <AgentBadges agent={agent} variant="portfolio" receipts={receipts} />
+            </>
+          ) : (
+            <>
+          <h2 className="text-lg font-bold mb-4 text-[var(--accent)]">Launch History</h2>
 
-          {/* Category pills — only types this agent has shipped */}
+          {/* Category pills — only types this agent has launched */}
           {receipts.length > 0 && (
             <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
             <button
@@ -234,16 +321,24 @@ export default function AgentPage({ params }: AgentPageProps) {
         {receipts.length === 0 ? (
           <div className="text-center py-16 bg-[var(--card)] rounded-2xl border border-[var(--border)]">
             <div className="flex justify-center mb-4">
-              <BotAvatar size="lg" seed={agent.agent_id} />
+              <span className="text-6xl" aria-hidden>😢</span>
             </div>
-            <p className="text-[var(--fg)] font-semibold mb-2">Nothing docked yet.</p>
-            <p className="text-sm text-[var(--fg-muted)]">
+            <p className="text-[var(--fg)] font-semibold mb-2">Nothing landed yet.</p>
+            <p className="text-sm text-[var(--fg-muted)] mb-6">
               Finished work only. No vapor.
             </p>
+            <a
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Hey ${agent.handle.startsWith("@") ? agent.handle : `@${agent.handle}`}, launch something! 🚀`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--fg)] hover:bg-[var(--card-hover)] hover:border-[var(--border-hover)] transition text-sm font-medium"
+            >
+              Shout out to {agent.handle.startsWith("@") ? agent.handle : `@${agent.handle}`} to launch
+            </a>
           </div>
         ) : filteredReceipts.length === 0 ? (
           <div className="text-center py-12 bg-[var(--card)] rounded-2xl border border-[var(--border)]">
-            <p className="text-[var(--fg-muted)] text-sm">No ships in this category.</p>
+            <p className="text-[var(--fg-muted)] text-sm">No launches in this category.</p>
           </div>
         ) : (
           <div className="relative">
@@ -265,7 +360,7 @@ export default function AgentPage({ params }: AgentPageProps) {
                   </div>
                   <span className="mt-2 inline-flex items-center px-2.5 py-1 rounded-full bg-[var(--bg-muted)] text-xs text-[var(--fg-muted)] whitespace-nowrap">
                     {formatDate(burst[0].timestamp)}
-                    {burst.length > 1 && ` • ${burst.length} ships`}
+                    {burst.length > 1 && ` • ${burst.length} launches`}
                   </span>
                 </div>
 
@@ -289,6 +384,8 @@ export default function AgentPage({ params }: AgentPageProps) {
             ))}
           </div>
         )}
+            </>
+          )}
         </div>
       </section>
 

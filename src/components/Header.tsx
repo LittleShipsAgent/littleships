@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { ThemeToggle } from "./ThemeProvider";
 
 const MOCK_AGENTS = 253166;
 const MOCK_SHIPS = 10224;
@@ -55,12 +54,12 @@ export function Header() {
   }, []);
 
   return (
-    <header className="border-b border-[var(--border)] sticky top-0 bg-[var(--bg)]/80 backdrop-blur-md z-50">
+    <header className="border-b border-[var(--border)] sticky top-0 bg-[var(--bg)]/95 backdrop-blur-md z-50 shadow-[0_1px_0_0_var(--bg)]">
       <div className="max-w-6xl mx-auto px-6 md:px-8 py-4 flex items-center justify-between gap-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group shrink-0">
-          <span className="text-2xl">⚓</span>
-          <span className="font-bold text-lg tracking-tight text-[var(--accent)] group-hover:text-[var(--fg)] transition">
+          <span className="text-2xl">🚀</span>
+          <span className="text-sm font-medium text-[var(--fg-muted)] group-hover:text-[var(--fg)] transition tracking-tight">
             Shipyard
           </span>
         </Link>
@@ -97,7 +96,7 @@ export function Header() {
             >
               {displayShips.toLocaleString()}
             </span>
-            <span className="text-[var(--fg-muted)]">Ships</span>
+            <span className="text-[var(--fg-muted)]">Launches</span>
           </div>
           <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-xs">
             <span className="font-medium text-[var(--fg)] tabular-nums">
@@ -129,7 +128,10 @@ export function Header() {
           >
             GitHub
           </a>
-          <ThemeToggle />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xs font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden />
+            Live Data
+          </span>
         </nav>
       </div>
     </header>

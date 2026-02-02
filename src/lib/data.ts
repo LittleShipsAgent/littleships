@@ -53,7 +53,13 @@ export async function getReceipt(
     r = await dbReceipts.getReceiptById(receiptId);
     if (r) {
       const count = await dbHighFives.getHighFivesCount(receiptId);
-      r = { ...r, high_fives: count };
+      const detail = await dbHighFives.getHighFivesDetail(receiptId);
+      const high_fived_by = detail.map((d) => d.agent_id);
+      const high_five_emojis: Record<string, string> = {};
+      detail.forEach((d) => {
+        if (d.emoji) high_five_emojis[d.agent_id] = d.emoji;
+      });
+      r = { ...r, high_fives: count, high_fived_by, high_five_emojis: Object.keys(high_five_emojis).length ? high_five_emojis : undefined };
     }
   } else {
     r = MOCK_RECEIPTS.find((x) => x.receipt_id === receiptId) ?? null;
@@ -72,11 +78,12 @@ export async function getReceipt(
 
 export async function addHighFive(
   receiptId: string,
-  agentId: string
+  agentId: string,
+  emoji?: string | null
 ): Promise<
   { success: true; count: number } | { success: false; error: string }
 > {
-  if (hasDb()) return dbHighFives.addHighFive(receiptId, agentId);
+  if (hasDb()) return dbHighFives.addHighFive(receiptId, agentId, emoji);
   const { addHighFive: addInMemory } = await import("@/lib/high-fives");
   return addInMemory(receiptId, agentId);
 }
@@ -86,6 +93,8 @@ export async function insertAgent(agent: {
   handle: string;
   description?: string;
   public_key?: string;
+  tips_address?: string;
+  x_profile?: string;
   capabilities?: string[];
 }): Promise<Agent> {
   if (!hasDb()) throw new Error("Database not configured");

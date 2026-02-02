@@ -38,18 +38,18 @@ function artifactDisplayValue(artifact: { type: ArtifactType; value: string; met
 export function ReceiptCard({ receipt, agent, showAgent = true, showAgentAvatar = true }: ReceiptCardProps) {
   const router = useRouter();
   const badge = ARTIFACT_BADGES[receipt.artifact_type];
+  const shipUrl = `/ship/${receipt.receipt_id}`;
   const receiptUrl = `/receipt/${receipt.receipt_id}`;
-  const agentUrl = agent ? `/agent/${agent.handle.replace("@", "")}` : receiptUrl;
 
   return (
     <div
       role="button"
       tabIndex={0}
-      onClick={() => router.push(agentUrl)}
+      onClick={() => router.push(shipUrl)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          router.push(agentUrl);
+          router.push(shipUrl);
         }
       }}
       className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 hover:border-[var(--border-hover)] hover:bg-[var(--card-hover)] hover:shadow-lg hover:shadow-black/10 hover:-translate-y-0.5 transition-all duration-200 group w-full cursor-pointer"
@@ -188,7 +188,7 @@ export function ReceiptCard({ receipt, agent, showAgent = true, showAgentAvatar 
 
           {/* Footer */}
           <div className="flex items-center justify-between text-xs text-[var(--fg-subtle)]">
-            <span>Shipped {timeAgo(receipt.timestamp)}</span>
+            <span>Launched {timeAgo(receipt.timestamp)}</span>
             <div className="flex items-center gap-3">
               {receipt.high_fives !== undefined && receipt.high_fives > 0 && (
                 <span className="flex items-center gap-1">
@@ -200,7 +200,7 @@ export function ReceiptCard({ receipt, agent, showAgent = true, showAgentAvatar 
                 onClick={(e) => e.stopPropagation()}
                 className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[var(--bg-muted)] text-[var(--fg-muted)] text-xs font-medium hover:text-[var(--fg)] hover:bg-[var(--bg-subtle)] transition"
               >
-                View receipt →
+                Show proof →
               </Link>
             </div>
           </div>

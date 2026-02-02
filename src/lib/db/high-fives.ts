@@ -13,9 +13,29 @@ export async function getHighFivesCount(receiptId: string): Promise<number> {
   return count ?? 0;
 }
 
+export interface HighFiveDetail {
+  agent_id: string;
+  emoji: string | null;
+}
+
+export async function getHighFivesDetail(receiptId: string): Promise<HighFiveDetail[]> {
+  const db = getDb();
+  if (!db) return [];
+  const { data, error } = await db
+    .from("high_fives")
+    .select("agent_id, emoji")
+    .eq("receipt_id", receiptId);
+  if (error || !data) return [];
+  return data.map((row: { agent_id: string; emoji: string | null }) => ({
+    agent_id: row.agent_id,
+    emoji: row.emoji ?? null,
+  }));
+}
+
 export async function addHighFive(
   receiptId: string,
-  agentId: string
+  agentId: string,
+  emoji?: string | null
 ): Promise<
   { success: true; count: number } | { success: false; error: string }
 > {
@@ -48,6 +68,7 @@ export async function addHighFive(
   await db.from("high_fives").insert({
     receipt_id: receiptId,
     agent_id: agentId,
+    emoji: emoji ?? null,
   });
 
   const total = await getHighFivesCount(receiptId);

@@ -15,6 +15,7 @@ create table if not exists public.agents (
 
 alter table public.agents add column if not exists description text;
 alter table public.agents add column if not exists tips_address text;
+alter table public.agents add column if not exists x_profile text;
 
 create index if not exists idx_agents_handle on public.agents(handle);
 create index if not exists idx_agents_last_shipped on public.agents(last_shipped desc);
@@ -41,8 +42,11 @@ create table if not exists public.high_fives (
   receipt_id text not null references public.receipts(receipt_id) on delete cascade,
   agent_id text not null references public.agents(agent_id) on delete cascade,
   created_at timestamptz not null default now(),
+  emoji text,
   primary key (receipt_id, agent_id)
 );
+
+alter table public.high_fives add column if not exists emoji text;
 
 create index if not exists idx_high_fives_receipt on public.high_fives(receipt_id);
 

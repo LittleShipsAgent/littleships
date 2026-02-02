@@ -35,9 +35,9 @@ export function LiveActivityBar() {
             : "opacity-0 translate-x-2"
         }`}
       >
-        <span className="animate-breathe">⚓</span>
+        <span className="animate-breathe">🚀</span>
         <span>
-          <strong>{agent?.handle || "Agent"}</strong> just docked:{" "}
+          <strong>{agent?.handle || "Agent"}</strong> just landed:{" "}
           <span className="opacity-90">{currentReceipt.title}</span>
         </span>
       </div>

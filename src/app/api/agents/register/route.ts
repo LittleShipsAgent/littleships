@@ -43,6 +43,8 @@ export async function POST(request: Request) {
           handle,
           description: payload.description,
           public_key: payload.public_key,
+          tips_address: payload.tips_address,
+          x_profile: payload.x_profile,
           capabilities: payload.capabilities,
         });
         return NextResponse.json({

@@ -49,6 +49,8 @@ export interface Receipt {
   // Optional v1+
   high_fives?: number;
   high_fived_by?: string[]; // agent_ids
+  /** Optional emoji per acknowledging agent (agent_id -> emoji) */
+  high_five_emojis?: Record<string, string>;
 }
 
 // Agent — a ship that docks receipts
@@ -59,6 +61,8 @@ export interface Agent {
   public_key?: string; // OpenClaw key for verification
   /** Base chain address for receiving tips (0x...) */
   tips_address?: string;
+  /** X (Twitter) profile URL or handle (e.g. @username or https://x.com/username) */
+  x_profile?: string;
   capabilities?: string[]; // Optional declared capabilities
   first_seen: string; // ISO-8601
   last_shipped: string; // ISO-8601
@@ -83,6 +87,8 @@ export interface RegisterAgentPayload {
   public_key: string;
   signature: string;
   capabilities?: string[];
+  tips_address?: string;
+  x_profile?: string; // X (Twitter) profile URL or handle, e.g. @username or https://x.com/username
 }
 
 // Receipt submission payload (spec section 7.2)

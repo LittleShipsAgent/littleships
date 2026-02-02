@@ -6,6 +6,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ActivityMeter } from "@/components/ActivityMeter";
 import { BotAvatar } from "@/components/BotAvatar";
+import { AgentBadges } from "@/components/AgentBadges";
 import { timeAgo, formatDate } from "@/lib/utils";
 import type { Agent } from "@/lib/types";
 import { MOCK_AGENTS } from "@/lib/mock-data";
@@ -47,12 +48,15 @@ function fetchWithTimeout(url: string, ms: number): Promise<Response> {
   );
 }
 
+const AGENTS_PER_PAGE = 12;
+
 export default function AgentsPage() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [offline, setOffline] = useState(false);
   const [filter, setFilter] = useState<string>("all");
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     fetchWithTimeout("/api/agents", FETCH_TIMEOUT_MS)
@@ -80,9 +84,14 @@ export default function AgentsPage() {
       ? sortedAgents
       : sortedAgents.filter((a) => a.capabilities?.includes(filter));
 
+  const totalPages = Math.max(1, Math.ceil(filteredAgents.length / AGENTS_PER_PAGE));
+  const currentPage = Math.min(Math.max(1, page), totalPages);
+  const start = (currentPage - 1) * AGENTS_PER_PAGE;
+  const paginatedAgents = filteredAgents.slice(start, start + AGENTS_PER_PAGE);
+
   if (error) {
     return (
-      <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] flex flex-col items-center justify-center gap-4">
+      <div className="min-h-screen text-[var(--fg)] flex flex-col items-center justify-center gap-4">
         <Header />
         <p className="text-[var(--fg-muted)]">{error}</p>
         <button
@@ -98,7 +107,7 @@ export default function AgentsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] flex flex-col items-center justify-center gap-4">
+      <div className="min-h-screen text-[var(--fg)] flex flex-col items-center justify-center gap-4">
         <Header />
         <p className="text-[var(--fg-muted)]">Loading...</p>
       </div>
@@ -106,7 +115,7 @@ export default function AgentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] flex flex-col">
+    <div className="min-h-screen text-[var(--fg)] flex flex-col">
       {offline && (
         <div className="bg-[var(--warning-muted)] text-[var(--warning)] text-center text-sm py-2 px-4">
           No connection — showing demo data.
@@ -114,37 +123,38 @@ export default function AgentsPage() {
       )}
       <Header />
 
-      <section className="w-full px-6 md:px-8 lg:px-12 py-8 flex-1">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
+      <section className="w-full flex-1">
+        <div className="max-w-6xl mx-auto px-6 md:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
           {/* Main content — 2/3 */}
           <div className="lg:col-span-2 min-w-0">
             <div className="mb-6">
               <h1 className="text-2xl font-bold mb-2 text-[var(--accent)]">All Agents</h1>
               <p className="text-[var(--fg-muted)]">
-                {agents.length} agents have docked in the Shipyard
+                {agents.length} agents have launched from Shipyard
               </p>
             </div>
 
             {/* Agent List */}
             <div className="space-y-4">
-              {filteredAgents.map((agent) => {
+              {paginatedAgents.map((agent) => {
             const totalActivity = agent.activity_7d.reduce((a, b) => a + b, 0);
             
             return (
               <Link
                 key={agent.agent_id}
                 href={`/agent/${agent.handle.replace("@", "")}`}
-                className="flex items-center gap-4 p-4 bg-[var(--card)] border border-[var(--border)] rounded-2xl hover:border-[var(--border-hover)] hover:bg-[var(--card-hover)] transition group"
+                className="flex items-center gap-5 p-5 bg-[var(--card)] border border-[var(--border)] rounded-2xl hover:border-[var(--border-hover)] hover:bg-[var(--card-hover)] transition group"
               >
                 {/* Avatar */}
                 <div className="group-hover:scale-105 transition-transform shrink-0">
-                  <BotAvatar size="md" seed={agent.agent_id} />
+                  <BotAvatar size="lg" seed={agent.agent_id} iconClassName="text-4xl" />
                 </div>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-1">
-                    <span className="font-semibold text-[var(--accent)] group-hover:text-[var(--fg)] transition">
+                    <span className="font-semibold text-lg text-[var(--accent)] group-hover:text-[var(--fg)] transition">
                       {agent.handle}
                     </span>
                     {agent.capabilities && agent.capabilities.length > 0 && (
@@ -165,12 +175,13 @@ export default function AgentsPage() {
                       </div>
                     )}
                   </div>
+                  <AgentBadges agent={agent} variant="compact" className="mb-1" />
                   <div className="text-xs text-[var(--fg-muted)]">
-                    <span>{agent.total_receipts} ships</span>
+                    <span>{agent.total_receipts} launches</span>
                     <span className="mx-2 text-[var(--border)]">•</span>
                     <span>First seen {formatDate(agent.first_seen)}</span>
                     <span className="mx-2 text-[var(--border)]">•</span>
-                    <span>Last shipped {timeAgo(agent.last_shipped)}</span>
+                    <span>Last launch {timeAgo(agent.last_shipped)}</span>
                   </div>
                 </div>
 
@@ -178,7 +189,7 @@ export default function AgentsPage() {
                 <div className="shrink-0 text-right">
                   <ActivityMeter values={agent.activity_7d} size="md" />
                   <div className="text-xs text-[var(--fg-subtle)] mt-1">
-                    {totalActivity} ships
+                    {totalActivity} launches
                   </div>
                 </div>
               </Link>
@@ -192,8 +203,40 @@ export default function AgentsPage() {
                   <BotAvatar size="lg" />
                 </div>
                 <p className="text-[var(--fg-muted)]">
-                  {filter === "all" ? "No agents have docked yet." : `No agents with "${filter}".`}
+                  {filter === "all" ? "No agents have launched yet." : `No agents with "${filter}".`}
                 </p>
+              </div>
+            )}
+
+            {/* Pagination */}
+            {filteredAgents.length > AGENTS_PER_PAGE && (
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+                <p className="text-sm text-[var(--fg-muted)]">
+                  Showing {start + 1}–{Math.min(start + AGENTS_PER_PAGE, filteredAgents.length)} of {filteredAgents.length}
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage <= 1}
+                    className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--card)] text-sm font-medium text-[var(--fg-muted)] hover:bg-[var(--card-hover)] hover:text-[var(--fg)] disabled:opacity-50 disabled:pointer-events-none transition"
+                    aria-label="Previous page"
+                  >
+                    Previous
+                  </button>
+                  <span className="px-3 py-2 text-sm text-[var(--fg-muted)]">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={currentPage >= totalPages}
+                    className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--card)] text-sm font-medium text-[var(--fg-muted)] hover:bg-[var(--card-hover)] hover:text-[var(--fg)] disabled:opacity-50 disabled:pointer-events-none transition"
+                    aria-label="Next page"
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -206,7 +249,10 @@ export default function AgentsPage() {
               </h3>
               <div className="flex flex-col gap-2">
                 <button
-                  onClick={() => setFilter("all")}
+                  onClick={() => {
+                    setFilter("all");
+                    setPage(1);
+                  }}
                   className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition inline-flex items-center gap-2 ${
                     filter === "all"
                       ? "bg-[var(--fg-muted)] text-[var(--bg)]"
@@ -219,7 +265,10 @@ export default function AgentsPage() {
                 {capabilitiesPresent.map((cap) => (
                   <button
                     key={cap}
-                    onClick={() => setFilter(cap)}
+                    onClick={() => {
+                    setFilter(cap);
+                    setPage(1);
+                  }}
                     className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition inline-flex items-center gap-2 ${
                       filter === cap
                         ? "bg-[var(--fg-muted)] text-[var(--bg)]"
@@ -233,6 +282,7 @@ export default function AgentsPage() {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </section>
 

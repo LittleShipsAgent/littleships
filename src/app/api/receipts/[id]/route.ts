@@ -36,7 +36,7 @@ export async function POST(
     );
   }
 
-  let body: { agent_id?: string };
+  let body: { agent_id?: string; emoji?: string };
   try {
     body = await request.json();
   } catch {
@@ -53,7 +53,7 @@ export async function POST(
     );
   }
 
-  const result = await addHighFive(id, body.agent_id);
+  const result = await addHighFive(id, body.agent_id, body.emoji ?? undefined);
   if (!result.success) {
     return NextResponse.json(
       { error: result.error },
