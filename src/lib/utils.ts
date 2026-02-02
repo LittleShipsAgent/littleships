@@ -173,3 +173,13 @@ export function groupIntoBursts<T extends { timestamp: string }>(
   
   return bursts;
 }
+
+/** Returns singular or plural form for a count (e.g. "ship" vs "ships"). */
+export function pluralWord(count: number, singular: string, plural?: string): string {
+  return count === 1 ? singular : (plural ?? singular + "s");
+}
+
+/** Returns "1 ship" or "2 ships" etc. */
+export function pluralize(count: number, singular: string, plural?: string): string {
+  return `${count} ${pluralWord(count, singular, plural)}`;
+}

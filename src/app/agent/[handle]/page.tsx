@@ -6,12 +6,11 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProofCard } from "@/components/ProofCard";
 import { ActivityMeter } from "@/components/ActivityMeter";
-import { BotAvatar, getAgentGlowColor } from "@/components/BotAvatar";
-import { formatDate, timeAgo, groupIntoBursts, artifactIcon, artifactLabel, truncateAddress } from "@/lib/utils";
+import { BotAvatar, getAgentGlowColor, getAgentColor } from "@/components/BotAvatar";
+import { formatDate, timeAgo, groupIntoBursts, artifactIcon, artifactLabel, truncateAddress, pluralize } from "@/lib/utils";
 import type { Agent, Receipt } from "@/lib/types";
 import type { ArtifactType } from "@/lib/types";
 import { getAgentByHandle, getReceiptsForAgent } from "@/lib/mock-data";
-import { getBadgeStatus } from "@/lib/badges";
 import { isLittleShipsTeamMember } from "@/lib/team";
 import Link from "next/link";
 
@@ -40,7 +39,6 @@ export default function AgentPage({ params }: AgentPageProps) {
   const [proofs, setProofs] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [profileTab, setProfileTab] = useState<"activity" | "badges">("activity");
   const [dismissReady, setDismissReady] = useState(false);
 
   useEffect(() => {
@@ -85,9 +83,100 @@ export default function AgentPage({ params }: AgentPageProps) {
 
   if (loading || agent === undefined) {
     return (
-      <div className="min-h-screen text-[var(--fg)] flex flex-col items-center justify-center gap-4">
+      <div className="min-h-screen text-[var(--fg)] flex flex-col">
         <Header />
-        <p className="text-[var(--fg-muted)]">Loading...</p>
+
+        {/* Agent header skeleton */}
+        <section className="border-b border-[var(--border)] relative px-4 md:px-6 py-4">
+          <div className="relative max-w-6xl mx-auto px-6 md:px-8 py-8 rounded-2xl border-2 border-[var(--border)] bg-[var(--card)] overflow-hidden animate-pulse">
+            <div className="relative flex items-start gap-6">
+              <span className="w-28 h-28 rounded-2xl bg-[var(--card-hover)] shrink-0" aria-hidden />
+              <div className="flex-1 min-w-0 space-y-3">
+                <div className="h-9 w-48 rounded bg-[var(--card-hover)]" aria-hidden />
+                <div className="h-4 w-full max-w-xl rounded bg-[var(--card-hover)]" aria-hidden />
+                <div className="h-4 w-4/5 max-w-lg rounded bg-[var(--card-hover)]" aria-hidden />
+                <div className="flex flex-wrap gap-4 pt-1">
+                  <span className="h-4 w-24 rounded bg-[var(--card-hover)]" aria-hidden />
+                  <span className="h-4 w-20 rounded bg-[var(--card-hover)]" aria-hidden />
+                  <span className="h-4 w-28 rounded bg-[var(--card-hover)]" aria-hidden />
+                </div>
+              </div>
+              <div className="shrink-0 text-right">
+                <div className="h-[72px] w-[90px] rounded-md bg-[var(--card-hover)] flex items-end gap-1 px-1 pb-0" aria-hidden />
+                <div className="h-4 w-14 rounded bg-[var(--card-hover)] mt-2 ml-auto" aria-hidden />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* JSON Export bar skeleton */}
+        <section className="border-b border-[var(--border)] bg-[var(--bg-subtle)]">
+          <div className="max-w-6xl mx-auto px-6 md:px-8 py-3 flex items-center justify-end gap-2">
+            <span className="h-9 w-24 rounded-lg bg-[var(--card-hover)]" aria-hidden />
+            <span className="h-9 w-28 rounded-lg bg-[var(--card-hover)]" aria-hidden />
+          </div>
+        </section>
+
+        {/* Ship History skeleton */}
+        <section className="w-full flex-1">
+          <div className="max-w-6xl mx-auto px-6 md:px-8 py-8 animate-pulse">
+            <div className="h-7 w-32 rounded bg-[var(--card-hover)] mb-6" aria-hidden />
+            <div className="flex items-center gap-2 mb-6">
+              <span className="h-9 w-12 rounded-full bg-[var(--card-hover)]" aria-hidden />
+              <span className="h-9 w-20 rounded-full bg-[var(--card-hover)]" aria-hidden />
+              <span className="h-9 w-24 rounded-full bg-[var(--card-hover)]" aria-hidden />
+            </div>
+            <div className="relative">
+              <div className="absolute left-12 top-0 bottom-0 w-px bg-[var(--border)]" aria-hidden />
+              {/* Burst 1 */}
+              <div className="relative flex gap-0 pb-8">
+                <div className="flex flex-col items-center w-24 shrink-0 pt-0.5">
+                  <span className="w-12 h-12 rounded-full bg-[var(--card-hover)] shrink-0" aria-hidden />
+                  <span className="h-5 w-20 rounded-full bg-[var(--card-hover)] mt-2" aria-hidden />
+                </div>
+                <div className="w-12 shrink-0 -ml-8 flex items-start pt-4" aria-hidden>
+                  <div className="w-full h-px bg-[var(--border)]" />
+                </div>
+                <div className="flex-1 min-w-0 space-y-4">
+                  <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5">
+                    <div className="flex gap-4">
+                      <span className="w-16 h-16 rounded-xl bg-[var(--card-hover)] shrink-0" aria-hidden />
+                      <div className="flex-1 space-y-2">
+                        <span className="block h-4 w-20 rounded bg-[var(--card-hover)]" aria-hidden />
+                        <span className="block h-5 w-full rounded bg-[var(--card-hover)]" aria-hidden />
+                        <span className="block h-4 w-3/4 rounded bg-[var(--card-hover)]" aria-hidden />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Burst 2 */}
+              <div className="relative flex gap-0 pb-8">
+                <div className="flex flex-col items-center w-24 shrink-0 pt-0.5">
+                  <span className="w-12 h-12 rounded-full bg-[var(--card-hover)] shrink-0" aria-hidden />
+                  <span className="h-5 w-20 rounded-full bg-[var(--card-hover)] mt-2" aria-hidden />
+                </div>
+                <div className="w-12 shrink-0 -ml-8 flex items-start pt-4" aria-hidden>
+                  <div className="w-full h-px bg-[var(--border)]" />
+                </div>
+                <div className="flex-1 min-w-0 space-y-4">
+                  <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5">
+                    <div className="flex gap-4">
+                      <span className="w-16 h-16 rounded-xl bg-[var(--card-hover)] shrink-0" aria-hidden />
+                      <div className="flex-1 space-y-2">
+                        <span className="block h-4 w-20 rounded bg-[var(--card-hover)]" aria-hidden />
+                        <span className="block h-5 w-full rounded bg-[var(--card-hover)]" aria-hidden />
+                        <span className="block h-4 w-2/3 rounded bg-[var(--card-hover)]" aria-hidden />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <Footer />
       </div>
     );
   }
@@ -101,19 +190,14 @@ export default function AgentPage({ params }: AgentPageProps) {
       : proofs.filter((r) => r.artifact_type === categoryFilter);
   const proofBursts = groupIntoBursts(filteredProofs);
   const totalActivity = agent.activity_7d.reduce((a, b) => a + b, 0);
-  const earnedBadgeCount = getBadgeStatus(agent, proofs).filter((s) => s.earned).length;
-  const displayHandle = agent.handle.startsWith("@") ? agent.handle : `@${agent.handle}`;
-
-  function shareProfile() {
-    if (!agent) return;
-    const url = typeof window !== "undefined" ? `${window.location.origin}/agent/${handle}` : "";
-    const text = `My LittleShips clout: ${earnedBadgeCount} badges, ${agent.total_receipts} ships. See what ${displayHandle} has shipped 🚀`;
-    const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
-    window.open(shareUrl, "_blank", "noopener,noreferrer");
-  }
+  const agentColor = getAgentColor(agent.agent_id, agent.color);
+  const agentGlowColor = getAgentGlowColor(agent.agent_id, agent.color);
 
   return (
-    <div className="min-h-screen text-[var(--fg)] flex flex-col">
+    <div
+      className="min-h-screen text-[var(--fg)] flex flex-col"
+      style={{ "--agent-color": agentColor } as React.CSSProperties}
+    >
       <Header />
 
       {/* Just registered banner */}
@@ -135,28 +219,41 @@ export default function AgentPage({ params }: AgentPageProps) {
         </div>
       )}
 
-      {/* Agent Header - rounded module with margin; inner glow like half-circle from top */}
+      {/* Agent Header - rounded module with margin; inner glow and agent-color border */}
       <section className="border-b border-[var(--border)] relative px-4 md:px-6 py-4">
-        <div className="relative max-w-6xl mx-auto px-6 md:px-8 py-8 rounded-2xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
+        <div
+          className="relative max-w-6xl mx-auto px-6 md:px-8 py-8 rounded-2xl border-2 bg-[var(--card)] overflow-hidden"
+          style={{
+            borderColor: agentGlowColor,
+            boxShadow: `inset 0 0 48px ${agentGlowColor}, inset 0 0 0 1px ${agentGlowColor}`,
+          }}
+        >
           {/* Half-circle glow from top */}
           <div
             className="absolute inset-0 rounded-2xl pointer-events-none"
             style={{
-              background: `radial-gradient(ellipse 100% 80% at 50% 0%, ${getAgentGlowColor(agent.agent_id)} 0%, transparent 55%)`,
+              background: `radial-gradient(ellipse 100% 80% at 50% 0%, ${agentGlowColor} 0%, transparent 55%)`,
             }}
             aria-hidden
           />
           <div className="relative flex items-start gap-6">
             {/* Avatar */}
-            <BotAvatar size="xl" seed={agent.agent_id} iconClassName="text-6xl" />
+            <BotAvatar size="xl" seed={agent.agent_id} colorKey={agent.color} iconClassName="text-6xl" />
 
             {/* Info */}
             <div className="flex-1 min-w-0">
-              <h1 className="text-3xl md:text-4xl font-bold mb-1 text-[var(--accent)]">
+              <h1 className="text-3xl md:text-4xl font-bold mb-1 text-[var(--agent-color)]">
                 {agent.handle.startsWith("@") ? agent.handle : `@${agent.handle}`}
               </h1>
               {isLittleShipsTeamMember(agent.agent_id) && (
-                <span className="inline-flex items-center px-2.5 py-1 rounded-lg border border-[var(--accent)]/50 bg-[var(--accent)]/15 text-[var(--accent)] text-xs font-medium mb-3">
+                <span
+                  className="inline-flex items-center px-2.5 py-1 rounded-lg border text-xs font-medium mb-3"
+                  style={{
+                    borderColor: agentColor,
+                    backgroundColor: agentColor.replace(")", ", 0.15)").replace("rgb", "rgba"),
+                    color: agentColor,
+                  }}
+                >
                   LittleShips team
                 </span>
               )}
@@ -176,7 +273,7 @@ export default function AgentPage({ params }: AgentPageProps) {
                 </div>
                 <div>
                   <span className="text-[var(--fg-subtle)]">Total ships:</span>{" "}
-                  <span className="text-[var(--fg)]">{agent.total_receipts}</span>
+                  <span className="text-[var(--fg)]">{pluralize(agent.total_receipts, "ship")}</span>
                 </div>
               </div>
 
@@ -192,7 +289,7 @@ export default function AgentPage({ params }: AgentPageProps) {
                       }
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-[var(--fg-muted)] hover:text-[var(--accent)] transition"
+                      className="inline-flex items-center gap-1.5 text-[var(--fg-muted)] hover:text-[var(--agent-color)] transition"
                       aria-label="X profile"
                     >
                       <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -208,7 +305,7 @@ export default function AgentPage({ params }: AgentPageProps) {
                         href={`https://basescan.org/address/${agent.tips_address}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-mono text-[var(--fg)] hover:text-[var(--accent)] transition"
+                        className="font-mono text-[var(--fg)] hover:text-[var(--agent-color)] transition"
                       >
                         {truncateAddress(agent.tips_address)}
                       </a>
@@ -216,54 +313,25 @@ export default function AgentPage({ params }: AgentPageProps) {
                   )}
                 </div>
               )}
-              <div className="mt-3 flex flex-wrap items-center gap-4 text-xs">
-                <button
-                  type="button"
-                  onClick={shareProfile}
-                  className="inline-flex items-center gap-1.5 text-[var(--fg-muted)] hover:text-[var(--accent)] transition font-medium"
-                  aria-label="Share profile on X"
-                >
-                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8" />
-                    <polyline points="16 6 12 2 8 6" />
-                    <line x1="12" y1="2" x2="12" y2="15" />
-                  </svg>
-                  Share my clout
-                </button>
-              </div>
             </div>
 
             {/* 7-day Activity Meter */}
             <div className="shrink-0 text-right">
-              <ActivityMeter values={agent.activity_7d} size="xl" />
+              <ActivityMeter values={agent.activity_7d} size="xl" color={agentColor} />
               <div className="text-xs text-[var(--fg-muted)] mt-1">
-                {totalActivity} ships
+                {pluralize(totalActivity, "ship")}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Tabs + JSON Export bar */}
+      {/* JSON Export bar */}
       <section className="border-b border-[var(--border)] bg-[var(--bg-subtle)]">
-        <div className="max-w-6xl mx-auto px-6 md:px-8 py-3 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => setProfileTab("activity")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                profileTab === "activity"
-                  ? "bg-[var(--fg-muted)] text-[var(--bg)]"
-                  : "bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] border border-[var(--border)]"
-              }`}
-            >
-              Activity
-            </button>
-          </div>
-          <div className="flex items-center gap-2">
+        <div className="max-w-6xl mx-auto px-6 md:px-8 py-3 flex items-center justify-end gap-2">
             <Link
               href={`/agent/${handle}/feed.json`}
-              className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] hover:text-[var(--accent)] transition font-mono text-xs"
+              className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] hover:text-[var(--agent-color)] transition font-mono text-xs"
             >
               <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -272,14 +340,13 @@ export default function AgentPage({ params }: AgentPageProps) {
             </Link>
             <Link
               href={`/agent/${handle}/feed.ndjson`}
-              className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] hover:text-[var(--accent)] transition font-mono text-xs"
+              className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] hover:text-[var(--agent-color)] transition font-mono text-xs"
             >
               <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               feed.ndjson
             </Link>
-          </div>
         </div>
       </section>
 
@@ -287,7 +354,7 @@ export default function AgentPage({ params }: AgentPageProps) {
       <section className="w-full flex-1">
         <div className="max-w-6xl mx-auto px-6 md:px-8 py-8">
           <>
-          <h2 className="text-lg font-bold mb-4 text-[var(--accent)]">Ship History</h2>
+          <h2 className="text-lg font-bold mb-4 text-[var(--fg)]">Ship History</h2>
 
           {/* Category pills — only types this agent has shipped */}
           {proofs.length > 0 && (
@@ -359,9 +426,9 @@ export default function AgentPage({ params }: AgentPageProps) {
                   >
                     📦
                   </div>
-                  <span className="mt-2 inline-flex items-center px-2.5 py-1 rounded-full bg-[var(--bg-muted)] text-xs text-[var(--fg-muted)] whitespace-nowrap">
-                    {formatDate(burst[0].timestamp)}
-                    {burst.length > 1 && ` • ${burst.length} ships`}
+                  <span className="mt-2 inline-flex flex-col items-center px-2.5 py-1.5 rounded-full bg-[var(--bg-muted)] text-xs text-[var(--fg-muted)] whitespace-nowrap text-center leading-tight">
+                    <span>{formatDate(burst[0].timestamp)}</span>
+                    <span>{pluralize(burst.length, "ship")}</span>
                   </span>
                 </div>
 
@@ -378,6 +445,7 @@ export default function AgentPage({ params }: AgentPageProps) {
                       receipt={proof}
                       agent={agent}
                       showAgent={false}
+                      accentColor={agentColor}
                     />
                   ))}
                 </div>

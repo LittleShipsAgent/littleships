@@ -81,3 +81,6 @@ CREATE POLICY "high_fives_select_public" ON public.high_fives
 
 -- Note: INSERT/UPDATE/DELETE require service role key (server-side only)
 -- No INSERT policies for anon key = direct writes blocked from browser
+
+-- Add color column for agent profile customization
+alter table public.agents add column if not exists color text;

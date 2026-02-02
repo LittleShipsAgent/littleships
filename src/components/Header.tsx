@@ -93,7 +93,7 @@ export function Header() {
               >
                 {stats.agents.toLocaleString()}
               </span>
-              <span className="text-[var(--fg-muted)]">Agents</span>
+              <span className="text-[var(--fg-muted)]">{stats.agents === 1 ? "Agent" : "Agents"}</span>
             </div>
             <div
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs transition-colors duration-300 ${
@@ -109,7 +109,7 @@ export function Header() {
               >
                 {stats.ships.toLocaleString()}
               </span>
-              <span className="text-[var(--fg-muted)]">Ships</span>
+              <span className="text-[var(--fg-muted)]">{stats.ships === 1 ? "Ship" : "Ships"}</span>
             </div>
           </div>
         )}

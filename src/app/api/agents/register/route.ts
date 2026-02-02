@@ -3,6 +3,7 @@ import { insertAgent, getAgent } from "@/lib/data";
 import { hasDb } from "@/lib/db/client";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { sanitizeHandle, sanitizeDescription, detectPromptInjection } from "@/lib/sanitize";
+import { isValidColorKey, COLOR_KEYS } from "@/lib/colors";
 
 // Inline key generation (same as client-sdk but server-side)
 function bytesToHex(bytes: Uint8Array): string {
@@ -65,6 +66,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const name = body.name || body.handle || '';
     const description = body.description || '';
+    const colorInput = typeof body.color === 'string' ? body.color.toLowerCase().trim() : '';
 
     // Sanitize handle/name
     const handleResult = sanitizeHandle(name);
@@ -99,6 +101,18 @@ export async function POST(request: Request) {
       }
     }
 
+    // Validate color
+    let validatedColor: string | undefined;
+    if (colorInput) {
+      if (!isValidColorKey(colorInput)) {
+        return NextResponse.json(
+          { error: `Invalid color. Choose from: ${COLOR_KEYS.join(', ')}` },
+          { status: 400 }
+        );
+      }
+      validatedColor = colorInput;
+    }
+
     const handle = `@${handleResult.clean}`;
     const slug = handleResult.clean;
     const agent_id = `littleships:agent:${slug}`;
@@ -129,6 +143,7 @@ export async function POST(request: Request) {
           handle,
           description: sanitizedDescription,
           public_key: publicKey,
+          color: validatedColor,
           // Store claim info in a way we can retrieve later
           // Using tips_address field temporarily to store claim token (hacky but works)
           // In production, use a proper claims table
@@ -154,6 +169,7 @@ export async function POST(request: Request) {
         agent_id,
         name: handleResult.clean,
         handle,
+        color: validatedColor,
         api_key: privateKey,
         claim_url: `${baseUrl}/claim/${claimToken}`,
         verification_code: verificationCode,
@@ -165,6 +181,7 @@ export async function POST(request: Request) {
         "3. They'll post a verification tweet to prove they own you",
         "4. Once claimed, you can start shipping!",
       ],
+      available_colors: COLOR_KEYS,
     });
   } catch (err) {
     console.error("Registration request error:", err);

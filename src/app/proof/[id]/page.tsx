@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { getAgentColor } from "@/components/BotAvatar";
 import type { Receipt, Agent } from "@/lib/types";
 import { MOCK_RECEIPTS, getAgentById } from "@/lib/mock-data";
 
@@ -53,14 +54,57 @@ export default function ProofPage({ params }: ProofPageProps) {
 
   if (data === undefined) {
     return (
-      <div className="min-h-screen text-[var(--fg)] flex flex-col items-center justify-center gap-4">
+      <div className="min-h-screen text-[var(--fg)] flex flex-col">
         <Header />
-        <p className="text-[var(--fg-muted)]">Loading...</p>
+
+        <section className="flex-1 relative">
+          <div
+            className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
+            style={{
+              background: "radial-gradient(ellipse 100% 80% at 50% 0%, var(--accent-muted) 0%, transparent 60%)",
+            }}
+            aria-hidden
+          />
+          <div className="relative z-10 max-w-4xl mx-auto px-6 md:px-8 py-8 w-full animate-pulse">
+          {/* Breadcrumb skeleton */}
+          <nav className="mb-6 flex items-center gap-2 text-sm">
+            <span className="h-4 w-16 rounded bg-[var(--card-hover)]" aria-hidden />
+            <span className="text-[var(--fg-subtle)]">/</span>
+            <span className="h-4 w-24 rounded bg-[var(--card-hover)]" aria-hidden />
+          </nav>
+
+          {/* Title + buttons skeleton */}
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <span className="h-5 w-12 rounded bg-[var(--card-hover)]" aria-hidden />
+              <span className="h-5 w-32 rounded bg-[var(--card-hover)] font-mono" aria-hidden />
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="h-9 w-24 rounded-lg bg-[var(--card-hover)]" aria-hidden />
+              <span className="h-9 w-36 rounded-lg bg-[var(--card-hover)]" aria-hidden />
+            </div>
+          </div>
+
+          {/* JSON block skeleton */}
+          <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--card)] space-y-2">
+            <span className="block h-4 w-full max-w-md rounded bg-[var(--card-hover)] font-mono" aria-hidden />
+            <span className="block h-4 w-full max-w-sm rounded bg-[var(--card-hover)] font-mono" aria-hidden />
+            <span className="block h-4 w-full max-w-lg rounded bg-[var(--card-hover)] font-mono" aria-hidden />
+            <span className="block h-4 w-full max-w-xs rounded bg-[var(--card-hover)] font-mono" aria-hidden />
+            <span className="block h-4 w-full max-w-md rounded bg-[var(--card-hover)] font-mono" aria-hidden />
+            <span className="block h-4 w-full max-w-sm rounded bg-[var(--card-hover)] font-mono" aria-hidden />
+            <span className="block h-4 w-3/4 max-w-md rounded bg-[var(--card-hover)] font-mono" aria-hidden />
+          </div>
+          </div>
+        </section>
+
+        <Footer />
       </div>
     );
   }
 
   const { proof, agent } = data;
+  const agentColor = agent ? getAgentColor(agent.agent_id, agent.color) : undefined;
   const payload = { proof, agent: agent ? { agent_id: agent.agent_id, handle: agent.handle } : null };
   const jsonString = JSON.stringify(payload, null, 2);
 
@@ -69,10 +113,21 @@ export default function ProofPage({ params }: ProofPageProps) {
   };
 
   return (
-    <div className="min-h-screen text-[var(--fg)] flex flex-col">
+    <div
+      className="min-h-screen text-[var(--fg)] flex flex-col"
+      style={agentColor ? ({ "--agent-color": agentColor } as React.CSSProperties) : undefined}
+    >
       <Header />
 
-      <section className="max-w-4xl mx-auto px-6 md:px-8 py-8 flex-1 w-full">
+      <section className="flex-1 relative">
+        <div
+          className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
+          style={{
+            background: "radial-gradient(ellipse 100% 80% at 50% 0%, var(--accent-muted) 0%, transparent 60%)",
+          }}
+          aria-hidden
+        />
+        <div className="relative z-10 max-w-4xl mx-auto px-6 md:px-8 py-8 w-full">
         <nav className="mb-6 text-sm text-[var(--fg-muted)] flex items-center gap-2 flex-wrap">
           <Link href="/" className="hover:text-[var(--accent)] transition">
             LittleShips
@@ -95,7 +150,7 @@ export default function ProofPage({ params }: ProofPageProps) {
             </button>
             <Link
               href={`/ship/${proof.receipt_id}`}
-              className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--accent)] hover:bg-[var(--card-hover)] transition"
+              className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--agent-color,var(--accent))] hover:bg-[var(--card-hover)] transition"
             >
               View ship page →
             </Link>
@@ -105,6 +160,7 @@ export default function ProofPage({ params }: ProofPageProps) {
         <pre className="p-6 rounded-xl border border-[var(--border)] bg-[var(--card)] text-sm font-mono text-[var(--fg)] overflow-x-auto whitespace-pre-wrap break-all">
           {jsonString}
         </pre>
+        </div>
       </section>
 
       <Footer />

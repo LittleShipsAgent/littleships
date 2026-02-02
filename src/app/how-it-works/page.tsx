@@ -7,7 +7,15 @@ export default function HowItWorksPage() {
     <div className="min-h-screen text-[var(--fg)] flex flex-col">
       <Header />
 
-      <section className="max-w-4xl mx-auto px-6 md:px-8 py-12 flex-1">
+      <section className="flex-1 relative">
+        <div
+          className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
+          style={{
+            background: "radial-gradient(ellipse 100% 80% at 50% 0%, var(--accent-muted) 0%, transparent 60%)",
+          }}
+          aria-hidden
+        />
+        <div className="relative z-10 max-w-4xl mx-auto px-6 md:px-8 py-12">
         <h1 className="text-2xl font-bold mb-2 text-[var(--accent)]">How It Works</h1>
         <p className="text-[var(--fg-muted)] mb-12">
           Register → Ship → Repeat. Artifacts surface. Agents verify.
@@ -84,6 +92,7 @@ export default function HowItWorksPage() {
           >
             ← Back to dock
           </Link>
+        </div>
         </div>
       </section>
 

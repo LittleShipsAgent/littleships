@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Receipt, Agent } from "@/lib/types";
-import { timeAgo, shipTypeIcon, shipTypeLabel, inferShipTypeFromArtifact } from "@/lib/utils";
+import { timeAgo, shipTypeIcon, shipTypeLabel, inferShipTypeFromArtifact, pluralize } from "@/lib/utils";
 
 interface ProofCardProps {
   receipt: Receipt;
@@ -44,8 +44,10 @@ export function ProofCard({ receipt, agent, showAgent = true, showAgentAvatar = 
           router.push(shipUrl);
         }
       }}
-      className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 hover:border-[var(--border-hover)] hover:bg-[var(--card-hover)] hover:shadow-lg hover:shadow-black/10 hover:-translate-y-0.5 transition-all duration-200 group w-full cursor-pointer"
-      style={accentColor ? { "--card-accent": accentColor } as React.CSSProperties : undefined}
+      className="bg-[var(--card)] border border-[var(--border)] hover:border-[var(--border-hover)] rounded-2xl p-5 hover:bg-[var(--card-hover)] hover:shadow-lg hover:shadow-black/10 hover:-translate-y-0.5 transition-all duration-200 group w-full cursor-pointer"
+      style={
+        accentColor ? ({ "--card-accent": accentColor } as React.CSSProperties) : undefined
+      }
     >
       <div className="flex gap-4">
         {/* Ship type icon — impact first, big and clear */}
@@ -61,7 +63,7 @@ export function ProofCard({ receipt, agent, showAgent = true, showAgentAvatar = 
               <span className="text-xs font-medium text-[var(--fg-muted)] uppercase tracking-wider">
                 {label}
               </span>
-              <h3 className="proof-card-title font-semibold text-[var(--fg)] line-clamp-1 mt-0.5">
+              <h3 className="proof-card-title font-semibold text-[var(--card-accent,var(--fg))] line-clamp-1 mt-0.5">
                 {receipt.title}
               </h3>
             </div>
@@ -87,7 +89,7 @@ export function ProofCard({ receipt, agent, showAgent = true, showAgentAvatar = 
           {showAgent && agent && (
             <Link
               href={`/agent/${agent.handle.replace("@", "")}`}
-              className="text-sm text-[var(--fg-muted)] hover:text-[var(--accent)] transition inline-flex items-center gap-1.5 mb-3"
+              className="text-sm text-[var(--fg-muted)] hover:text-[var(--card-accent,var(--accent))] transition inline-flex items-center gap-1.5 mb-3"
               onClick={(e) => e.stopPropagation()}
             >
               {showAgentAvatar && (
@@ -121,9 +123,9 @@ export function ProofCard({ receipt, agent, showAgent = true, showAgentAvatar = 
               <Link
                 href={proofUrl}
                 onClick={(e) => e.stopPropagation()}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[var(--card-hover)] border border-[var(--border)] text-[var(--fg-muted)] font-medium hover:text-[var(--fg)] hover:bg-[var(--bg-subtle)] hover:border-[var(--border-hover)] transition"
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[var(--card-hover)] border border-[var(--border)] text-[var(--fg-muted)] font-medium hover:text-[var(--card-accent,var(--fg))] hover:bg-[var(--bg-subtle)] hover:border-[var(--border-hover)] transition"
               >
-                {proofCount} proof →
+                {pluralize(proofCount, "proof", "proofs")} →
               </Link>
             </div>
           </div>

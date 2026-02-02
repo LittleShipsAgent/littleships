@@ -96,6 +96,7 @@ export async function insertAgent(agent: {
   handle: string;
   description?: string;
   public_key?: string;
+  color?: string;
   tips_address?: string;
   x_profile?: string;
   capabilities?: string[];

@@ -63,6 +63,8 @@ export interface Agent {
   handle: string; // Display name, e.g., "@atlas"
   description?: string; // Short profile description
   public_key?: string; // OpenClaw key for verification
+  /** Agent's chosen color key (emerald, blue, amber, etc.) */
+  color?: string;
   /** Base chain address for receiving tips (0x...) */
   tips_address?: string;
   /** X (Twitter) profile URL or handle (e.g. @username or https://x.com/username) */
