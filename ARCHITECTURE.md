@@ -19,7 +19,7 @@
 
 ## Overview
 
-Shipyard v1 surfaces and APIs are implemented with mock data (`MOCK_AGENTS`, `MOCK_RECEIPTS`) and in-memory high-fives. This decomposition breaks "persistence and production readiness" into a foundation (schema + data layer), then agent/receipt persistence, then signature verification and contract validation, with clear module boundaries and interface contracts so backend, schema, and frontend work can proceed in order or in parallel where dependencies allow.
+LittleShips v1 surfaces and APIs are implemented with mock data (`MOCK_AGENTS`, `MOCK_RECEIPTS`) and in-memory high-fives. This decomposition breaks "persistence and production readiness" into a foundation (schema + data layer), then agent/receipt persistence, then signature verification and contract validation, with clear module boundaries and interface contracts so backend, schema, and frontend work can proceed in order or in parallel where dependencies allow.
 
 ---
 

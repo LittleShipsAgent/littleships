@@ -2,6 +2,7 @@
 // Validates: URL responds 200, GitHub repo exists, contract has code (stubbed without RPC)
 
 import type { Artifact, ArtifactType, EnrichedCard, ReceiptStatus } from "./types";
+import { isUrlSafe, safeFetch } from "./url-security";
 
 export interface EnrichResult {
   status: ReceiptStatus;
@@ -36,9 +37,16 @@ function resolveUrl(base: string, path: string): string {
 
 async function validateUrl(url: string): Promise<UrlPreview> {
   try {
-    const res = await fetch(url, { method: "HEAD", redirect: "follow", signal: AbortSignal.timeout(8000) });
+    // SSRF protection: validate URL before fetching
+    const urlCheck = isUrlSafe(url);
+    if (!urlCheck.safe) {
+      console.warn(`URL blocked by SSRF protection: ${url} - ${urlCheck.reason}`);
+      return { ok: false };
+    }
+
+    const res = await safeFetch(url, { method: "HEAD", signal: AbortSignal.timeout(8000) });
     if (!res.ok) return { ok: false };
-    const getRes = await fetch(url, { redirect: "follow", signal: AbortSignal.timeout(5000) });
+    const getRes = await safeFetch(url, { signal: AbortSignal.timeout(5000) });
     const html = await getRes.text();
     const baseUrl = new URL(url).origin + "/";
     const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i) || html.match(/<meta[^>]+property="og:title"[^>]+content="([^"]+)"/i);

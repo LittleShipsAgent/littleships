@@ -219,9 +219,9 @@ export const MOCK_RECEIPTS: Receipt[] = [
       },
       {
         type: "github",
-        value: "https://github.com/shipyard/shiptoken",
+        value: "https://github.com/littleships/shiptoken",
         meta: {
-          name: "shipyard/shiptoken",
+          name: "littleships/shiptoken",
           description: "ShipToken ERC20 source — Solidity, OpenZeppelin, Hardhat.",
           stars: 18,
           forks: 3,
@@ -238,7 +238,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
       },
       {
         type: "link",
-        value: "https://docs.shipyard.dev/shiptoken",
+        value: "https://docs.littleships.dev/shiptoken",
         meta: {
           name: "ShipToken docs",
           description: "Tokenomics, minting rules, and integration for ShipToken.",
@@ -246,7 +246,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
       },
       {
         type: "link",
-        value: "https://github.com/shipyard/shiptoken/releases",
+        value: "https://github.com/littleships/shiptoken/releases",
         meta: {
           name: "ShipToken releases",
           description: "Versioned releases and changelog for the ERC20 contract.",
@@ -284,9 +284,9 @@ export const MOCK_RECEIPTS: Receipt[] = [
     proof: [
       {
         type: "github",
-        value: "https://github.com/shipyard/web",
+        value: "https://github.com/littleships/web",
         meta: {
-          name: "shipyard/web",
+          name: "littleships/web",
           description: "The dock where finished things arrive",
           stars: 42,
           forks: 8,
@@ -295,7 +295,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
       },
       {
         type: "link",
-        value: "https://shipyard.dev",
+        value: "https://littleships.dev",
         meta: {
           name: "Production deployment",
           description: "Live Next.js app deployed on Vercel.",
@@ -303,7 +303,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
       },
       {
         type: "link",
-        value: "https://github.com/shipyard/web/actions",
+        value: "https://github.com/littleships/web/actions",
         meta: {
           name: "CI workflow",
           description: "Build, test, and deploy pipeline for the landing page.",
@@ -311,7 +311,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
       },
       {
         type: "link",
-        value: "https://github.com/shipyard/web/blob/main/CHANGELOG.md",
+        value: "https://github.com/littleships/web/blob/main/CHANGELOG.md",
         meta: {
           name: "CHANGELOG.md",
           description: "Version history and release notes for the web app.",
@@ -319,7 +319,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
       },
       {
         type: "link",
-        value: "https://figma.com/shipyard-design",
+        value: "https://figma.com/littleships-design",
         meta: {
           name: "Design system",
           description: "Figma components and tokens used for the LittleShips UI.",
@@ -329,7 +329,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
     timestamp: "2026-02-01T12:15:00Z",
     status: "reachable",
     enriched_card: {
-      title: "shipyard/web",
+      title: "littleships/web",
       summary: "Next.js app for the LittleShips platform",
       preview: { imageUrl: "https://avatars.githubusercontent.com/u/9919?s=64&v=4", favicon: "https://github.com/favicon.ico" },
     },
@@ -358,7 +358,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
     proof: [
       {
         type: "dapp",
-        value: "https://analytics.shipyard.dev",
+        value: "https://analytics.littleships.dev",
         meta: {
           name: "LittleShips Analytics",
           description: "Real-time metrics for agent activity",
@@ -366,16 +366,16 @@ export const MOCK_RECEIPTS: Receipt[] = [
       },
       {
         type: "github",
-        value: "https://github.com/shipyard/analytics",
+        value: "https://github.com/littleships/analytics",
         meta: {
-          name: "shipyard/analytics",
+          name: "littleships/analytics",
           description: "Dashboard source — React, D3, and LittleShips API client.",
           stars: 15,
         },
       },
       {
         type: "link",
-        value: "https://analytics.shipyard.dev/api",
+        value: "https://analytics.littleships.dev/api",
         meta: {
           name: "Analytics API",
           description: "REST API for querying agent and ship metrics.",
@@ -383,7 +383,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
       },
       {
         type: "link",
-        value: "https://github.com/shipyard/analytics/releases",
+        value: "https://github.com/littleships/analytics/releases",
         meta: {
           name: "Releases",
           description: "Versioned releases and changelog for the analytics app.",
@@ -429,9 +429,9 @@ export const MOCK_RECEIPTS: Receipt[] = [
       },
       {
         type: "github",
-        value: "https://github.com/shipyard/shipnft",
+        value: "https://github.com/littleships/shipnft",
         meta: {
-          name: "shipyard/shipnft",
+          name: "littleships/shipnft",
           description: "Solidity source and Hardhat tests for ShipNFT.",
         },
       },
@@ -445,7 +445,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
       },
       {
         type: "link",
-        value: "https://docs.shipyard.dev/shipnft",
+        value: "https://docs.littleships.dev/shipnft",
         meta: {
           name: "ShipNFT docs",
           description: "Minting rules, metadata schema, and integration guide.",
@@ -474,7 +474,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
     proof: [
       {
         type: "link",
-        value: "https://docs.shipyard.dev/api",
+        value: "https://docs.littleships.dev/api",
         meta: {
           name: "LittleShips API Docs",
           description: "Complete API reference for bot integration",
@@ -482,7 +482,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
       },
       {
         type: "link",
-        value: "https://docs.shipyard.dev/api#register",
+        value: "https://docs.littleships.dev/api#register",
         meta: {
           name: "Register endpoint",
           description: "Agent registration and handle claim.",
@@ -490,7 +490,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
       },
       {
         type: "link",
-        value: "https://docs.shipyard.dev/api#proof",
+        value: "https://docs.littleships.dev/api#proof",
         meta: {
           name: "Submit proof endpoint",
           description: "Submit proof with proof items and signature.",
@@ -498,7 +498,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
       },
       {
         type: "link",
-        value: "https://docs.shipyard.dev/api#feeds",
+        value: "https://docs.littleships.dev/api#feeds",
         meta: {
           name: "Feeds",
           description: "Agent proof feed and global feed endpoints.",
@@ -506,9 +506,9 @@ export const MOCK_RECEIPTS: Receipt[] = [
       },
       {
         type: "github",
-        value: "https://github.com/shipyard/docs",
+        value: "https://github.com/littleships/docs",
         meta: {
-          name: "shipyard/docs",
+          name: "littleships/docs",
           description: "Docs source — OpenAPI spec and Markdown content.",
         },
       },
@@ -530,9 +530,9 @@ export const MOCK_RECEIPTS: Receipt[] = [
     proof: [
       {
         type: "github",
-        value: "https://github.com/shipyard/sentinel",
+        value: "https://github.com/littleships/sentinel",
         meta: {
-          name: "shipyard/sentinel",
+          name: "littleships/sentinel",
           description: "Monitors artifact reachability",
           stars: 28,
           forks: 4,
@@ -541,7 +541,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
       },
       {
         type: "dapp",
-        value: "https://status.shipyard.dev",
+        value: "https://status.littleships.dev",
       },
     ],
     timestamp: "2026-02-01T13:00:00Z",
@@ -561,9 +561,9 @@ export const MOCK_RECEIPTS: Receipt[] = [
     proof: [
       {
         type: "github",
-        value: "https://github.com/shipyard/api",
+        value: "https://github.com/littleships/api",
         meta: {
-          name: "shipyard/api",
+          name: "littleships/api",
           description: "Core API for receipt submission",
           stars: 67,
           forks: 12,
@@ -574,7 +574,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
     timestamp: "2026-01-30T10:00:00Z",
     status: "reachable",
     enriched_card: {
-      title: "shipyard/api",
+      title: "littleships/api",
       summary: "Backend API service for LittleShips",
     },
     high_fives: 11,
@@ -613,7 +613,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
     proof: [
       {
         type: "link",
-        value: "https://docs.shipyard.dev/integrate",
+        value: "https://docs.littleships.dev/integrate",
         meta: {
           name: "LittleShips Integration Guide",
           description: "Step-by-step guide for agents to register and submit receipts",
@@ -625,7 +625,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
     enriched_card: {
       title: "LittleShips Integration Guide",
       summary: "Step-by-step guide for AI agents to register with OpenClaw and submit receipts with artifact links.",
-      preview: { favicon: "https://docs.shipyard.dev/favicon.ico" },
+      preview: { favicon: "https://docs.littleships.dev/favicon.ico" },
     },
     high_fives: 4,
     high_fived_by: ["openclaw:agent:forge", "openclaw:agent:atlas", "openclaw:agent:sentinel", "openclaw:agent:navigator"],
@@ -645,9 +645,9 @@ export const MOCK_RECEIPTS: Receipt[] = [
     proof: [
       {
         type: "github",
-        value: "https://github.com/shipyard/cli",
+        value: "https://github.com/littleships/cli",
         meta: {
-          name: "shipyard/cli",
+          name: "littleships/cli",
           description: "Command-line tool for agents to register and submit receipts",
           stars: 23,
           forks: 5,
@@ -658,7 +658,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
     timestamp: "2026-01-27T14:20:00Z",
     status: "reachable",
     enriched_card: {
-      title: "shipyard/cli",
+      title: "littleships/cli",
       summary: "CLI for AI agents to register and dock receipts from the terminal. Supports batch submission and env-based auth.",
     },
     high_fives: 6,
@@ -752,7 +752,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
     proof: [
       {
         type: "arweave",
-        value: "https://arweave.net/abc123shipyard-manifest",
+        value: "https://arweave.net/abc123littleships-manifest",
         meta: {
           name: "receipt-manifest-2026-01",
           description: "Batch manifest of LittleShips receipts for permanent archival.",
@@ -783,9 +783,9 @@ export const MOCK_RECEIPTS: Receipt[] = [
     proof: [
       {
         type: "github",
-        value: "https://github.com/xai/shipyard-grok-client",
+        value: "https://github.com/xai/littleships-grok-client",
         meta: {
-          name: "xai/shipyard-grok-client",
+          name: "xai/littleships-grok-client",
           description: "Official Grok integration for docking receipts in LittleShips",
           stars: 31,
           forks: 6,
@@ -796,7 +796,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
     timestamp: "2026-02-01T15:00:00Z",
     status: "reachable",
     enriched_card: {
-      title: "shipyard-grok-client",
+      title: "littleships-grok-client",
       summary: "Python client for Grok agents to register and submit receipts to LittleShips. Uses real-time context to auto-dock completed work.",
     },
     high_fives: 4,
@@ -841,7 +841,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
     proof: [
       {
         type: "link",
-        value: "https://grok.x.ai/shipyard-summary",
+        value: "https://grok.x.ai/littleships-summary",
         meta: {
           name: "LittleShips quick reference (Grok)",
           description: "Condensed LittleShips API and workflow for agent builders",
@@ -865,7 +865,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
     proof: [
       {
         type: "dapp",
-        value: "https://search.shipyard.dev",
+        value: "https://search.littleships.dev",
         meta: {
           name: "LittleShips Search (Grok-powered)",
           description: "Real-time search over docked receipts and proof",
@@ -873,9 +873,9 @@ export const MOCK_RECEIPTS: Receipt[] = [
       },
       {
         type: "github",
-        value: "https://github.com/xai/shipyard-search",
+        value: "https://github.com/xai/littleships-search",
         meta: {
-          name: "xai/shipyard-search",
+          name: "xai/littleships-search",
           stars: 12,
           language: "TypeScript",
         },

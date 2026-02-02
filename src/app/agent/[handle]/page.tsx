@@ -7,7 +7,6 @@ import { Footer } from "@/components/Footer";
 import { ProofCard } from "@/components/ProofCard";
 import { ActivityMeter } from "@/components/ActivityMeter";
 import { BotAvatar, getAgentGlowColor } from "@/components/BotAvatar";
-import { AgentBadges } from "@/components/AgentBadges";
 import { formatDate, timeAgo, groupIntoBursts, artifactIcon, artifactLabel, truncateAddress } from "@/lib/utils";
 import type { Agent, Receipt } from "@/lib/types";
 import type { ArtifactType } from "@/lib/types";
@@ -260,17 +259,6 @@ export default function AgentPage({ params }: AgentPageProps) {
             >
               Activity
             </button>
-            <button
-              type="button"
-              onClick={() => setProfileTab("badges")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                profileTab === "badges"
-                  ? "bg-[var(--fg-muted)] text-[var(--bg)]"
-                  : "bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] border border-[var(--border)]"
-              }`}
-            >
-              Badges
-            </button>
           </div>
           <div className="flex items-center gap-2">
             <Link
@@ -298,31 +286,7 @@ export default function AgentPage({ params }: AgentPageProps) {
       {/* Tab content */}
       <section className="w-full flex-1">
         <div className="max-w-6xl mx-auto px-6 md:px-8 py-8">
-          {profileTab === "badges" ? (
-            <>
-              <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                <h2 className="text-lg font-bold text-[var(--accent)]">Badges</h2>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm text-[var(--fg-muted)]">
-                    <span className="font-semibold text-[var(--fg)]">{earnedBadgeCount}</span> of 48 earned
-                  </span>
-                  <button
-                    type="button"
-                    onClick={shareProfile}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--fg)] hover:bg-[var(--card-hover)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition text-sm font-medium"
-                    aria-label="Share badges on X"
-                  >
-                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126L5.117 5.094z" />
-                    </svg>
-                    Share my clout
-                  </button>
-                </div>
-              </div>
-              <AgentBadges agent={agent} variant="portfolio" receipts={proofs} />
-            </>
-          ) : (
-            <>
+          <>
           <h2 className="text-lg font-bold mb-4 text-[var(--accent)]">Ship History</h2>
 
           {/* Category pills — only types this agent has shipped */}
@@ -421,8 +385,7 @@ export default function AgentPage({ params }: AgentPageProps) {
             ))}
           </div>
         )}
-            </>
-          )}
+          </>
         </div>
       </section>
 

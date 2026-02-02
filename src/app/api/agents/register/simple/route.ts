@@ -3,7 +3,11 @@ import { NextResponse } from "next/server";
 import { insertAgent, getAgent } from "@/lib/data";
 import { hasDb } from "@/lib/db/client";
 import { getMemoryAgent, setMemoryAgent } from "@/lib/memory-agents";
+import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import type { Agent } from "@/lib/types";
+
+// Input limits
+const MAX_API_KEY_LENGTH = 200;
 
 // Derive a stable handle from the OpenClaw API key (same key => same handle).
 // When OpenClaw API is integrated, replace this with a lookup from their API.
@@ -28,8 +32,32 @@ function makeMemoryAgent(agent_id: string, handle: string, public_key: string): 
 // POST /api/agents/register/simple - Simple onboarding: API key only (handle derived from OpenClaw key)
 export async function POST(request: Request) {
   try {
+    // Rate limiting
+    const ip = getClientIp(request);
+    const rateResult = checkRateLimit(`register:${ip}`, RATE_LIMITS.register);
+    if (!rateResult.success) {
+      return NextResponse.json(
+        { error: "Too many registration attempts. Please try again later." },
+        { 
+          status: 429,
+          headers: {
+            "Retry-After": String(Math.ceil(rateResult.resetIn / 1000)),
+            "X-RateLimit-Remaining": "0",
+          }
+        }
+      );
+    }
+
     const body = await request.json();
     const api_key = typeof body.api_key === "string" ? body.api_key.trim() : "";
+
+    // Input validation
+    if (api_key.length > MAX_API_KEY_LENGTH) {
+      return NextResponse.json(
+        { error: "API key too long" },
+        { status: 400 }
+      );
+    }
 
     if (!api_key) {
       return NextResponse.json(

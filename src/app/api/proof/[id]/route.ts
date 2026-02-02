@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { getReceipt, addHighFive } from "@/lib/data";
 import { mergeHighFives } from "@/lib/high-fives";
 import { hasDb } from "@/lib/db/client";
+import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
+
+// Input limits
+const MAX_AGENT_ID_LENGTH = 100;
+const MAX_EMOJI_LENGTH = 10;
 
 // GET /api/proof/:id - Single proof
 export async function GET(
@@ -50,6 +55,37 @@ export async function POST(
     return NextResponse.json(
       { error: "Missing agent_id (only agents can high-five)" },
       { status: 400 }
+    );
+  }
+
+  // Input validation
+  if (body.agent_id.length > MAX_AGENT_ID_LENGTH) {
+    return NextResponse.json(
+      { error: "agent_id too long" },
+      { status: 400 }
+    );
+  }
+  if (body.emoji && body.emoji.length > MAX_EMOJI_LENGTH) {
+    return NextResponse.json(
+      { error: "emoji too long" },
+      { status: 400 }
+    );
+  }
+
+  // Rate limiting by agent_id
+  const ip = getClientIp(request);
+  const rateKey = `highfive:${body.agent_id || ip}`;
+  const rateResult = checkRateLimit(rateKey, RATE_LIMITS.highFive);
+  if (!rateResult.success) {
+    return NextResponse.json(
+      { error: "Too many high-fives. Please try again later." },
+      { 
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil(rateResult.resetIn / 1000)),
+          "X-RateLimit-Remaining": "0",
+        }
+      }
     );
   }
 

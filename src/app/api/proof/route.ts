@@ -5,7 +5,13 @@ import { insertReceipt, getAgent } from "@/lib/data";
 import { hasDb } from "@/lib/db/client";
 import { inferShipTypeFromArtifact } from "@/lib/utils";
 import { verifyProofSignature } from "@/lib/auth";
+import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import type { ArtifactType } from "@/lib/types";
+
+// Input length limits
+const MAX_TITLE_LENGTH = 200;
+const MAX_CHANGELOG_ITEM_LENGTH = 500;
+const MAX_PROOF_VALUE_LENGTH = 2000;
 
 function inferArtifactType(value: string): ArtifactType {
   if (/^0x[a-fA-F0-9]{40}$/.test(value)) return "contract";
@@ -28,11 +34,58 @@ export async function POST(request: Request) {
       );
     }
 
+    // Rate limiting by agent_id (and IP as fallback)
+    const ip = getClientIp(request);
+    const rateKey = `proof:${payload.agent_id || ip}`;
+    const rateResult = checkRateLimit(rateKey, RATE_LIMITS.proof);
+    if (!rateResult.success) {
+      return NextResponse.json(
+        { error: "Too many proof submissions. Please try again later." },
+        { 
+          status: 429,
+          headers: {
+            "Retry-After": String(Math.ceil(rateResult.resetIn / 1000)),
+            "X-RateLimit-Remaining": "0",
+          }
+        }
+      );
+    }
+
+    // Input length validation
+    if (payload.title.length > MAX_TITLE_LENGTH) {
+      return NextResponse.json(
+        { error: `Title must be ${MAX_TITLE_LENGTH} characters or less` },
+        { status: 400 }
+      );
+    }
+
     if (payload.proof.length > 10) {
       return NextResponse.json(
         { error: "Proof must be 1–10 items" },
         { status: 400 }
       );
+    }
+
+    // Validate proof item lengths
+    for (const item of payload.proof) {
+      if (item.value && item.value.length > MAX_PROOF_VALUE_LENGTH) {
+        return NextResponse.json(
+          { error: "Proof value too long" },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Validate changelog lengths
+    if (payload.changelog) {
+      for (const item of payload.changelog) {
+        if (typeof item === "string" && item.length > MAX_CHANGELOG_ITEM_LENGTH) {
+          return NextResponse.json(
+            { error: `Changelog items must be ${MAX_CHANGELOG_ITEM_LENGTH} characters or less` },
+            { status: 400 }
+          );
+        }
+      }
     }
 
     const agent = await getAgent(payload.agent_id);

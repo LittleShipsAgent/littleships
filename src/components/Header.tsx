@@ -4,53 +4,63 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const MOCK_AGENTS = 253166;
-const MOCK_SHIPS = 10224;
-const MOCK_TODAY = 2593;
-
-const AGENTS_INCREMENT_MS = 2500;
-const SHIPS_INCREMENT_MS = 3000;
 const BUMP_EFFECT_MS = 500;
+
+interface Stats {
+  agents: number;
+  ships: number;
+}
 
 export function Header() {
   const pathname = usePathname();
-  const [displayAgents, setDisplayAgents] = useState(MOCK_AGENTS);
-  const [displayShips, setDisplayShips] = useState(MOCK_SHIPS);
+  const [stats, setStats] = useState<Stats | null>(null);
   const [agentsBump, setAgentsBump] = useState(false);
   const [shipsBump, setShipsBump] = useState(false);
+  const prevStats = useRef<Stats | null>(null);
   const agentsBumpTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shipsBumpTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Agents pill: increment and flash accent
+  // Fetch real stats from API
   useEffect(() => {
-    const id = setInterval(() => {
-      setDisplayAgents((n) => n + 1);
-      setAgentsBump(true);
-      if (agentsBumpTimeout.current) clearTimeout(agentsBumpTimeout.current);
-      agentsBumpTimeout.current = setTimeout(() => {
-        setAgentsBump(false);
-        agentsBumpTimeout.current = null;
-      }, BUMP_EFFECT_MS);
-    }, AGENTS_INCREMENT_MS);
-    return () => {
-      clearInterval(id);
-      if (agentsBumpTimeout.current) clearTimeout(agentsBumpTimeout.current);
-    };
-  }, []);
+    async function fetchStats() {
+      try {
+        const [agentsRes, feedRes] = await Promise.all([
+          fetch("/api/agents"),
+          fetch("/api/feed"),
+        ]);
+        const agentsData = await agentsRes.json();
+        const feedData = await feedRes.json();
+        const newStats = {
+          agents: agentsData.count || 0,
+          ships: feedData.count || 0,
+        };
+        
+        // Trigger bump effect if stats increased
+        if (prevStats.current) {
+          if (newStats.agents > prevStats.current.agents) {
+            setAgentsBump(true);
+            if (agentsBumpTimeout.current) clearTimeout(agentsBumpTimeout.current);
+            agentsBumpTimeout.current = setTimeout(() => setAgentsBump(false), BUMP_EFFECT_MS);
+          }
+          if (newStats.ships > prevStats.current.ships) {
+            setShipsBump(true);
+            if (shipsBumpTimeout.current) clearTimeout(shipsBumpTimeout.current);
+            shipsBumpTimeout.current = setTimeout(() => setShipsBump(false), BUMP_EFFECT_MS);
+          }
+        }
+        
+        prevStats.current = newStats;
+        setStats(newStats);
+      } catch {
+        // Silently fail - stats will just not show
+      }
+    }
 
-  // Ships pill: increment and flash accent (same effect as Agents)
-  useEffect(() => {
-    const id = setInterval(() => {
-      setDisplayShips((n) => n + 1);
-      setShipsBump(true);
-      if (shipsBumpTimeout.current) clearTimeout(shipsBumpTimeout.current);
-      shipsBumpTimeout.current = setTimeout(() => {
-        setShipsBump(false);
-        shipsBumpTimeout.current = null;
-      }, BUMP_EFFECT_MS);
-    }, SHIPS_INCREMENT_MS);
+    fetchStats();
+    const interval = setInterval(fetchStats, 30000); // Refresh every 30s
     return () => {
-      clearInterval(id);
+      clearInterval(interval);
+      if (agentsBumpTimeout.current) clearTimeout(agentsBumpTimeout.current);
       if (shipsBumpTimeout.current) clearTimeout(shipsBumpTimeout.current);
     };
   }, []);
@@ -66,47 +76,43 @@ export function Header() {
           </span>
         </Link>
 
-        {/* Stats — high mock numbers; Agents pill increments */}
-        <div className="flex items-center gap-2 shrink-0">
-          <div
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs transition-colors duration-300 ${
-              agentsBump
-                ? "border-teal-500/50 bg-teal-500/15"
-                : "border-[var(--border)] bg-[var(--card)]"
-            }`}
-          >
-            <span
-              className={`font-medium tabular-nums transition-colors duration-300 ${
-                agentsBump ? "text-teal-600 dark:text-teal-400" : "text-[var(--fg)]"
+        {/* Stats — real data from API */}
+        {stats && (
+          <div className="flex items-center gap-2 shrink-0">
+            <div
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs transition-colors duration-300 ${
+                agentsBump
+                  ? "border-teal-500/50 bg-teal-500/15"
+                  : "border-[var(--border)] bg-[var(--card)]"
               }`}
             >
-              {displayAgents.toLocaleString()}
-            </span>
-            <span className="text-[var(--fg-muted)]">Agents</span>
-          </div>
-          <div
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs transition-colors duration-300 ${
-              shipsBump
-                ? "border-teal-500/50 bg-teal-500/15"
-                : "border-[var(--border)] bg-[var(--card)]"
-            }`}
-          >
-            <span
-              className={`font-medium tabular-nums transition-colors duration-300 ${
-                shipsBump ? "text-teal-600 dark:text-teal-400" : "text-[var(--fg)]"
+              <span
+                className={`font-medium tabular-nums transition-colors duration-300 ${
+                  agentsBump ? "text-teal-600 dark:text-teal-400" : "text-[var(--fg)]"
+                }`}
+              >
+                {stats.agents.toLocaleString()}
+              </span>
+              <span className="text-[var(--fg-muted)]">Agents</span>
+            </div>
+            <div
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs transition-colors duration-300 ${
+                shipsBump
+                  ? "border-teal-500/50 bg-teal-500/15"
+                  : "border-[var(--border)] bg-[var(--card)]"
               }`}
             >
-              {displayShips.toLocaleString()}
-            </span>
-            <span className="text-[var(--fg-muted)]">Launches</span>
+              <span
+                className={`font-medium tabular-nums transition-colors duration-300 ${
+                  shipsBump ? "text-teal-600 dark:text-teal-400" : "text-[var(--fg)]"
+                }`}
+              >
+                {stats.ships.toLocaleString()}
+              </span>
+              <span className="text-[var(--fg-muted)]">Ships</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-xs">
-            <span className="font-medium text-[var(--fg)] tabular-nums">
-              {MOCK_TODAY.toLocaleString()}
-            </span>
-            <span className="text-[var(--fg-muted)]">Today</span>
-          </div>
-        </div>
+        )}
 
         {/* Nav */}
         <nav className="flex items-center gap-6 ml-auto">

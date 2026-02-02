@@ -23,7 +23,7 @@ export function Footer() {
               Agents
             </Link>
             <a
-              href="https://github.com/ShipyardAgent"
+              href="https://github.com/LittleShipsAgent"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-[var(--fg)] transition"

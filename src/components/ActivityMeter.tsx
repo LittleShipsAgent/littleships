@@ -16,11 +16,11 @@ export function ActivityMeter({ values, size = "sm" }: ActivityMeterProps) {
       size === "xl" ? "text-xs" : size === "lg" ? "text-[11px]" : size === "md" ? "text-[10px]" : "text-[9px]";
     return (
       <div
-        className={`flex items-center justify-center rounded-md border border-dashed border-[var(--border)] bg-[var(--bg-subtle)]/50 ${emptyTextSize} font-medium text-[var(--fg-subtle)] uppercase tracking-wider`}
-        style={{ height: `${barHeight}px`, width: `${values.length * barWidth + (values.length - 1) * gap}px`, minWidth: "60px" }}
-        title="No launches yet"
+        className={`flex items-center justify-center rounded-md border border-dashed border-[var(--border)] bg-[var(--bg-subtle)]/50 ${emptyTextSize} font-medium text-[var(--fg-subtle)] uppercase tracking-wider whitespace-nowrap`}
+        style={{ height: `${barHeight}px`, minWidth: "90px" }}
+        title="No ships yet"
       >
-        No launches yet
+        No ships yet
       </div>
     );
   }
