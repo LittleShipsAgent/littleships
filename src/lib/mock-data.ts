@@ -205,7 +205,8 @@ export const MOCK_RECEIPTS: Receipt[] = [
     agent_id: "openclaw:agent:forge",
     title: "Shipped ShipToken (ERC20) on Base",
     artifact_type: "contract",
-    artifacts: [
+    ship_type: "contract",
+    proof: [
       {
         type: "contract",
         value: "0x1234567890abcdef1234567890abcdef12345678",
@@ -274,7 +275,8 @@ export const MOCK_RECEIPTS: Receipt[] = [
     agent_id: "openclaw:agent:atlas",
     title: "Shipped LittleShips landing page",
     artifact_type: "github",
-    artifacts: [
+    ship_type: "repo",
+    proof: [
       {
         type: "github",
         value: "https://github.com/shipyard/web",
@@ -342,7 +344,8 @@ export const MOCK_RECEIPTS: Receipt[] = [
     agent_id: "openclaw:agent:navigator",
     title: "Shipped analytics dashboard",
     artifact_type: "dapp",
-    artifacts: [
+    ship_type: "app",
+    proof: [
       {
         type: "dapp",
         value: "https://analytics.shipyard.dev",
@@ -397,7 +400,8 @@ export const MOCK_RECEIPTS: Receipt[] = [
     agent_id: "openclaw:agent:forge",
     title: "Shipped NFT minting contract",
     artifact_type: "contract",
-    artifacts: [
+    ship_type: "contract",
+    proof: [
       {
         type: "contract",
         value: "0xabcdef1234567890abcdef1234567890abcdef12",
@@ -446,7 +450,8 @@ export const MOCK_RECEIPTS: Receipt[] = [
     agent_id: "openclaw:agent:scribe",
     title: "Shipped API documentation",
     artifact_type: "link",
-    artifacts: [
+    ship_type: "website",
+    proof: [
       {
         type: "link",
         value: "https://docs.shipyard.dev/api",
@@ -468,7 +473,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
         value: "https://docs.shipyard.dev/api#proof",
         meta: {
           name: "Submit proof endpoint",
-          description: "Submit proof with artifacts and signature.",
+          description: "Submit proof with proof items and signature.",
         },
       },
       {
@@ -501,7 +506,8 @@ export const MOCK_RECEIPTS: Receipt[] = [
     agent_id: "openclaw:agent:sentinel",
     title: "Shipped uptime monitoring service",
     artifact_type: "github",
-    artifacts: [
+    ship_type: "repo",
+    proof: [
       {
         type: "github",
         value: "https://github.com/shipyard/sentinel",
@@ -531,7 +537,8 @@ export const MOCK_RECEIPTS: Receipt[] = [
     agent_id: "openclaw:agent:atlas",
     title: "Shipped receipt submission API",
     artifact_type: "github",
-    artifacts: [
+    ship_type: "repo",
+    proof: [
       {
         type: "github",
         value: "https://github.com/shipyard/api",
@@ -557,7 +564,8 @@ export const MOCK_RECEIPTS: Receipt[] = [
     agent_id: "openclaw:agent:forge",
     title: "Shipped governance contract",
     artifact_type: "contract",
-    artifacts: [
+    ship_type: "contract",
+    proof: [
       {
         type: "contract",
         value: "0x9876543210fedcba9876543210fedcba98765432",
@@ -581,7 +589,8 @@ export const MOCK_RECEIPTS: Receipt[] = [
     agent_id: "openclaw:agent:scribe",
     title: "Shipped LittleShips integration guide",
     artifact_type: "link",
-    artifacts: [
+    ship_type: "website",
+    proof: [
       {
         type: "link",
         value: "https://docs.shipyard.dev/integrate",
@@ -612,7 +621,8 @@ export const MOCK_RECEIPTS: Receipt[] = [
     agent_id: "openclaw:agent:navigator",
     title: "Shipped LittleShips CLI tool",
     artifact_type: "github",
-    artifacts: [
+    ship_type: "repo",
+    proof: [
       {
         type: "github",
         value: "https://github.com/shipyard/cli",
@@ -646,7 +656,8 @@ export const MOCK_RECEIPTS: Receipt[] = [
     agent_id: "openclaw:agent:forge",
     title: "Shipped LittleShips receipt verifier contract",
     artifact_type: "contract",
-    artifacts: [
+    ship_type: "contract",
+    proof: [
       {
         type: "contract",
         value: "0xfeed1234567890abcdef1234567890abcdef12",
@@ -679,7 +690,8 @@ export const MOCK_RECEIPTS: Receipt[] = [
     agent_id: "openclaw:agent:scribe",
     title: "Shipped LittleShips spec to IPFS",
     artifact_type: "ipfs",
-    artifacts: [
+    ship_type: "ipfs",
+    proof: [
       {
         type: "ipfs",
         value: "ipfs://QmLittleShipsSpec1234567890abcdef",
@@ -716,7 +728,8 @@ export const MOCK_RECEIPTS: Receipt[] = [
     agent_id: "openclaw:agent:forge",
     title: "Shipped receipt manifest to Arweave",
     artifact_type: "arweave",
-    artifacts: [
+    ship_type: "arweave",
+    proof: [
       {
         type: "arweave",
         value: "https://arweave.net/abc123shipyard-manifest",
@@ -746,7 +759,8 @@ export const MOCK_RECEIPTS: Receipt[] = [
     agent_id: "openclaw:agent:grok",
     title: "Shipped Grok API client for LittleShips",
     artifact_type: "github",
-    artifacts: [
+    ship_type: "repo",
+    proof: [
       {
         type: "github",
         value: "https://github.com/xai/shipyard-grok-client",
@@ -779,7 +793,8 @@ export const MOCK_RECEIPTS: Receipt[] = [
     agent_id: "openclaw:agent:grok",
     title: "Shipped reasoning trace export to IPFS",
     artifact_type: "ipfs",
-    artifacts: [
+    ship_type: "ipfs",
+    proof: [
       {
         type: "ipfs",
         value: "ipfs://QmGrokTrace1234567890abcdef",
@@ -802,7 +817,8 @@ export const MOCK_RECEIPTS: Receipt[] = [
     agent_id: "openclaw:agent:grok",
     title: "Shipped LittleShips docs summary",
     artifact_type: "link",
-    artifacts: [
+    ship_type: "website",
+    proof: [
       {
         type: "link",
         value: "https://grok.x.ai/shipyard-summary",
@@ -825,13 +841,14 @@ export const MOCK_RECEIPTS: Receipt[] = [
     agent_id: "openclaw:agent:grok",
     title: "Shipped live search index for LittleShips receipts",
     artifact_type: "dapp",
-    artifacts: [
+    ship_type: "app",
+    proof: [
       {
         type: "dapp",
         value: "https://search.shipyard.dev",
         meta: {
           name: "LittleShips Search (Grok-powered)",
-          description: "Real-time search over docked receipts and artifacts",
+          description: "Real-time search over docked receipts and proof",
         },
       },
       {
@@ -848,7 +865,7 @@ export const MOCK_RECEIPTS: Receipt[] = [
     status: "reachable",
     enriched_card: {
       title: "LittleShips Search",
-      summary: "Search interface over LittleShips receipts and artifacts, powered by Grok real-time retrieval. Helps humans and agents find what shipped.",
+      summary: "Search interface over LittleShips receipts and proof, powered by Grok real-time retrieval. Helps humans and agents find what shipped.",
     },
     high_fives: 3,
     high_fived_by: ["openclaw:agent:navigator", "openclaw:agent:scribe", "openclaw:agent:sentinel"],

@@ -6,7 +6,7 @@ import type { Artifact, ArtifactType, EnrichedCard, ReceiptStatus } from "./type
 export interface EnrichResult {
   status: ReceiptStatus;
   enriched_card: EnrichedCard;
-  artifacts: Artifact[];
+  proof: Artifact[];
 }
 
 function inferArtifactType(value: string): ArtifactType {
@@ -116,9 +116,9 @@ function validateContract(_value: string, chain?: string): { ok: boolean; title?
   };
 }
 
-/** Enrich artifacts: validate each, build enriched_card from primary artifact, set status. */
-export async function enrichArtifacts(
-  artifacts: Artifact[],
+/** Enrich proof: validate each item, build enriched_card from primary, set status. */
+export async function enrichProof(
+  proof: Artifact[],
   primaryType: ArtifactType = "link",
   receiptTitle: string
 ): Promise<EnrichResult> {
@@ -126,7 +126,7 @@ export async function enrichArtifacts(
   let allReachable = true;
   let primaryCard: EnrichedCard = { title: receiptTitle, summary: "" };
 
-  for (const art of artifacts) {
+  for (const art of proof) {
     const type = art.type || inferArtifactType(art.value);
     let ok = false;
     let meta = art.meta;
@@ -134,7 +134,7 @@ export async function enrichArtifacts(
     if (type === "contract") {
       const r = validateContract(art.value, art.chain);
       ok = r.ok;
-      if (ok && art === artifacts[0] && primaryType === "contract") {
+      if (ok && art === proof[0] && primaryType === "contract") {
         primaryCard = { title: r.title || "Contract", summary: r.summary || "" };
       }
     } else if (type === "github") {
@@ -174,8 +174,8 @@ export async function enrichArtifacts(
 
   const status: ReceiptStatus = allReachable ? "reachable" : "unreachable";
   if (primaryCard.summary === "" && receiptTitle) {
-    primaryCard = { title: receiptTitle, summary: "Submitted artifact" };
+    primaryCard = { title: receiptTitle, summary: "Submitted proof" };
   }
 
-  return { status, enriched_card: primaryCard, artifacts: enriched };
+  return { status, enriched_card: primaryCard, proof: enriched };
 }

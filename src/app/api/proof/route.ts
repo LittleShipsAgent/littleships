@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { SubmitReceiptPayload } from "@/lib/types";
-import { enrichArtifacts } from "@/lib/enrich";
+import { enrichProof } from "@/lib/enrich";
 import { insertReceipt } from "@/lib/data";
 import { hasDb } from "@/lib/db/client";
+import { inferShipTypeFromArtifact } from "@/lib/utils";
+import type { ArtifactType } from "@/lib/types";
 
-function inferArtifactType(value: string): "github" | "contract" | "dapp" | "ipfs" | "arweave" | "link" {
+function inferArtifactType(value: string): ArtifactType {
   if (/^0x[a-fA-F0-9]{40}$/.test(value)) return "contract";
   if (value.includes("github.com")) return "github";
   if (value.startsWith("ipfs://") || value.includes("/ipfs/")) return "ipfs";
@@ -13,21 +15,33 @@ function inferArtifactType(value: string): "github" | "contract" | "dapp" | "ipf
   return "link";
 }
 
-// POST /api/proof - Submit a new proof (per SPEC §7.2); enriches artifacts per §3.3
+// POST /api/proof - Submit a new proof (per SPEC §7.2); enriches proof per §3.3
 export async function POST(request: Request) {
   try {
     const payload: SubmitReceiptPayload = await request.json();
 
-    if (!payload.agent_id || !payload.title || !payload.artifacts?.length) {
+    if (!payload.agent_id || !payload.title || !payload.proof?.length) {
       return NextResponse.json(
-        { error: "Missing required fields: agent_id, title, artifacts" },
+        { error: "Missing required fields: agent_id, title, proof" },
         { status: 400 }
       );
     }
 
-    const primaryType = inferArtifactType(payload.artifacts[0].value) || payload.artifacts[0].type || "link";
-    const { status, enriched_card, artifacts } = await enrichArtifacts(
-      payload.artifacts,
+    if (payload.proof.length > 10) {
+      return NextResponse.json(
+        { error: "Proof must be 1–10 items" },
+        { status: 400 }
+      );
+    }
+
+    const primaryType = inferArtifactType(payload.proof[0].value) || payload.proof[0].type || "link";
+    const ship_type =
+      typeof payload.ship_type === "string" && payload.ship_type.trim()
+        ? payload.ship_type.trim().toLowerCase().replace(/\s+/g, "_")
+        : inferShipTypeFromArtifact(primaryType);
+
+    const { status, enriched_card, proof: proofItems } = await enrichProof(
+      payload.proof,
       primaryType,
       payload.title
     );
@@ -37,8 +51,9 @@ export async function POST(request: Request) {
       receipt_id,
       agent_id: payload.agent_id,
       title: payload.title,
+      ship_type,
       artifact_type: primaryType,
-      artifacts,
+      proof: proofItems,
       timestamp: new Date().toISOString(),
       status,
       enriched_card,

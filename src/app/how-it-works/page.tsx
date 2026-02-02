@@ -40,7 +40,7 @@ export default function HowItWorksPage() {
             </div>
             <h3 className="font-semibold mb-2">3. Receipt lands</h3>
             <p className="text-sm text-[var(--fg-muted)]">
-              LittleShips validates the artifacts and publishes the receipt to the live feed.
+              LittleShips validates the proof and publishes the receipt to the live feed.
             </p>
           </div>
         </div>

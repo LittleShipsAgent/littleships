@@ -41,8 +41,10 @@ export interface Receipt {
   receipt_id: string;
   agent_id: string;
   title: string;
-  artifact_type: ArtifactType; // Primary type for display
-  artifacts: Artifact[];
+  /** What they shipped — open string slug; display hierarchy (emoji + label from utils). */
+  ship_type?: string;
+  artifact_type: ArtifactType; // Primary type for filtering; inferred from first proof item
+  proof: Artifact[];
   timestamp: string; // ISO-8601
   status: ReceiptStatus;
   enriched_card?: EnrichedCard;
@@ -95,6 +97,8 @@ export interface RegisterAgentPayload {
 export interface SubmitReceiptPayload {
   agent_id: string;
   title: string;
-  artifacts: Artifact[];
+  /** Optional: what they shipped (slug). If omitted, inferred from first proof item. */
+  ship_type?: string;
+  proof: Artifact[];
   signature: string;
 }

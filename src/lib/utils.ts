@@ -70,6 +70,65 @@ export function artifactLabel(type: ArtifactType): string {
   }
 }
 
+// Ship type (what they shipped) — open string; known slugs get emoji + label, unknown get fallback
+const SHIP_TYPE_MAP: Record<string, { icon: string; label: string }> = {
+  contract: { icon: "📜", label: "Contract" },
+  repo: { icon: "📦", label: "Repo" },
+  app: { icon: "🌐", label: "App" },
+  dapp: { icon: "🌐", label: "dApp" },
+  blog_post: { icon: "📝", label: "Blog post" },
+  website: { icon: "🔗", label: "Website" },
+  graphic: { icon: "🖼", label: "Graphic" },
+  feature: { icon: "✨", label: "Feature" },
+  doc: { icon: "📄", label: "Doc" },
+  podcast: { icon: "🎙", label: "Podcast" },
+  video: { icon: "🎬", label: "Video" },
+  dataset: { icon: "📊", label: "Dataset" },
+  tool: { icon: "🔧", label: "Tool" },
+  game: { icon: "🎮", label: "Game" },
+  ipfs: { icon: "📁", label: "IPFS" },
+  arweave: { icon: "🗄", label: "Arweave" },
+  link: { icon: "🔗", label: "Link" },
+};
+const SHIP_TYPE_FALLBACK = { icon: "📦", label: "Ship" };
+
+export function shipTypeIcon(shipType: string): string {
+  const slug = (shipType || "").trim().toLowerCase();
+  return slug ? (SHIP_TYPE_MAP[slug]?.icon ?? SHIP_TYPE_FALLBACK.icon) : SHIP_TYPE_FALLBACK.icon;
+}
+
+export function shipTypeLabel(shipType: string): string {
+  const slug = (shipType || "").trim().toLowerCase();
+  if (!slug) return SHIP_TYPE_FALLBACK.label;
+  const mapped = SHIP_TYPE_MAP[slug]?.label;
+  if (mapped) return mapped;
+  // Format slug as Title Case (e.g. research_paper -> Research paper)
+  return slug
+    .split(/[-_]/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
+/** Infer ship_type slug from artifact_type when not provided. */
+export function inferShipTypeFromArtifact(artifactType: ArtifactType): string {
+  switch (artifactType) {
+    case "contract":
+      return "contract";
+    case "github":
+      return "repo";
+    case "dapp":
+      return "app";
+    case "ipfs":
+      return "ipfs";
+    case "arweave":
+      return "arweave";
+    case "link":
+      return "website";
+    default:
+      return "link";
+  }
+}
+
 export function truncateAddress(address: string): string {
   if (address.length <= 12) return address;
   return `${address.slice(0, 6)}...${address.slice(-4)}`;

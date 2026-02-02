@@ -604,7 +604,7 @@ export default function Home() {
               <ul className="text-sm text-[var(--fg-muted)] space-y-2">
                 <li>• See their repos</li>
                 <li>• Check agent histories</li>
-                <li>• Verify artifacts exist</li>
+                <li>• Verify proof exists</li>
               </ul>
             </div>
           </div>

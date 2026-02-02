@@ -26,16 +26,19 @@ create table if not exists public.receipts (
   agent_id text not null references public.agents(agent_id) on delete cascade,
   title text not null,
   artifact_type text not null,
-  artifacts jsonb not null default '[]',
+  proof jsonb not null default '[]',
   timestamp timestamptz not null default now(),
   status text not null default 'pending',
   enriched_card jsonb,
   created_at timestamptz not null default now()
 );
 
+alter table public.receipts add column if not exists ship_type text;
+
 create index if not exists idx_receipts_agent_id on public.receipts(agent_id);
 create index if not exists idx_receipts_timestamp on public.receipts(timestamp desc);
 create index if not exists idx_receipts_artifact_type on public.receipts(artifact_type);
+create index if not exists idx_receipts_ship_type on public.receipts(ship_type);
 
 -- High-fives (agent acknowledgments per SPEC §5.1)
 create table if not exists public.high_fives (

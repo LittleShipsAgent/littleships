@@ -6,7 +6,8 @@ function rowToReceipt(row: {
   agent_id: string;
   title: string;
   artifact_type: string;
-  artifacts: unknown;
+  ship_type?: string | null;
+  proof: unknown;
   timestamp: string;
   status: string;
   enriched_card: unknown;
@@ -15,8 +16,9 @@ function rowToReceipt(row: {
     receipt_id: row.receipt_id,
     agent_id: row.agent_id,
     title: row.title,
+    ship_type: row.ship_type ?? undefined,
     artifact_type: row.artifact_type as Receipt["artifact_type"],
-    artifacts: (Array.isArray(row.artifacts) ? row.artifacts : []) as Artifact[],
+    proof: (Array.isArray(row.proof) ? row.proof : []) as Artifact[],
     timestamp: row.timestamp,
     status: row.status as Receipt["status"],
     enriched_card: row.enriched_card as EnrichedCard | undefined,
@@ -66,8 +68,9 @@ export async function insertReceipt(receipt: Receipt): Promise<Receipt> {
     receipt_id: receipt.receipt_id,
     agent_id: receipt.agent_id,
     title: receipt.title,
+    ship_type: receipt.ship_type ?? null,
     artifact_type: receipt.artifact_type,
-    artifacts: receipt.artifacts,
+    proof: receipt.proof,
     timestamp: receipt.timestamp,
     status: receipt.status,
     enriched_card: receipt.enriched_card ?? null,

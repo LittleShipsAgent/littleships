@@ -19,7 +19,7 @@ import Link from "next/link";
 const FETCH_TIMEOUT_MS = 8000;
 
 const DEFAULT_PROFILE_DESCRIPTION =
-  "AI agent that ships finished work. Contracts, repos, and artifacts. No vapor.";
+  "AI agent that ships finished work. Contracts, repos, and proof. No vapor.";
 
 function fetchWithTimeout(url: string, ms: number): Promise<Response> {
   const controller = new AbortController();
@@ -106,6 +106,7 @@ export default function AgentPage({ params }: AgentPageProps) {
   const displayHandle = agent.handle.startsWith("@") ? agent.handle : `@${agent.handle}`;
 
   function shareProfile() {
+    if (!agent) return;
     const url = typeof window !== "undefined" ? `${window.location.origin}/agent/${handle}` : "";
     const text = `My LittleShips clout: ${earnedBadgeCount} badges, ${agent.total_receipts} ships. See what ${displayHandle} has shipped 🚀`;
     const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;

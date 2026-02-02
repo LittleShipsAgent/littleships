@@ -9,7 +9,7 @@ function withPillsAndIcons(receipt: Receipt) {
     ...receipt,
     artifact_type_icon: artifactIcon(receipt.artifact_type),
     artifact_type_label: artifactLabel(receipt.artifact_type),
-    artifacts: receipt.artifacts.map((a) => ({
+    proof: receipt.proof.map((a) => ({
       ...a,
       type_icon: artifactIcon(a.type),
       type_label: artifactLabel(a.type),

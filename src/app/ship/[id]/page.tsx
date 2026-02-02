@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { BotAvatar } from "@/components/BotAvatar";
-import { formatDateTime, truncateAddress, artifactIcon, artifactLabel } from "@/lib/utils";
+import { formatDateTime, truncateAddress, artifactIcon, artifactLabel, shipTypeIcon, shipTypeLabel, inferShipTypeFromArtifact } from "@/lib/utils";
 import type { Receipt, Agent } from "@/lib/types";
 import { MOCK_RECEIPTS, getAgentById } from "@/lib/mock-data";
 
@@ -96,10 +96,18 @@ export default function ShipPage({ params }: ShipPageProps) {
           </span>
         </nav>
 
-        {/* Title */}
-        <h1 className="text-2xl md:text-3xl font-bold text-[var(--fg)] mb-4 leading-tight">
-          {receipt.title}
-        </h1>
+        {/* Ship type + title */}
+        <div className="mb-4">
+          <span className="inline-flex items-center gap-2 text-sm font-medium text-[var(--fg-muted)] uppercase tracking-wider">
+            <span className="text-xl" aria-hidden>
+              {shipTypeIcon(receipt.ship_type ?? inferShipTypeFromArtifact(receipt.artifact_type))}
+            </span>
+            {shipTypeLabel(receipt.ship_type ?? inferShipTypeFromArtifact(receipt.artifact_type))}
+          </span>
+          <h1 className="text-2xl md:text-3xl font-bold text-[var(--fg)] mt-1 leading-tight">
+            {receipt.title}
+          </h1>
+        </div>
 
         {/* Meta — agent, date, status */}
         <div className="mb-8">
@@ -123,7 +131,12 @@ export default function ShipPage({ params }: ShipPageProps) {
                   : "bg-[var(--warning-muted)] text-[var(--warning)]"
               }`}
             >
-              {receipt.status === "reachable" && "Reachable"}
+              {receipt.status === "reachable" && (
+                <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              )}
+              {receipt.status === "reachable" && "Verified"}
               {receipt.status === "unreachable" && "Unreachable"}
               {receipt.status === "pending" && "Pending"}
             </span>
@@ -186,13 +199,13 @@ export default function ShipPage({ params }: ShipPageProps) {
         )}
 
         {/* Changelog — detailed artifact descriptions */}
-        {receipt.artifacts.some((a) => a.meta?.description) && (
+        {receipt.proof.some((a) => a.meta?.description) && (
           <div className="mb-8">
             <h2 className="text-sm font-semibold text-[var(--fg-muted)] uppercase tracking-wider mb-3">
               Changelog
             </h2>
-            <ul className="space-y-2 list-none pl-0 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5">
-              {receipt.artifacts.map(
+            <ul className="space-y-2 list-none rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 pl-6">
+              {receipt.proof.map(
                 (a, i) =>
                   a.meta?.description && (
                     <li key={i} className="flex gap-3 text-sm text-[var(--fg-muted)]">
@@ -208,13 +221,13 @@ export default function ShipPage({ params }: ShipPageProps) {
           </div>
         )}
 
-        {/* Artifacts — link cards */}
+        {/* Proof — link cards */}
         <div className="mb-8">
           <h2 className="text-sm font-semibold text-[var(--fg-muted)] uppercase tracking-wider mb-4">
-            Artifacts ({receipt.artifacts.length})
+            Proof ({receipt.proof.length})
           </h2>
           <div className="space-y-3">
-            {receipt.artifacts.map((artifact, i) => (
+            {receipt.proof.map((artifact, i) => (
               <a
                 key={i}
                 href={artifact.value}
