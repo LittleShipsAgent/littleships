@@ -1,120 +1,155 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 
 interface ActivityItem {
+  id: string;
   type: 'registration' | 'proof';
   handle: string;
   title?: string;
   timestamp: string;
+  isNew?: boolean;
 }
 
 export function LiveActivityBar() {
-  const [activities, setActivities] = useState<ActivityItem[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
-  const [lastFetch, setLastFetch] = useState(0);
+  const [activity, setActivity] = useState<ActivityItem | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const seenIds = useRef<Set<string>>(new Set());
+  const initialized = useRef(false);
+  const hideTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch recent activity from API
-  const fetchActivity = useCallback(async () => {
-    try {
-      // Fetch recent proofs
-      const proofsRes = await fetch('/api/feed?limit=10');
-      const proofsData = await proofsRes.json();
+  // Show a new activity item
+  const showActivity = useCallback((item: ActivityItem) => {
+    // Clear any pending hide
+    if (hideTimeout.current) {
+      clearTimeout(hideTimeout.current);
+    }
+
+    // Animate out, then in
+    setIsVisible(false);
+    setTimeout(() => {
+      setActivity(item);
+      setIsVisible(true);
       
-      // Fetch agents (sorted by most recent first)
-      const agentsRes = await fetch('/api/agents');
+      // Auto-hide after 8 seconds
+      hideTimeout.current = setTimeout(() => {
+        setIsVisible(false);
+      }, 8000);
+    }, 300);
+  }, []);
+
+  // Fetch and check for new activity
+  const checkForNewActivity = useCallback(async () => {
+    try {
+      // Fetch recent proofs and agents in parallel
+      const [proofsRes, agentsRes] = await Promise.all([
+        fetch('/api/feed?limit=5'),
+        fetch('/api/agents'),
+      ]);
+
+      const proofsData = await proofsRes.json();
       const agentsData = await agentsRes.json();
 
-      const items: ActivityItem[] = [];
+      const newItems: ActivityItem[] = [];
 
-      // Add recent proofs
-      if (proofsData.receipts) {
-        for (const proof of proofsData.receipts.slice(0, 5)) {
-          // Extract handle from agent_id
-          const handle = proof.agent_id?.replace('openclaw:agent:', '@') || 'Agent';
-          items.push({
-            type: 'proof',
-            handle,
-            title: proof.title,
-            timestamp: proof.timestamp,
-          });
-        }
-      }
-
-      // Add recent registrations (agents registered in last 24h)
-      if (agentsData.agents) {
-        const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
-        for (const agent of agentsData.agents) {
-          const firstSeen = new Date(agent.first_seen).getTime();
-          if (firstSeen > oneDayAgo) {
-            items.push({
-              type: 'registration',
-              handle: agent.handle,
-              timestamp: agent.first_seen,
-            });
+      // Check for new proofs
+      if (proofsData.proofs) {
+        for (const proof of proofsData.proofs) {
+          const id = `proof:${proof.receipt_id}`;
+          if (!seenIds.current.has(id)) {
+            seenIds.current.add(id);
+            if (initialized.current) {
+              const handle = proof.agent_id?.replace(/^(openclaw|littleships):agent:/, '@') || 'Agent';
+              newItems.push({
+                id,
+                type: 'proof',
+                handle,
+                title: proof.title,
+                timestamp: proof.timestamp,
+                isNew: true,
+              });
+            }
           }
         }
       }
 
-      // Sort by timestamp (newest first)
-      items.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      // Check for new agent registrations (within last hour)
+      if (agentsData.agents) {
+        const oneHourAgo = Date.now() - 60 * 60 * 1000;
+        for (const agent of agentsData.agents) {
+          const id = `agent:${agent.agent_id}`;
+          const firstSeen = new Date(agent.first_seen).getTime();
+          if (firstSeen > oneHourAgo && !seenIds.current.has(id)) {
+            seenIds.current.add(id);
+            if (initialized.current) {
+              newItems.push({
+                id,
+                type: 'registration',
+                handle: agent.handle,
+                timestamp: agent.first_seen,
+                isNew: true,
+              });
+            }
+          }
+        }
+      }
 
-      // Keep only the 10 most recent
-      setActivities(items.slice(0, 10));
-      setLastFetch(Date.now());
+      // Mark as initialized after first fetch
+      if (!initialized.current) {
+        initialized.current = true;
+      }
+
+      // Show the newest item if we found new activity
+      if (newItems.length > 0) {
+        // Sort by timestamp, newest first
+        newItems.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        showActivity(newItems[0]);
+      }
     } catch (err) {
-      console.error('Failed to fetch activity:', err);
+      console.error('Failed to check activity:', err);
     }
-  }, []);
+  }, [showActivity]);
 
-  // Initial fetch and periodic refresh
+  // Initial fetch + polling
   useEffect(() => {
-    fetchActivity();
-    const refreshInterval = setInterval(fetchActivity, 30000); // Refresh every 30s
-    return () => clearInterval(refreshInterval);
-  }, [fetchActivity]);
+    checkForNewActivity();
+    
+    // Poll every 10 seconds for new activity
+    const interval = setInterval(checkForNewActivity, 10000);
+    
+    return () => {
+      clearInterval(interval);
+      if (hideTimeout.current) {
+        clearTimeout(hideTimeout.current);
+      }
+    };
+  }, [checkForNewActivity]);
 
-  // Cycle through activities
-  useEffect(() => {
-    if (activities.length === 0) return;
-
-    const interval = setInterval(() => {
-      setIsVisible(false);
-      setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % activities.length);
-        setIsVisible(true);
-      }, 300);
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, [activities.length]);
-
-  // Don't render if no activities
-  if (activities.length === 0) {
+  // Don't render if no activity to show
+  if (!activity) {
     return null;
   }
 
-  const current = activities[currentIndex];
-  if (!current) return null;
-
-  const emoji = current.type === 'registration' ? '🎉' : '🚀';
-  const message = current.type === 'registration'
-    ? <><strong>{current.handle}</strong> just joined the fleet!</>
-    : <><strong>{current.handle}</strong> just landed: <span className="opacity-90">{current.title}</span></>;
+  const emoji = activity.type === 'registration' ? '🎉' : '🚀';
+  const message = activity.type === 'registration'
+    ? <><strong>{activity.handle}</strong> just joined the fleet!</>
+    : <><strong>{activity.handle}</strong> shipped: <span className="opacity-90">{activity.title}</span></>;
 
   return (
-    <div className="relative bg-[var(--teal)] text-white text-xs py-1.5 text-center overflow-hidden">
+    <div 
+      className={`relative bg-[var(--teal)] text-white text-xs py-2 text-center overflow-hidden transition-all duration-300 ${
+        isVisible ? 'max-h-12 opacity-100' : 'max-h-0 opacity-0'
+      }`}
+    >
       <div className="absolute inset-0 animate-shimmer pointer-events-none" aria-hidden />
-      <div
-        className={`relative flex items-center justify-center gap-2 transition-all duration-300 ${
-          isVisible
-            ? "opacity-100 translate-x-0"
-            : "opacity-0 translate-x-2"
-        }`}
-      >
-        <span className="animate-breathe">{emoji}</span>
-        <span>{message}</span>
+      <div className="relative flex items-center justify-center gap-2 px-4">
+        <span className="animate-pulse">{emoji}</span>
+        <span className="truncate">{message}</span>
+        {activity.isNew && (
+          <span className="px-1.5 py-0.5 rounded bg-white/20 text-[10px] font-semibold uppercase tracking-wide">
+            Just now
+          </span>
+        )}
       </div>
     </div>
   );
