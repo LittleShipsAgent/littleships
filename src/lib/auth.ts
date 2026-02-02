@@ -1,28 +1,189 @@
 /**
  * Signature verification for registration and proof submission.
- * Stub: returns true until OpenClaw verification spec is integrated.
- * When spec is available, implement verifyRegistrationSignature and verifyProofSignature
- * using the agent's public_key and the expected message format.
+ * Uses Ed25519 (via Web Crypto API) for public key signatures.
  */
 
-// TODO: Implement using OpenClaw verification spec when available.
-// Expected: verify that signature was produced by private key corresponding to public_key
-// over a well-defined message (e.g. hash of payload fields).
+// Convert base64 to Uint8Array
+function base64ToBytes(base64: string): Uint8Array<ArrayBuffer> {
+  const binary = atob(base64.replace(/-/g, '+').replace(/_/g, '/'));
+  const buffer = new ArrayBuffer(binary.length);
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
 
-export function verifyRegistrationSignature(_payload: {
+// Convert hex to Uint8Array
+function hexToBytes(hex: string): Uint8Array<ArrayBuffer> {
+  const buffer = new ArrayBuffer(hex.length / 2);
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < hex.length; i += 2) {
+    bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+  }
+  return bytes;
+}
+
+// Normalize key input (accepts hex, base64, or raw)
+function normalizeKey(key: string): Uint8Array<ArrayBuffer> {
+  const cleaned = key.replace(/^0x/, '').replace(/^ed25519:/, '');
+  
+  // Try hex first (64 chars = 32 bytes for Ed25519 public key)
+  if (/^[a-fA-F0-9]{64}$/.test(cleaned)) {
+    return hexToBytes(cleaned);
+  }
+  
+  // Try base64 (43-44 chars for 32 bytes)
+  return base64ToBytes(cleaned);
+}
+
+// Normalize signature input
+function normalizeSignature(sig: string): Uint8Array<ArrayBuffer> {
+  const cleaned = sig.replace(/^0x/, '');
+  
+  // Hex (128 chars = 64 bytes for Ed25519 signature)
+  if (/^[a-fA-F0-9]{128}$/.test(cleaned)) {
+    return hexToBytes(cleaned);
+  }
+  
+  // Base64
+  return base64ToBytes(cleaned);
+}
+
+// Simple hash for message components
+function simpleHash(str: string): string {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash).toString(16).padStart(8, '0');
+}
+
+/**
+ * Verify an Ed25519 signature using Web Crypto API
+ */
+async function verifySignature(
+  message: string,
+  signature: string,
+  publicKey: string
+): Promise<boolean> {
+  try {
+    const keyBytes = normalizeKey(publicKey);
+    const sigBytes = normalizeSignature(signature);
+    const messageBytes = new TextEncoder().encode(message);
+
+    const key = await crypto.subtle.importKey(
+      'raw',
+      keyBytes,
+      { name: 'Ed25519' },
+      false,
+      ['verify']
+    );
+
+    return await crypto.subtle.verify(
+      'Ed25519',
+      key,
+      sigBytes,
+      messageBytes
+    );
+  } catch (error) {
+    console.error('Signature verification error:', error);
+    return false;
+  }
+}
+
+// Signature verification is now enabled.
+// Clients must sign payloads with Ed25519 keys.
+const SIGNATURE_VERIFICATION_ENABLED = true;
+
+// Maximum age for timestamps (5 minutes)
+const MAX_TIMESTAMP_AGE_MS = 5 * 60 * 1000;
+
+/**
+ * Verify registration signature.
+ * Message format: "register:<handle>:<timestamp>"
+ */
+export async function verifyRegistrationSignature(payload: {
   handle?: string;
   public_key: string;
   signature: string;
-}): boolean {
-  // Stub: accept all. Replace with real verification when OpenClaw spec is available.
-  return true;
+  timestamp?: number;
+}): Promise<boolean> {
+  // If verification disabled, accept all (for backward compatibility)
+  if (!SIGNATURE_VERIFICATION_ENABLED) {
+    return true;
+  }
+
+  if (!payload.handle || !payload.public_key || !payload.signature) {
+    return false;
+  }
+
+  // Validate timestamp if provided
+  if (payload.timestamp) {
+    const now = Date.now();
+    if (Math.abs(now - payload.timestamp) > MAX_TIMESTAMP_AGE_MS) {
+      console.warn('Registration timestamp too old or in future');
+      return false;
+    }
+  }
+
+  const handle = payload.handle.replace(/^@/, '');
+  const message = `register:${handle}:${payload.timestamp || 0}`;
+  
+  return verifySignature(message, payload.signature, payload.public_key);
 }
 
-export function verifyProofSignature(
-  _payload: { agent_id: string; title: string; proof: unknown; signature: string },
-  _agentPublicKey: string | undefined
-): boolean {
-  // Stub: accept all. Replace with real verification when OpenClaw spec is available.
-  // When agent has no public_key, stub allows; you may reject with 401 if required.
-  return true;
+/**
+ * Verify proof submission signature.
+ * Message format: "proof:<agent_id>:<title_hash>:<proof_hash>:<timestamp>"
+ */
+export async function verifyProofSignature(
+  payload: { 
+    agent_id: string; 
+    title: string; 
+    proof: unknown; 
+    signature: string;
+    timestamp?: number;
+  },
+  agentPublicKey: string | undefined
+): Promise<boolean> {
+  // If verification disabled, accept all (for backward compatibility)
+  if (!SIGNATURE_VERIFICATION_ENABLED) {
+    return true;
+  }
+
+  if (!agentPublicKey) {
+    console.warn('Agent has no public key, cannot verify signature');
+    return false;
+  }
+
+  if (!payload.signature) {
+    return false;
+  }
+
+  // Validate timestamp if provided
+  if (payload.timestamp) {
+    const now = Date.now();
+    if (Math.abs(now - payload.timestamp) > MAX_TIMESTAMP_AGE_MS) {
+      console.warn('Proof timestamp too old or in future');
+      return false;
+    }
+  }
+
+  const titleHash = simpleHash(payload.title);
+  const proofHash = simpleHash(JSON.stringify(payload.proof));
+  const message = `proof:${payload.agent_id}:${titleHash}:${proofHash}:${payload.timestamp || 0}`;
+
+  return verifySignature(message, payload.signature, agentPublicKey);
+}
+
+/**
+ * Check if a timestamp is fresh (within allowed window)
+ */
+export function isTimestampFresh(timestamp: number | undefined): boolean {
+  if (!timestamp) return true; // No timestamp = no check (backward compat)
+  const now = Date.now();
+  return Math.abs(now - timestamp) <= MAX_TIMESTAMP_AGE_MS;
 }

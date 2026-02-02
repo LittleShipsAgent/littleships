@@ -6,6 +6,8 @@ import { hasDb } from "@/lib/db/client";
 import { inferShipTypeFromArtifact } from "@/lib/utils";
 import { verifyProofSignature } from "@/lib/auth";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
+import { sanitizeTitle, detectPromptInjection } from "@/lib/sanitize";
+import { isUrlSafe } from "@/lib/url-security";
 import type { ArtifactType } from "@/lib/types";
 
 // Input length limits
@@ -51,8 +53,24 @@ export async function POST(request: Request) {
       );
     }
 
+    // Sanitize title
+    const titleResult = sanitizeTitle(payload.title);
+    if (!titleResult.clean) {
+      return NextResponse.json(
+        { error: "Invalid title" },
+        { status: 400 }
+      );
+    }
+    const sanitizedTitle = titleResult.clean;
+
+    // Check for prompt injection in title
+    const titleInjections = detectPromptInjection(payload.title);
+    if (titleInjections.length > 0) {
+      console.warn(`Potential prompt injection in proof title from ${payload.agent_id}:`, titleInjections);
+    }
+
     // Input length validation
-    if (payload.title.length > MAX_TITLE_LENGTH) {
+    if (sanitizedTitle.length > MAX_TITLE_LENGTH) {
       return NextResponse.json(
         { error: `Title must be ${MAX_TITLE_LENGTH} characters or less` },
         { status: 400 }
@@ -66,13 +84,25 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate proof item lengths
-    for (const item of payload.proof) {
+    // Validate proof item lengths and URLs
+    for (let i = 0; i < payload.proof.length; i++) {
+      const item = payload.proof[i];
       if (item.value && item.value.length > MAX_PROOF_VALUE_LENGTH) {
         return NextResponse.json(
           { error: "Proof value too long" },
           { status: 400 }
         );
+      }
+      // Validate URLs (except contracts and IPFS/Arweave)
+      const type = inferArtifactType(item.value);
+      if (type !== 'contract' && !item.value.startsWith('ipfs://') && !item.value.startsWith('ar://')) {
+        const urlCheck = isUrlSafe(item.value);
+        if (!urlCheck.safe) {
+          return NextResponse.json(
+            { error: `Proof item ${i + 1} URL blocked: ${urlCheck.reason}` },
+            { status: 400 }
+          );
+        }
       }
     }
 
@@ -95,7 +125,9 @@ export async function POST(request: Request) {
         { status: 404 }
       );
     }
-    if (!verifyProofSignature(payload, agent.public_key)) {
+    // Verify signature (async)
+    const sigValid = await verifyProofSignature(payload, agent.public_key);
+    if (!sigValid) {
       return NextResponse.json(
         { error: "Invalid signature" },
         { status: 401 }
@@ -111,7 +143,7 @@ export async function POST(request: Request) {
     const { status, enriched_card, proof: proofItems } = await enrichProof(
       payload.proof,
       primaryType,
-      payload.title
+      sanitizedTitle
     );
 
     const receipt_id = `SHP-${crypto.randomUUID()}`;
@@ -121,7 +153,7 @@ export async function POST(request: Request) {
     const proof = {
       receipt_id,
       agent_id: payload.agent_id,
-      title: payload.title,
+      title: sanitizedTitle,
       ship_type,
       artifact_type: primaryType,
       proof: proofItems,
@@ -135,8 +167,9 @@ export async function POST(request: Request) {
       try {
         await insertReceipt(proof);
       } catch (err) {
+        console.error("Proof storage error:", err);
         return NextResponse.json(
-          { error: err instanceof Error ? err.message : "Failed to store proof" },
+          { error: "Failed to store proof" },
           { status: 500 }
         );
       }

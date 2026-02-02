@@ -3,6 +3,7 @@
 
 import type { Artifact, ArtifactType, EnrichedCard, ReceiptStatus } from "./types";
 import { isUrlSafe, safeFetch } from "./url-security";
+import { sanitizeScrapedContent } from "./sanitize";
 
 export interface EnrichResult {
   status: ReceiptStatus;
@@ -48,19 +49,42 @@ async function validateUrl(url: string): Promise<UrlPreview> {
     if (!res.ok) return { ok: false };
     const getRes = await safeFetch(url, { signal: AbortSignal.timeout(5000) });
     const html = await getRes.text();
-    const baseUrl = new URL(url).origin + "/";
+    
+    // Extract and sanitize metadata
     const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i) || html.match(/<meta[^>]+property="og:title"[^>]+content="([^"]+)"/i);
     const descMatch = html.match(/<meta[^>]+name="description"[^>]+content="([^"]+)"/i) || html.match(/<meta[^>]+property="og:description"[^>]+content="([^"]+)"/i);
     const ogImage = html.match(/<meta[^>]+property="og:image"[^>]+content="([^"]+)"/i);
-    const imageUrl = ogImage ? resolveUrl(url, ogImage[1].trim()) : undefined;
     const faviconMatch = html.match(/<link[^>]+rel="(?:shortcut )?icon"[^>]+href="([^"]+)"/i) || html.match(/<link[^>]+href="([^"]+)"[^>]+rel="(?:shortcut )?icon"/i);
-    const favicon = faviconMatch ? resolveUrl(url, faviconMatch[1].trim()) : undefined;
+    
+    // Resolve and validate image URLs
+    let imageUrl: string | undefined;
+    if (ogImage) {
+      const resolved = resolveUrl(url, ogImage[1].trim());
+      const imgCheck = isUrlSafe(resolved);
+      if (imgCheck.safe && resolved.startsWith("http")) {
+        imageUrl = resolved;
+      }
+    }
+    
+    let favicon: string | undefined;
+    if (faviconMatch) {
+      const resolved = resolveUrl(url, faviconMatch[1].trim());
+      const favCheck = isUrlSafe(resolved);
+      if (favCheck.safe && resolved.startsWith("http")) {
+        favicon = resolved;
+      }
+    }
+
+    // Sanitize scraped text content
+    const title = titleMatch ? sanitizeScrapedContent(titleMatch[1]).clean.slice(0, 120) : undefined;
+    const description = descMatch ? sanitizeScrapedContent(descMatch[1]).clean.slice(0, 200) : undefined;
+
     return {
       ok: true,
-      title: titleMatch ? titleMatch[1].trim().slice(0, 120) : undefined,
-      description: descMatch ? descMatch[1].trim().slice(0, 200) : undefined,
-      imageUrl: imageUrl?.startsWith("http") ? imageUrl : undefined,
-      favicon: favicon?.startsWith("http") ? favicon : undefined,
+      title: title || undefined,
+      description: description || undefined,
+      imageUrl,
+      favicon,
     };
   } catch {
     return { ok: false };
@@ -81,12 +105,18 @@ async function validateGitHub(url: string): Promise<GitHubPreview> {
     const match = url.match(/github\.com\/([^/]+)\/([^/]+?)(?:\/|$)/);
     if (!match) return { ok: false };
     const [, owner, repo] = match;
+    
+    // Sanitize owner/repo to prevent injection
+    const safeOwner = owner.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40);
+    const safeRepo = repo.replace(/[^a-zA-Z0-9_.-]/g, '').slice(0, 100);
+    if (!safeOwner || !safeRepo) return { ok: false };
+
     const [repoRes, ownerRes] = await Promise.all([
-      fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+      fetch(`https://api.github.com/repos/${safeOwner}/${safeRepo}`, {
         headers: { Accept: "application/vnd.github.v3+json" },
         signal: AbortSignal.timeout(6000),
       }),
-      fetch(`https://api.github.com/users/${owner}`, {
+      fetch(`https://api.github.com/users/${safeOwner}`, {
         headers: { Accept: "application/vnd.github.v3+json" },
         signal: AbortSignal.timeout(6000),
       }),
@@ -94,19 +124,37 @@ async function validateGitHub(url: string): Promise<GitHubPreview> {
     if (!repoRes.ok) return { ok: false };
     const data = (await repoRes.json()) as { name?: string; full_name?: string; description?: string; stargazers_count?: number; forks_count?: number; language?: string; owner?: { avatar_url?: string } };
     const ownerData = ownerRes.ok ? ((await ownerRes.json()) as { avatar_url?: string }) : null;
-    const imageUrl = ownerData?.avatar_url ?? data.owner?.avatar_url;
+    
+    // Validate avatar URL
+    let imageUrl: string | undefined;
+    const avatarUrl = ownerData?.avatar_url ?? data.owner?.avatar_url;
+    if (avatarUrl) {
+      const avatarCheck = isUrlSafe(avatarUrl);
+      if (avatarCheck.safe) {
+        imageUrl = avatarUrl;
+      }
+    }
+    if (!imageUrl) {
+      imageUrl = `https://github.com/${safeOwner}.png`;
+    }
+
+    // Sanitize description
+    const sanitizedDesc = data.description 
+      ? sanitizeScrapedContent(data.description).clean 
+      : undefined;
+
     return {
       ok: true,
-      name: data.full_name || data.name || `${owner}/${repo}`,
-      description: data.description?.slice(0, 200) || undefined,
+      name: data.full_name || data.name || `${safeOwner}/${safeRepo}`,
+      description: sanitizedDesc?.slice(0, 200) || undefined,
       meta: {
-        name: data.full_name || `${owner}/${repo}`,
-        description: data.description || undefined,
+        name: data.full_name || `${safeOwner}/${safeRepo}`,
+        description: sanitizedDesc || undefined,
         stars: data.stargazers_count,
         forks: data.forks_count,
         language: data.language ?? undefined,
       },
-      imageUrl: imageUrl ?? `https://github.com/${owner}.png`,
+      imageUrl,
       favicon: "https://github.com/favicon.ico",
     };
   } catch {
