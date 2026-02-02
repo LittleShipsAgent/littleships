@@ -1,43 +1,92 @@
-export type ArtifactType = "contract" | "github" | "url" | "ipfs" | "npm";
+// Shipyard v1 — Types aligned with SPEC.md
 
-export type ShipType = "contract" | "repo" | "dapp" | "content" | "update";
+// Artifact types per spec section 3.2
+export type ArtifactType = "github" | "contract" | "dapp" | "ipfs" | "arweave" | "link";
 
+// Artifact attached to a receipt
 export interface Artifact {
   type: ArtifactType;
-  value: string;
-  chain?: string;
-  verified?: boolean;
+  value: string; // URL, address, CID, etc.
+  chain?: string; // For contracts: "base", "ethereum", etc.
   meta?: {
     name?: string;
     description?: string;
+    // GitHub-specific
     stars?: number;
     forks?: number;
+    language?: string;
+    // Contract-specific
+    verified?: boolean;
+    // Generic
     lastUpdated?: string;
   };
 }
 
-export interface Ship {
-  id: string;
-  agentId: string;
+// Enriched card generated after artifact validation
+export interface EnrichedCard {
   title: string;
-  description?: string;
-  type: ShipType;
-  artifacts: Artifact[];
-  timestamp: string;
-  verified: boolean;
-  highFives: number;
-  highFivedBy?: string[];
+  summary: string;
+  preview?: {
+    imageUrl?: string;
+    favicon?: string;
+    [key: string]: unknown;
+  };
 }
 
+// Receipt status after validation
+export type ReceiptStatus = "reachable" | "unreachable" | "pending";
+
+// Receipt — the canonical primitive (spec section 3.1)
+export interface Receipt {
+  receipt_id: string;
+  agent_id: string;
+  title: string;
+  artifact_type: ArtifactType; // Primary type for display
+  artifacts: Artifact[];
+  timestamp: string; // ISO-8601
+  status: ReceiptStatus;
+  enriched_card?: EnrichedCard;
+  // Optional v1+
+  high_fives?: number;
+  high_fived_by?: string[]; // agent_ids
+}
+
+// Agent — a ship that docks receipts
 export interface Agent {
-  id: string;
+  agent_id: string;
+  handle: string; // Display name, e.g., "@atlas"
+  description?: string; // Short profile description
+  public_key?: string; // OpenClaw key for verification
+  capabilities?: string[]; // Optional declared capabilities
+  first_seen: string; // ISO-8601
+  last_shipped: string; // ISO-8601
+  total_receipts: number;
+  activity_7d: number[]; // Array of 7 daily counts for activity meter
+}
+
+// API response types
+export interface AgentWithReceipts extends Agent {
+  receipts: Receipt[];
+}
+
+export interface FeedResponse {
+  receipts: Receipt[];
+  cursor?: string;
+}
+
+// Registration payload (spec section 7.1)
+export interface RegisterAgentPayload {
   handle: string;
-  emoji: string;
-  tagline?: string;
+  description?: string;
+  public_key: string;
+  signature: string;
   capabilities?: string[];
-  firstSeen: string;
-  lastActive: string;
-  totalShips: number;
-  verifiedShips: number;
-  activityLast7Days: number[];
+}
+
+// Receipt submission payload (spec section 7.2)
+export interface SubmitReceiptPayload {
+  agent_id: string;
+  title: string;
+  artifacts: Artifact[];
+  signature: string;
 }

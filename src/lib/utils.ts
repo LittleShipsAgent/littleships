@@ -1,4 +1,4 @@
-import { ShipType, ArtifactType } from "./types";
+import { ArtifactType } from "./types";
 
 export function timeAgo(iso: string): string {
   const ms = Date.now() - new Date(iso).getTime();
@@ -14,52 +14,38 @@ export function timeAgo(iso: string): string {
   return `${w}w ago`;
 }
 
-export function shipTypeIcon(type: ShipType): string {
-  switch (type) {
-    case "contract":
-      return "📜";
-    case "repo":
-      return "📦";
-    case "dapp":
-      return "🌐";
-    case "content":
-      return "📄";
-    case "update":
-      return "🔄";
-    default:
-      return "📎";
-  }
+export function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
-export function shipTypeLabel(type: ShipType): string {
-  switch (type) {
-    case "contract":
-      return "Smart Contract";
-    case "repo":
-      return "Repository";
-    case "dapp":
-      return "dApp";
-    case "content":
-      return "Content";
-    case "update":
-      return "Update";
-    default:
-      return "Ship";
-  }
+export function formatDateTime(iso: string): string {
+  return new Date(iso).toLocaleString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export function artifactIcon(type: ArtifactType): string {
   switch (type) {
     case "contract":
-      return "⛓️";
+      return "📜";
     case "github":
-      return "🐙";
-    case "url":
-      return "🔗";
-    case "ipfs":
-      return "📌";
-    case "npm":
       return "📦";
+    case "dapp":
+      return "🌐";
+    case "ipfs":
+      return "📁";
+    case "arweave":
+      return "🗄️";
+    case "link":
+      return "🔗";
     default:
       return "📎";
   }
@@ -70,15 +56,17 @@ export function artifactLabel(type: ArtifactType): string {
     case "contract":
       return "Contract";
     case "github":
-      return "GitHub";
-    case "url":
-      return "URL";
+      return "Repo";
+    case "dapp":
+      return "dApp";
     case "ipfs":
       return "IPFS";
-    case "npm":
-      return "npm";
-    default:
+    case "arweave":
+      return "Arweave";
+    case "link":
       return "Link";
+    default:
+      return "Artifact";
   }
 }
 
@@ -98,4 +86,31 @@ export function truncateUrl(url: string): string {
 
 export function cn(...classes: (string | undefined | false)[]): string {
   return classes.filter(Boolean).join(" ");
+}
+
+// Group receipts into bursts (within 2 hours of each other)
+export function groupIntoBursts<T extends { timestamp: string }>(
+  items: T[],
+  maxGapMs: number = 2 * 60 * 60 * 1000 // 2 hours
+): T[][] {
+  if (items.length === 0) return [];
+  
+  const sorted = [...items].sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  );
+  
+  const bursts: T[][] = [[sorted[0]]];
+  
+  for (let i = 1; i < sorted.length; i++) {
+    const current = new Date(sorted[i].timestamp).getTime();
+    const previous = new Date(sorted[i - 1].timestamp).getTime();
+    
+    if (previous - current <= maxGapMs) {
+      bursts[bursts.length - 1].push(sorted[i]);
+    } else {
+      bursts.push([sorted[i]]);
+    }
+  }
+  
+  return bursts;
 }

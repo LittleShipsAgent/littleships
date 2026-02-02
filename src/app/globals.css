@@ -1,42 +1,42 @@
 @import "tailwindcss";
 
 :root {
-  --font-inter: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  
-  /* Dark theme (default) */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* Dark theme (default) — dock / water feel */
   --bg: #0a0a0a;
-  --bg-subtle: #111111;
-  --bg-muted: #1a1a1a;
-  --fg: #ffffff;
-  --fg-muted: rgba(255, 255, 255, 0.6);
-  --fg-subtle: rgba(255, 255, 255, 0.4);
-  --border: rgba(255, 255, 255, 0.1);
-  --border-hover: rgba(255, 255, 255, 0.2);
-  --card: rgba(255, 255, 255, 0.03);
-  --card-hover: rgba(255, 255, 255, 0.05);
-  --accent: #3b82f6;
-  --accent-muted: rgba(59, 130, 246, 0.2);
-  --success: #22c55e;
-  --success-muted: rgba(34, 197, 94, 0.2);
+  --bg-subtle: #0f1419;
+  --bg-muted: #151c24;
+  --fg: #f0f4f8;
+  --fg-muted: rgba(240, 244, 248, 0.65);
+  --fg-subtle: rgba(240, 244, 248, 0.45);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.15);
+  --card: rgba(255, 255, 255, 0.04);
+  --card-hover: rgba(255, 255, 255, 0.07);
+  --accent: #e63946;
+  --accent-muted: rgba(230, 57, 70, 0.2);
+  --success: #e63946;
+  --success-muted: rgba(230, 57, 70, 0.2);
   --warning: #eab308;
   --warning-muted: rgba(234, 179, 8, 0.2);
 }
 
 [data-theme="light"] {
-  --bg: #fafafa;
-  --bg-subtle: #f5f5f5;
-  --bg-muted: #eeeeee;
-  --fg: #0a0a0a;
-  --fg-muted: rgba(10, 10, 10, 0.7);
-  --fg-subtle: rgba(10, 10, 10, 0.5);
-  --border: rgba(0, 0, 0, 0.1);
-  --border-hover: rgba(0, 0, 0, 0.2);
-  --card: rgba(0, 0, 0, 0.02);
-  --card-hover: rgba(0, 0, 0, 0.04);
-  --accent: #2563eb;
-  --accent-muted: rgba(37, 99, 235, 0.1);
-  --success: #16a34a;
-  --success-muted: rgba(22, 163, 74, 0.1);
+  --bg: #f8fafc;
+  --bg-subtle: #f1f5f9;
+  --bg-muted: #e2e8f0;
+  --fg: #0f172a;
+  --fg-muted: rgba(15, 23, 42, 0.72);
+  --fg-subtle: rgba(15, 23, 42, 0.55);
+  --border: rgba(0, 0, 0, 0.08);
+  --border-hover: rgba(0, 0, 0, 0.15);
+  --card: #ffffff;
+  --card-hover: rgba(0, 0, 0, 0.02);
+  --accent: #c1121f;
+  --accent-muted: rgba(193, 18, 31, 0.12);
+  --success: #c1121f;
+  --success-muted: rgba(193, 18, 31, 0.12);
   --warning: #ca8a04;
   --warning-muted: rgba(202, 138, 4, 0.1);
 }
@@ -44,7 +44,7 @@
 body {
   background: var(--bg);
   color: var(--fg);
-  font-family: var(--font-inter);
+  font-family: var(--font-sans);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -84,10 +84,10 @@ body {
 /* Glow animation */
 @keyframes glow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 20px rgba(230, 57, 70, 0.25);
   }
   50% {
-    box-shadow: 0 0 40px rgba(59, 130, 246, 0.5);
+    box-shadow: 0 0 40px rgba(230, 57, 70, 0.4);
   }
 }
 
@@ -95,11 +95,11 @@ body {
   animation: glow 3s ease-in-out infinite;
 }
 
-/* Slide in animation */
+/* Slide in animation — arrival, not celebration (SPEC §8) */
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(14px);
   }
   to {
     opacity: 1;
@@ -108,7 +108,66 @@ body {
 }
 
 .animate-slide-in {
-  animation: slideIn 0.3s ease-out;
+  animation: slideIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* New card added — brief highlight (green), runs once */
+@keyframes newCardAdded {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.3);
+    transform: scale(0.99);
+  }
+  25% {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.35);
+    transform: scale(1.01);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+    transform: scale(1);
+  }
+}
+
+.animate-new-card {
+  animation: newCardAdded 1s ease-out forwards;
+}
+
+/* Live / breathing — subtle pulse so indicators feel alive */
+@keyframes breathe {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.95);
+  }
+}
+
+.animate-breathe {
+  animation: breathe 2.5s ease-in-out infinite;
+}
+
+/* Shimmer for live bar — overlay only, use on a child over solid bg */
+@keyframes shimmer {
+  0% {
+    background-position: -120% 0;
+  }
+  100% {
+    background-position: 220% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 45%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.06) 55%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 4s ease-in-out infinite;
 }
 
 /* Text truncation */

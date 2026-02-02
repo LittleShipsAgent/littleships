@@ -12,7 +12,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>("light");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -51,4 +51,38 @@ export function useTheme() {
     throw new Error("useTheme must be used within a ThemeProvider");
   }
   return context;
+}
+
+export function ThemeToggle() {
+  const [mounted, setMounted] = useState(false);
+  const [theme, setTheme] = useState<Theme>("light");
+
+  useEffect(() => {
+    setMounted(true);
+    const stored = localStorage.getItem("shipyard-theme") as Theme | null;
+    if (stored) {
+      setTheme(stored);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("shipyard-theme", newTheme);
+  };
+
+  if (!mounted) {
+    return <div className="w-8 h-8" />;
+  }
+
+  return (
+    <button
+      onClick={toggleTheme}
+      className="w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--card)] border border-[var(--border)] hover:border-[var(--border-hover)] transition"
+      aria-label="Toggle theme"
+    >
+      {theme === "dark" ? "☀️" : "🌙"}
+    </button>
+  );
 }
