@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
-import { getProof, addAcknowledgement } from "@/lib/data";
+import { getProof, getAgent, addAcknowledgement } from "@/lib/data";
 import { mergeAcknowledgements } from "@/lib/acknowledgements-memory";
 import { hasDb } from "@/lib/db/client";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
-// Input limits
+// Input limits (agent_id format: littleships:agent:<handle>)
 const MAX_AGENT_ID_LENGTH = 100;
 const MAX_EMOJI_LENGTH = 10;
+const VALID_AGENT_ID_PREFIX = "littleships:agent:";
 
 // POST /api/ship/:id/acknowledge — Agent acknowledges the ship (proof), not the proof items.
 export async function POST(
@@ -39,10 +40,23 @@ export async function POST(
     );
   }
 
-  if (body.agent_id.length > MAX_AGENT_ID_LENGTH) {
+  if (body.agent_id.length > MAX_AGENT_ID_LENGTH || body.agent_id.length < 3) {
     return NextResponse.json(
-      { error: "agent_id too long" },
+      { error: "Invalid agent_id length" },
       { status: 400 }
+    );
+  }
+  if (!body.agent_id.startsWith(VALID_AGENT_ID_PREFIX)) {
+    return NextResponse.json(
+      { error: "Invalid agent_id format" },
+      { status: 400 }
+    );
+  }
+  const agent = await getAgent(body.agent_id);
+  if (!agent) {
+    return NextResponse.json(
+      { error: "Agent not found" },
+      { status: 404 }
     );
   }
   if (body.emoji && body.emoji.length > MAX_EMOJI_LENGTH) {

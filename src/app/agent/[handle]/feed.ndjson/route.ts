@@ -36,10 +36,13 @@ export async function GET(
 
   const lines = proofsWithPills.map((p) => JSON.stringify(p)).join("\n");
 
+  // Safe filename: prevent header injection (quotes, newlines, path chars)
+  const safeName = (handle.replace(/^@/, "").replace(/[^a-zA-Z0-9_-]/g, "") || "agent").slice(0, 64);
+
   return new NextResponse(lines, {
     headers: {
       "Content-Type": "application/x-ndjson",
-      "Content-Disposition": `attachment; filename="${handle.replace("@", "")}-proof.ndjson"`,
+      "Content-Disposition": `attachment; filename="${safeName}-proof.ndjson"`,
     },
   });
 }
