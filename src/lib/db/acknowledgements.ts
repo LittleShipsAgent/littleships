@@ -2,29 +2,29 @@ import { getDb } from "./client";
 
 const MAX_PER_AGENT_PER_DAY = 20;
 
-export async function getHighFivesCount(receiptId: string): Promise<number> {
+export async function getAcknowledgementsCount(proofId: string): Promise<number> {
   const db = getDb();
   if (!db) return 0;
   const { count, error } = await db
-    .from("high_fives")
+    .from("acknowledgements")
     .select("*", { count: "exact", head: true })
-    .eq("receipt_id", receiptId);
+    .eq("proof_id", proofId);
   if (error) return 0;
   return count ?? 0;
 }
 
-export interface HighFiveDetail {
+export interface AcknowledgementDetail {
   agent_id: string;
   emoji: string | null;
 }
 
-export async function getHighFivesDetail(receiptId: string): Promise<HighFiveDetail[]> {
+export async function getAcknowledgementsDetail(proofId: string): Promise<AcknowledgementDetail[]> {
   const db = getDb();
   if (!db) return [];
   const { data, error } = await db
-    .from("high_fives")
+    .from("acknowledgements")
     .select("agent_id, emoji")
-    .eq("receipt_id", receiptId);
+    .eq("proof_id", proofId);
   if (error || !data) return [];
   return data.map((row: { agent_id: string; emoji: string | null }) => ({
     agent_id: row.agent_id,
@@ -32,8 +32,8 @@ export async function getHighFivesDetail(receiptId: string): Promise<HighFiveDet
   }));
 }
 
-export async function addHighFive(
-  receiptId: string,
+export async function addAcknowledgement(
+  proofId: string,
   agentId: string,
   emoji?: string | null
 ): Promise<
@@ -42,35 +42,35 @@ export async function addHighFive(
   const db = getDb();
   if (!db) return { success: false, error: "Database not configured" };
 
-  // Check if already high-fived
+  // Check if already acknowledged this ship
   const { data: existing } = await db
-    .from("high_fives")
-    .select("receipt_id")
-    .eq("receipt_id", receiptId)
+    .from("acknowledgements")
+    .select("proof_id")
+    .eq("proof_id", proofId)
     .eq("agent_id", agentId)
     .maybeSingle();
   if (existing)
-    return { success: false, error: "Already acknowledged this receipt" };
+    return { success: false, error: "Already acknowledged this proof" };
 
-  // Rate limit: count this agent's high-fives in last 24h
+  // Rate limit: count this agent's acknowledgements in last 24h
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const { count: dailyCount } = await db
-    .from("high_fives")
+    .from("acknowledgements")
     .select("*", { count: "exact", head: true })
     .eq("agent_id", agentId)
     .gte("created_at", since);
   if ((dailyCount ?? 0) >= MAX_PER_AGENT_PER_DAY)
     return {
       success: false,
-      error: "Rate limit: max high-fives per day reached",
+      error: "Rate limit: max acknowledgements per day reached",
     };
 
-  await db.from("high_fives").insert({
-    receipt_id: receiptId,
+  await db.from("acknowledgements").insert({
+    proof_id: proofId,
     agent_id: agentId,
     emoji: emoji ?? null,
   });
 
-  const total = await getHighFivesCount(receiptId);
+  const total = await getAcknowledgementsCount(proofId);
   return { success: true, count: total };
 }

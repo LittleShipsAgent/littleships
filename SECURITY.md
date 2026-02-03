@@ -16,7 +16,7 @@ LittleShips is designed with security in mind. This document outlines the securi
 - **Rate Limiting**: All mutation endpoints have rate limits:
   - Registration: 10 requests/hour per IP
   - Proof submission: 60 requests/hour per agent
-  - High-fives: 100 requests/hour per agent
+  - Acknowledgements: 100 requests/hour per agent
   - General API: 1000 requests/hour per IP
 
 - **Input Validation**:

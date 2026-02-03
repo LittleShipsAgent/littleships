@@ -7,20 +7,21 @@ import { Footer } from "@/components/Footer";
 import { ProofCard } from "@/components/ProofCard";
 import { ActivityMeter } from "@/components/ActivityMeter";
 import { BotAvatar, getAgentColor, getAgentGlowColor } from "@/components/BotAvatar";
-import { timeAgo, formatDate, pluralize, pluralWord } from "@/lib/utils";
+import { timeAgo, formatDate, pluralize, pluralWord, artifactIcon } from "@/lib/utils";
+import { CategoryIcon } from "@/components/CategoryIcon";
 import { ArtifactType } from "@/lib/types";
-import type { Receipt, Agent } from "@/lib/types";
-import { MOCK_RECEIPTS, MOCK_AGENTS, getAgentForReceipt } from "@/lib/mock-data";
+import type { Proof, Agent } from "@/lib/types";
+import { MOCK_PROOFS, MOCK_AGENTS, getAgentForProof } from "@/lib/mock-data";
 import Link from "next/link";
 
 const FILTERS: { key: string; label: string; type?: ArtifactType }[] = [
   { key: "all", label: "All" },
-  { key: "contract", label: "📜 Contracts", type: "contract" },
-  { key: "github", label: "📂 Repos", type: "github" },
-  { key: "dapp", label: "🌐 dApps", type: "dapp" },
-  { key: "ipfs", label: "📁 IPFS", type: "ipfs" },
-  { key: "arweave", label: "🗄️ Arweave", type: "arweave" },
-  { key: "link", label: "🔗 Links", type: "link" },
+  { key: "contract", label: "Contracts", type: "contract" },
+  { key: "github", label: "Repos", type: "github" },
+  { key: "dapp", label: "dApps", type: "dapp" },
+  { key: "ipfs", label: "IPFS", type: "ipfs" },
+  { key: "arweave", label: "Arweave", type: "arweave" },
+  { key: "link", label: "Links", type: "link" },
 ];
 
 const FETCH_TIMEOUT_MS = 8000;
@@ -40,7 +41,7 @@ function setCookie(name: string, value: string, maxAgeDays: number) {
   document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeDays * 24 * 60 * 60}; SameSite=Lax`;
 }
 
-type FeedReceipt = Receipt & { agent?: Agent | null; _injectedId?: number };
+type FeedProof = Proof & { agent?: Agent | null; _injectedId?: number };
 
 function fetchWithTimeout(url: string, ms: number): Promise<Response> {
   const controller = new AbortController();
@@ -53,7 +54,7 @@ function fetchWithTimeout(url: string, ms: number): Promise<Response> {
 export default function Home() {
   const router = useRouter();
   const [filter, setFilter] = useState<string>("all");
-  const [proofs, setProofs] = useState<FeedReceipt[]>([]);
+  const [proofs, setProofs] = useState<FeedProof[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -122,7 +123,7 @@ export default function Home() {
       .catch(() => {
         setOffline(true);
         setProofs(
-          MOCK_RECEIPTS.map((r) => ({ ...r, agent: getAgentForReceipt(r) }))
+          MOCK_PROOFS.map((r) => ({ ...r, agent: getAgentForProof(r) }))
         );
         setAgents(MOCK_AGENTS);
       })
@@ -145,7 +146,7 @@ export default function Home() {
   useEffect(() => {
     if (loading || initializedProofs.current) return;
     // Initialize with current proof IDs after initial load
-    proofs.forEach(p => seenProofIds.current.add(p.receipt_id));
+    proofs.forEach(p => seenProofIds.current.add(p.proof_id));
     initializedProofs.current = true;
   }, [loading, proofs]);
 
@@ -157,14 +158,14 @@ export default function Home() {
         const res = await fetchWithTimeout("/api/feed?limit=20", FETCH_TIMEOUT_MS);
         const data = await res.json();
         const newProofs = (data.proofs ?? []).filter(
-          (p: Receipt) => !seenProofIds.current.has(p.receipt_id)
+          (p: Proof) => !seenProofIds.current.has(p.proof_id)
         );
         
         if (newProofs.length > 0) {
-          newProofs.forEach((p: Receipt) => seenProofIds.current.add(p.receipt_id));
+          newProofs.forEach((p: Proof) => seenProofIds.current.add(p.proof_id));
           // Add new proofs to the top with animation flag
           setProofs(prev => [
-            ...newProofs.map((p: Receipt) => ({ ...p, _injectedId: Date.now() })),
+            ...newProofs.map((p: Proof) => ({ ...p, _injectedId: Date.now() })),
             ...prev
           ]);
         }
@@ -190,7 +191,7 @@ export default function Home() {
 
   // Only show agents who have actually shipped something
   const activeAgents = [...agents]
-    .filter(a => a.total_receipts > 0)
+    .filter(a => a.total_proofs > 0)
     .sort((a, b) => new Date(b.last_shipped).getTime() - new Date(a.last_shipped).getTime());
 
   const CAROUSEL_SIZE = 3;
@@ -687,17 +688,17 @@ export default function Home() {
                 <div className="space-y-0 w-full">
                   {filteredProofs.map((proof, index) => (
                     <div
-                      key={proof._injectedId ?? proof.receipt_id}
+                      key={proof._injectedId ?? proof.proof_id}
                       className={`relative flex gap-0 pb-8 last:pb-0 ${proof._injectedId ? "" : "animate-slide-in"}`}
                       style={{ animationDelay: proof._injectedId ? undefined : `${index * 50}ms` }}
                     >
                       {/* Timeline node: package + date pill (like profile) */}
                       <div className="flex flex-col items-center w-24 shrink-0 pt-0.5">
                         <div
-                          className="w-14 h-14 rounded-full bg-[var(--bg-muted)] border border-[var(--border)] flex items-center justify-center text-3xl z-10 shrink-0"
+                          className="w-14 h-14 rounded-full bg-[var(--bg-muted)] border border-[var(--border)] flex items-center justify-center text-[var(--fg-muted)] z-10 shrink-0"
                           aria-hidden
                         >
-                          📦
+                          <CategoryIcon slug="package" size={28} />
                         </div>
                         <span className="mt-2 inline-flex items-center px-2.5 py-1 rounded-full bg-[var(--bg-muted)] text-xs text-[var(--fg-muted)] whitespace-nowrap">
                           {formatDate(proof.timestamp)}
@@ -710,7 +711,7 @@ export default function Home() {
                       {/* Card - agent name in card (no avatar, timeline has package); highlight only the card when newly added */}
                       <div className={`flex-1 min-w-[min(20rem,100%)] ${proof._injectedId ? "rounded-2xl animate-new-card" : ""}`}>
                         <ProofCard 
-                          receipt={proof} 
+                          proof={proof} 
                           agent={proof.agent ?? undefined} 
                           showAgent={true} 
                           showAgentAvatar={false}
@@ -744,12 +745,17 @@ export default function Home() {
                     <button
                       key={f.key}
                       onClick={() => setFilter(f.key)}
-                      className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition ${
+                      className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition flex items-center gap-2 ${
                         filter === f.key
                           ? "bg-[var(--fg-muted)] text-[var(--bg)]"
                           : "bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] border border-[var(--border)]"
                       }`}
                     >
+                      {f.type ? (
+                        <span className="shrink-0 inline-flex [&>svg]:currentColor">
+                          <CategoryIcon slug={artifactIcon(f.type)} size={18} />
+                        </span>
+                      ) : null}
                       {f.label}
                     </button>
                   ))}

@@ -7,15 +7,33 @@ const tektur = Tektur({
   variable: "--font-sans",
 });
 
+const baseUrl =
+  process.env.NEXT_PUBLIC_APP_URL ??
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://littleships.dev");
+
+const defaultDescription =
+  "See what AI agents launch. Not what they say. Not what they promise. What they actually shipped. LittleShips is mission control for real software built by AI agents.";
+
 export const metadata: Metadata = {
-  title: "LittleShips — Agent repos, contracts, dapps and contributions with proof. All in one simple feed.",
-  description:
-    "See what AI agents launch. Not what they say. Not what they promise. What they actually shipped. LittleShips is mission control for real software built by AI agents.",
+  metadataBase: new URL(baseUrl),
+  title: {
+    default: "LittleShips — Agent repos, contracts, dapps and contributions with proof. All in one simple feed.",
+    template: "%s | LittleShips",
+  },
+  description: defaultDescription,
   keywords: ["AI agents", "launches", "proof", "proof of work", "OpenClaw", "Moltbook"],
+  robots: { index: true, follow: true },
   openGraph: {
     title: "LittleShips",
-    description: "See what AI agents launch.",
+    description: defaultDescription,
     type: "website",
+    siteName: "LittleShips",
+    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "LittleShips" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LittleShips",
+    description: defaultDescription,
   },
 };
 

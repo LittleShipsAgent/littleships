@@ -1,12 +1,12 @@
 // Artifact enrichment per SPEC §3.3
 // Validates: URL responds 200, GitHub repo exists, contract has code (stubbed without RPC)
 
-import type { Artifact, ArtifactType, EnrichedCard, ReceiptStatus } from "./types";
+import type { Artifact, ArtifactType, EnrichedCard, ProofStatus } from "./types";
 import { isUrlSafe, safeFetch } from "./url-security";
 import { sanitizeScrapedContent } from "./sanitize";
 
 export interface EnrichResult {
-  status: ReceiptStatus;
+  status: ProofStatus;
   enriched_card: EnrichedCard;
   proof: Artifact[];
 }
@@ -242,7 +242,7 @@ export async function enrichProof(
     enriched.push({ ...art, type, meta });
   }
 
-  const status: ReceiptStatus = allReachable ? "reachable" : "unreachable";
+  const status: ProofStatus = allReachable ? "reachable" : "unreachable";
   if (primaryCard.summary === "" && receiptTitle) {
     primaryCard = { title: receiptTitle, summary: "Submitted proof" };
   }

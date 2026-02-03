@@ -6,8 +6,8 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { getAgentColor } from "@/components/BotAvatar";
-import type { Receipt, Agent } from "@/lib/types";
-import { MOCK_RECEIPTS, getAgentById } from "@/lib/mock-data";
+import type { Proof, Agent } from "@/lib/types";
+import { MOCK_PROOFS, getAgentById } from "@/lib/mock-data";
 
 const FETCH_TIMEOUT_MS = 8000;
 
@@ -26,11 +26,12 @@ interface ProofPageProps {
 /** Machine-readable proof page: raw JSON + link to human ship page. */
 export default function ProofPage({ params }: ProofPageProps) {
   const { id } = use(params);
-  const [data, setData] = useState<{ proof: Receipt; agent: Agent | null } | null | undefined>(undefined);
+  const [data, setData] = useState<{ proof: Proof; agent: Agent | null } | null | undefined>(undefined);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const fallback = () => {
-      const proof = MOCK_RECEIPTS.find((r) => r.receipt_id === id);
+      const proof = MOCK_PROOFS.find((r) => r.proof_id === id);
       if (proof) {
         setData({ proof, agent: getAgentById(proof.agent_id) ?? null });
       } else {
@@ -109,7 +110,10 @@ export default function ProofPage({ params }: ProofPageProps) {
   const jsonString = JSON.stringify(payload, null, 2);
 
   const copyJson = () => {
-    navigator.clipboard.writeText(jsonString);
+    navigator.clipboard.writeText(jsonString).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   return (
@@ -133,23 +137,35 @@ export default function ProofPage({ params }: ProofPageProps) {
             LittleShips
           </Link>
           <span aria-hidden>/</span>
+          {agent && (
+            <>
+              <Link
+                href={`/agent/${agent.handle.replace(/^@/, "")}`}
+                className="hover:text-[var(--accent)] transition"
+              >
+                {agent.handle}
+              </Link>
+              <span aria-hidden>/</span>
+            </>
+          )}
+          <Link
+            href={`/ship/${proof.proof_id}`}
+            className="hover:text-[var(--accent)] transition truncate max-w-[12rem]"
+            title={proof.title}
+          >
+            {proof.title}
+          </Link>
+          <span aria-hidden>/</span>
           <span className="text-[var(--fg)]">Proof (JSON)</span>
         </nav>
 
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <h1 className="text-lg font-semibold text-[var(--fg)]">
-            Proof <code className="text-sm font-mono text-[var(--fg-muted)]">{proof.receipt_id}</code>
+            Proof <code className="text-sm font-mono text-[var(--fg-muted)]">{proof.proof_id}</code>
           </h1>
           <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={copyJson}
-              className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--fg-muted)] hover:text-[var(--fg)] hover:bg-[var(--card-hover)] transition"
-            >
-              Copy JSON
-            </button>
             <Link
-              href={`/ship/${proof.receipt_id}`}
+              href={`/ship/${proof.proof_id}`}
               className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--agent-color,var(--accent))] hover:bg-[var(--card-hover)] transition"
             >
               View ship page →
@@ -157,9 +173,21 @@ export default function ProofPage({ params }: ProofPageProps) {
           </div>
         </div>
 
-        <pre className="p-6 rounded-xl border border-[var(--border)] bg-[var(--card)] text-sm font-mono text-[var(--fg)] overflow-x-auto whitespace-pre-wrap break-all">
-          {jsonString}
-        </pre>
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
+          <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--border)] bg-[var(--card-hover)]">
+            <span className="text-xs font-medium text-[var(--fg-muted)] uppercase tracking-wider">Proof (JSON)</span>
+            <button
+              type="button"
+              onClick={copyJson}
+              className="px-2 py-1 rounded border border-[var(--border)] bg-[var(--card)] text-xs font-medium text-[var(--fg-muted)] hover:text-[var(--fg)] hover:bg-[var(--card-hover)] transition"
+            >
+              {copied ? "Copied!" : "Copy JSON"}
+            </button>
+          </div>
+          <pre className="p-6 text-sm font-mono text-[var(--fg)] overflow-x-auto whitespace-pre-wrap break-all">
+            {jsonString}
+          </pre>
+        </div>
         </div>
       </section>
 

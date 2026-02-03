@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { Agent, Receipt } from "@/lib/types";
+import type { Agent, Proof } from "@/lib/types";
 import { getBadgeStatus, TIER_LABELS, type BadgeTier, type BadgeDefinition } from "@/lib/badges";
 
 const TOP_SHIPPER_THRESHOLD = 15;
@@ -29,7 +29,7 @@ function getBadges(agent: Agent): BadgeItem[] {
   if (agent.public_key) {
     badges.push({ id: "verified", label: "Verified", styleClass: "badge-verified", hero: true, description: BADGE_DESCRIPTIONS.verified });
   }
-  if (agent.total_receipts >= TOP_SHIPPER_THRESHOLD) {
+  if (agent.total_proofs >= TOP_SHIPPER_THRESHOLD) {
     badges.push({ id: "top-shipper", label: "Top Launcher", styleClass: "badge-top-shipper", hero: true, description: BADGE_DESCRIPTIONS["top-shipper"] });
   }
   if (agent.x_profile) {
@@ -192,11 +192,11 @@ interface AgentBadgesProps {
   agent: Agent;
   variant?: BadgeVariant;
   className?: string;
-  /** Pass receipts for portfolio variant to show full catalog (earned + locked) */
-  receipts?: Receipt[];
+  /** Pass proofs for portfolio variant to show full catalog (earned + locked) */
+  proofs?: Proof[];
 }
 
-export function AgentBadges({ agent, variant = "full", className = "", receipts = [] }: AgentBadgesProps) {
+export function AgentBadges({ agent, variant = "full", className = "", proofs = [] }: AgentBadgesProps) {
   const badges = getBadges(agent);
   const isCompact = variant === "compact";
   const isPortfolio = variant === "portfolio";
@@ -207,7 +207,7 @@ export function AgentBadges({ agent, variant = "full", className = "", receipts 
   const hasDedicatedIcon = (id: string) => ["verified", "top-shipper", "on-x", "tips", "active"].includes(id);
 
   if (isPortfolio) {
-    const statuses = getBadgeStatus(agent, receipts);
+    const statuses = getBadgeStatus(agent, proofs);
     const byTier = ([[1], [2], [3], [4]] as const).map(([tier]) => ({
       tier,
       label: TIER_LABELS[tier],

@@ -6,9 +6,10 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { BotAvatar, getAgentColor } from "@/components/BotAvatar";
+import { CategoryIcon } from "@/components/CategoryIcon";
 import { formatDateTime, truncateAddress, artifactIcon, artifactLabel, shipTypeIcon, shipTypeLabel, inferShipTypeFromArtifact } from "@/lib/utils";
-import type { Receipt, Agent } from "@/lib/types";
-import { MOCK_RECEIPTS, getAgentById } from "@/lib/mock-data";
+import type { Proof, Agent } from "@/lib/types";
+import { MOCK_PROOFS, getAgentById } from "@/lib/mock-data";
 
 function agentDisplayName(handle: string): string {
   return handle.startsWith("@") ? handle.slice(1) : handle;
@@ -30,13 +31,13 @@ interface ShipPageProps {
 
 export default function ShipPage({ params }: ShipPageProps) {
   const { id } = use(params);
-  const [data, setData] = useState<{ receipt: Receipt; agent: Agent | null } | null | undefined>(undefined);
+  const [data, setData] = useState<{ proof: Proof; agent: Agent | null } | null | undefined>(undefined);
 
   useEffect(() => {
     const fallback = () => {
-      const receipt = MOCK_RECEIPTS.find((r) => r.receipt_id === id);
-      if (receipt) {
-        setData({ receipt, agent: getAgentById(receipt.agent_id) ?? null });
+      const proof = MOCK_PROOFS.find((r) => r.proof_id === id);
+      if (proof) {
+        setData({ proof, agent: getAgentById(proof.agent_id) ?? null });
       } else {
         setData(null);
       }
@@ -47,7 +48,7 @@ export default function ShipPage({ params }: ShipPageProps) {
         return r.json();
       })
       .then((json) =>
-        setData(json === null ? null : { receipt: json.proof ?? json, agent: json.agent ?? null })
+        setData(json === null ? null : { proof: json.proof ?? json, agent: json.agent ?? null })
       )
       .catch(fallback);
   }, [id]);
@@ -147,10 +148,10 @@ export default function ShipPage({ params }: ShipPageProps) {
     );
   }
 
-  const { receipt, agent } = data;
+  const { proof, agent } = data;
   const agentColor = agent ? getAgentColor(agent.agent_id, agent.color) : undefined;
   const acknowledgingAgents =
-    receipt.high_fived_by?.map((aid) => getAgentById(aid)).filter(Boolean) as Agent[] | undefined;
+    proof.acknowledged_by?.map((aid) => getAgentById(aid)).filter(Boolean) as Agent[] | undefined;
 
   return (
     <div
@@ -169,7 +170,7 @@ export default function ShipPage({ params }: ShipPageProps) {
         />
         <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-8 py-8 w-full">
         {/* Breadcrumb */}
-        <nav className="mb-8 text-sm text-[var(--fg-muted)] flex items-center gap-2">
+        <nav className="mb-8 text-sm text-[var(--fg-muted)] flex items-center gap-2 flex-wrap">
           <Link href="/" className="hover:text-[var(--accent)] transition">
             LittleShips
           </Link>
@@ -185,22 +186,27 @@ export default function ShipPage({ params }: ShipPageProps) {
               <span aria-hidden>/</span>
             </>
           )}
-          <span className="text-[var(--fg)] truncate" title={receipt.title}>
-            {receipt.title}
+          <span>Ship</span>
+          <span aria-hidden>/</span>
+          <span className="text-[var(--fg)] truncate" title={proof.title}>
+            {proof.title}
           </span>
         </nav>
 
         {/* Ship type + title */}
         <div className="mb-4">
           <span className="inline-flex items-center gap-2 text-sm font-medium text-[var(--fg-muted)] uppercase tracking-wider">
-            <span className="text-xl" aria-hidden>
-              {shipTypeIcon(receipt.ship_type ?? inferShipTypeFromArtifact(receipt.artifact_type))}
-            </span>
-            {shipTypeLabel(receipt.ship_type ?? inferShipTypeFromArtifact(receipt.artifact_type))}
+            <CategoryIcon slug={shipTypeIcon(proof.ship_type ?? inferShipTypeFromArtifact(proof.artifact_type))} size={20} />
+            {shipTypeLabel(proof.ship_type ?? inferShipTypeFromArtifact(proof.artifact_type))}
           </span>
           <h1 className="text-2xl md:text-3xl font-bold text-[var(--fg)] mt-1 leading-tight">
-            {receipt.title}
+            {proof.title}
           </h1>
+          {(proof.enriched_card?.summary || proof.enriched_card?.title) && (
+            <p className="text-[var(--fg-muted)] mt-2 leading-relaxed">
+              {proof.enriched_card?.summary ?? proof.enriched_card?.title}
+            </p>
+          )}
         </div>
 
         {/* Meta — agent, date, status */}
@@ -215,91 +221,36 @@ export default function ShipPage({ params }: ShipPageProps) {
                 <span>{agent.handle}</span>
               </Link>
             )}
-            <span>{formatDateTime(receipt.timestamp)}</span>
+            <span>{formatDateTime(proof.timestamp)}</span>
             <span
               className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
-                receipt.status === "reachable"
+                proof.status === "reachable"
                   ? "bg-teal-500/15 text-teal-600 dark:text-teal-400"
-                  : receipt.status === "unreachable"
+                  : proof.status === "unreachable"
                   ? "bg-red-500/15 text-red-600 dark:text-red-400"
                   : "bg-[var(--warning-muted)] text-[var(--warning)]"
               }`}
             >
-              {receipt.status === "reachable" && (
+              {proof.status === "reachable" && (
                 <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
               )}
-              {receipt.status === "reachable" && "Verified"}
-              {receipt.status === "unreachable" && "Unreachable"}
-              {receipt.status === "pending" && "Pending"}
+              {proof.status === "reachable" && "Verified"}
+              {proof.status === "unreachable" && "Unreachable"}
+              {proof.status === "pending" && "Pending"}
             </span>
           </div>
         </div>
 
-        {/* Description */}
-        {(receipt.enriched_card?.summary || receipt.enriched_card?.title) && (
-          <div className="mb-8">
-            <h2 className="text-sm font-semibold text-[var(--fg-muted)] uppercase tracking-wider mb-3">
-              Description
-            </h2>
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] overflow-hidden p-5">
-              {receipt.enriched_card?.preview?.imageUrl || receipt.enriched_card?.preview?.favicon ? (
-                <div className="flex gap-4">
-                  <div className="shrink-0 w-20 h-20 rounded-xl overflow-hidden bg-[var(--bg-muted)] flex items-center justify-center">
-                    {receipt.enriched_card.preview.imageUrl ? (
-                      <img
-                        src={receipt.enriched_card.preview.imageUrl}
-                        alt=""
-                        className="w-full h-full object-cover"
-                      />
-                    ) : receipt.enriched_card.preview.favicon ? (
-                      <img
-                        src={receipt.enriched_card.preview.favicon}
-                        alt=""
-                        className="w-10 h-10 object-contain"
-                      />
-                    ) : null}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    {receipt.enriched_card?.title && (
-                      <p className="text-sm font-semibold text-[var(--fg)] mb-1">
-                        {receipt.enriched_card.title}
-                      </p>
-                    )}
-                    {receipt.enriched_card?.summary && (
-                      <p className="text-sm text-[var(--fg-muted)] leading-relaxed">
-                        {receipt.enriched_card.summary}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <>
-                  {receipt.enriched_card?.title && (
-                    <p className="text-sm font-semibold text-[var(--fg)] mb-1">
-                      {receipt.enriched_card.title}
-                    </p>
-                  )}
-                  {receipt.enriched_card?.summary && (
-                    <p className="text-sm text-[var(--fg-muted)] leading-relaxed">
-                      {receipt.enriched_card.summary}
-                    </p>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Changelog — what happened, what was added, value (or short narrative fallback) */}
-        {(receipt.changelog?.length ?? 0) > 0 ? (
+        {(proof.changelog?.length ?? 0) > 0 ? (
           <div className="mb-8">
             <h2 className="text-sm font-semibold text-[var(--fg-muted)] uppercase tracking-wider mb-3">
               Changelog
             </h2>
             <ul className="space-y-2 list-none rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 pl-6">
-              {receipt.changelog!.map((line, i) => (
+              {proof.changelog!.map((line, i) => (
                 <li key={i} className="flex gap-3 text-sm text-[var(--fg-muted)]">
                   <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--border)] mt-1.5" aria-hidden />
                   <span className="leading-relaxed">{line}</span>
@@ -307,14 +258,14 @@ export default function ShipPage({ params }: ShipPageProps) {
               ))}
             </ul>
           </div>
-        ) : (receipt.enriched_card?.summary || receipt.title) ? (
+        ) : (proof.enriched_card?.summary || proof.title) ? (
           <div className="mb-8">
             <h2 className="text-sm font-semibold text-[var(--fg-muted)] uppercase tracking-wider mb-3">
               Changelog
             </h2>
             <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5">
               <p className="text-sm text-[var(--fg-muted)] leading-relaxed">
-                {receipt.enriched_card?.summary ?? receipt.title}
+                {proof.enriched_card?.summary ?? proof.title}
               </p>
             </div>
           </div>
@@ -323,10 +274,10 @@ export default function ShipPage({ params }: ShipPageProps) {
         {/* Proof — link cards */}
         <div className="mb-8">
           <h2 className="text-sm font-semibold text-[var(--fg-muted)] uppercase tracking-wider mb-4">
-            Proof ({receipt.proof.length})
+            Proof ({proof.proof.length})
           </h2>
           <div className="space-y-3">
-            {receipt.proof.map((artifact, i) => (
+            {proof.proof.map((artifact, i) => (
               <a
                 key={i}
                 href={artifact.value}
@@ -334,7 +285,9 @@ export default function ShipPage({ params }: ShipPageProps) {
                 rel="noopener noreferrer"
                 className="flex items-center gap-4 py-3 px-4 rounded-xl border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--card-hover)] hover:border-[var(--border-hover)] transition group"
               >
-                <span className="text-xl shrink-0">{artifactIcon(artifact.type)}</span>
+                <span className="shrink-0 text-[var(--fg-muted)]">
+                  <CategoryIcon slug={artifactIcon(artifact.type)} size={20} />
+                </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[var(--fg)] font-medium text-sm">
@@ -367,15 +320,15 @@ export default function ShipPage({ params }: ShipPageProps) {
         </div>
 
         {/* Agent acknowledgments */}
-        {receipt.high_fives !== undefined && receipt.high_fives > 0 && (
+        {proof.acknowledgements !== undefined && proof.acknowledgements > 0 && (
           <div className="mb-8">
             <h2 className="text-sm font-semibold text-[var(--fg)] uppercase tracking-wider mb-3">
-              Agent acknowledgments ({receipt.high_fives})
+              Agent acknowledgments ({proof.acknowledgements})
             </h2>
             <div className="flex flex-wrap gap-3">
               {acknowledgingAgents && acknowledgingAgents.length > 0 ? (
                 acknowledgingAgents.map((a) => {
-                  const emoji = receipt.high_five_emojis?.[a.agent_id] ?? "🤝";
+                  const emoji = proof.acknowledgement_emojis?.[a.agent_id] ?? "🤝";
                   return (
                     <Link
                       key={a.agent_id}
@@ -390,20 +343,20 @@ export default function ShipPage({ params }: ShipPageProps) {
                 })
               ) : (
                 <span className="text-sm text-[var(--fg)]">
-                  🤝 {receipt.high_fives} agent acknowledgment{receipt.high_fives !== 1 ? "s" : ""}
+                  🤝 {proof.acknowledgements} agent acknowledgment{proof.acknowledgements !== 1 ? "s" : ""}
                 </span>
               )}
             </div>
           </div>
         )}
 
-        {/* Meta + receipt link */}
+        {/* Meta + proof id link */}
         <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-[var(--border)]">
           <code className="text-xs text-[var(--fg-muted)] font-mono break-all">
-            {receipt.receipt_id}
+            {proof.proof_id}
           </code>
           <Link
-            href={`/proof/${receipt.receipt_id}`}
+            href={`/proof/${proof.proof_id}`}
             className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--agent-color,var(--fg-muted))] hover:text-[var(--agent-color,var(--accent))] hover:bg-[var(--card-hover)] transition"
           >
             Show proof

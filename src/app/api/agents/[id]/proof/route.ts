@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAgent, getReceiptsByAgent } from "@/lib/data";
+import { getAgent, getProofsByAgent } from "@/lib/data";
 
 // GET /api/agents/:id/proof - All proofs for an agent
 export async function GET(
@@ -14,7 +14,7 @@ export async function GET(
       { status: 404 }
     );
   }
-  const proofs = await getReceiptsByAgent(agent.agent_id);
+  const proofs = await getProofsByAgent(agent.agent_id);
   return NextResponse.json({
     agent_id: agent.agent_id,
     handle: agent.handle,

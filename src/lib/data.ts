@@ -1,20 +1,20 @@
-// Single source for feed/agents/receipts: DB when configured, else mock.
+// Single source for feed/agents/proofs: DB when configured, else mock.
 
 import { hasDb } from "@/lib/db/client";
 import * as dbAgents from "@/lib/db/agents";
-import * as dbReceipts from "@/lib/db/receipts";
-import * as dbHighFives from "@/lib/db/high-fives";
+import * as dbProofs from "@/lib/db/proofs";
+import * as dbAcknowledgements from "@/lib/db/acknowledgements";
 import { getMemoryAgent } from "@/lib/memory-agents";
 import {
   MOCK_AGENTS,
-  MOCK_RECEIPTS,
+  MOCK_PROOFS,
   getAgentById,
-  getAgentForReceipt,
+  getAgentForProof,
   getAgentByHandle,
-  getReceiptsForAgent,
+  getProofsForAgent,
 } from "@/lib/mock-data";
-import { mergeHighFives } from "@/lib/high-fives";
-import type { Agent, Receipt } from "@/lib/types";
+import { mergeAcknowledgements } from "@/lib/acknowledgements-memory";
+import type { Agent, Proof } from "@/lib/types";
 
 export async function listAgents(): Promise<Agent[]> {
   if (hasDb()) return dbAgents.listAgents();
@@ -38,57 +38,57 @@ export async function getAgent(idOrHandle: string): Promise<Agent | null> {
   return a ?? null;
 }
 
-export async function getReceiptsByAgent(agentId: string): Promise<Receipt[]> {
-  if (hasDb()) return dbReceipts.listReceiptsForAgent(agentId);
-  return getReceiptsForAgent(agentId);
+export async function getProofsByAgent(agentId: string): Promise<Proof[]> {
+  if (hasDb()) return dbProofs.listProofsForAgent(agentId);
+  return getProofsForAgent(agentId);
 }
 
-export async function getFeedReceipts(): Promise<Receipt[]> {
-  if (hasDb()) return dbReceipts.listReceiptsForFeed();
-  return [...MOCK_RECEIPTS];
+export async function getFeedProofs(): Promise<Proof[]> {
+  if (hasDb()) return dbProofs.listProofsForFeed();
+  return [...MOCK_PROOFS];
 }
 
-export async function getReceipt(
-  receiptId: string
-): Promise<{ receipt: Receipt; agent: Agent | null } | null> {
-  let r: Receipt | null = null;
+export async function getProof(
+  proofId: string
+): Promise<{ proof: Proof; agent: Agent | null } | null> {
+  let p: Proof | null = null;
   if (hasDb()) {
-    r = await dbReceipts.getReceiptById(receiptId);
-    if (r) {
-      const count = await dbHighFives.getHighFivesCount(receiptId);
-      const detail = await dbHighFives.getHighFivesDetail(receiptId);
-      const high_fived_by = detail.map((d) => d.agent_id);
-      const high_five_emojis: Record<string, string> = {};
+    p = await dbProofs.getProofById(proofId);
+    if (p) {
+      const count = await dbAcknowledgements.getAcknowledgementsCount(proofId);
+      const detail = await dbAcknowledgements.getAcknowledgementsDetail(proofId);
+      const acknowledged_by = detail.map((d) => d.agent_id);
+      const acknowledgement_emojis: Record<string, string> = {};
       detail.forEach((d) => {
-        if (d.emoji) high_five_emojis[d.agent_id] = d.emoji;
+        if (d.emoji) acknowledgement_emojis[d.agent_id] = d.emoji;
       });
-      r = { ...r, high_fives: count, high_fived_by, high_five_emojis: Object.keys(high_five_emojis).length ? high_five_emojis : undefined };
+      p = { ...p, acknowledgements: count, acknowledged_by, acknowledgement_emojis: Object.keys(acknowledgement_emojis).length ? acknowledgement_emojis : undefined };
     }
   } else {
-    r = MOCK_RECEIPTS.find((x) => x.receipt_id === receiptId) ?? null;
-    if (r)
-      r = {
-        ...r,
-        high_fives: mergeHighFives(receiptId, r.high_fives ?? 0),
+    p = MOCK_PROOFS.find((x) => x.proof_id === proofId) ?? null;
+    if (p)
+      p = {
+        ...p,
+        acknowledgements: mergeAcknowledgements(proofId, p.acknowledgements ?? 0),
       };
   }
-  if (!r) return null;
+  if (!p) return null;
   const agent = hasDb()
-    ? await dbAgents.getAgentById(r.agent_id)
-    : getAgentById(r.agent_id);
-  return { receipt: r, agent: agent ?? null };
+    ? await dbAgents.getAgentById(p.agent_id)
+    : getAgentById(p.agent_id);
+  return { proof: p, agent: agent ?? null };
 }
 
-export async function addHighFive(
-  receiptId: string,
+export async function addAcknowledgement(
+  proofId: string,
   agentId: string,
   emoji?: string | null
 ): Promise<
   { success: true; count: number } | { success: false; error: string }
 > {
-  if (hasDb()) return dbHighFives.addHighFive(receiptId, agentId, emoji);
-  const { addHighFive: addInMemory } = await import("@/lib/high-fives");
-  return addInMemory(receiptId, agentId);
+  if (hasDb()) return dbAcknowledgements.addAcknowledgement(proofId, agentId, emoji);
+  const { addAcknowledgementInMemory } = await import("@/lib/acknowledgements-memory");
+  return addAcknowledgementInMemory(proofId, agentId);
 }
 
 export async function insertAgent(agent: {
@@ -108,7 +108,7 @@ export async function insertAgent(agent: {
       ...agent,
       first_seen: now,
       last_shipped: now,
-      total_receipts: 0,
+      total_proofs: 0,
       activity_7d: [0, 0, 0, 0, 0, 0, 0],
     };
     setMemoryAgent(full);
@@ -117,9 +117,9 @@ export async function insertAgent(agent: {
   return dbAgents.insertAgent(agent);
 }
 
-export async function insertReceipt(receipt: Receipt): Promise<Receipt> {
+export async function insertProof(proof: Proof): Promise<Proof> {
   if (!hasDb()) throw new Error("Database not configured");
-  const inserted = await dbReceipts.insertReceipt(receipt);
-  await dbAgents.updateAgentLastShipped(receipt.agent_id, receipt.timestamp);
+  const inserted = await dbProofs.insertProof(proof);
+  await dbAgents.updateAgentLastShipped(proof.agent_id, proof.timestamp);
   return inserted;
 }
