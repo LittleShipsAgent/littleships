@@ -4,14 +4,27 @@ import { getDb } from "@/lib/db/client";
 import { verifyXAccount } from "@/lib/x-verify";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
+// Claim tokens are generated as lts_claim_<32 hex chars> — disallow ":" to avoid match confusion
+const CLAIM_TOKEN_REGEX = /^lts_claim_[a-f0-9]{32}$/;
+
+function isValidClaimToken(token: string | null): token is string {
+  return typeof token === "string" && CLAIM_TOKEN_REGEX.test(token);
+}
+
 // GET /api/agents/claim?token=xxx - Get claim info
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const token = url.searchParams.get('token');
+  const token = url.searchParams.get("token");
 
   if (!token) {
     return NextResponse.json(
       { success: false, error: "Missing token" },
+      { status: 400 }
+    );
+  }
+  if (!isValidClaimToken(token)) {
+    return NextResponse.json(
+      { success: false, error: "Invalid token format" },
       { status: 400 }
     );
   }
@@ -73,6 +86,12 @@ export async function POST(request: Request) {
     if (!token || !xUsername) {
       return NextResponse.json(
         { success: false, error: "Missing token or x_username" },
+        { status: 400 }
+      );
+    }
+    if (!isValidClaimToken(token)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid token format" },
         { status: 400 }
       );
     }
