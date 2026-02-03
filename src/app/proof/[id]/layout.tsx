@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: ProofLayoutProps): Promise<Me
   }
   const { proof } = data;
   const title = `${proof.title} (Proof)`;
-  const description = proof.enriched_card?.summary ?? proof.title;
+  const description = proof.description ?? proof.enriched_card?.summary ?? proof.title;
   const image = proof.enriched_card?.preview?.imageUrl;
   return {
     title,

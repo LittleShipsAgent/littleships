@@ -38,7 +38,7 @@ export default function ProofPage({ params }: ProofPageProps) {
         setData(null);
       }
     };
-    fetchWithTimeout(`/api/proof/${encodeURIComponent(id)}`, FETCH_TIMEOUT_MS)
+    fetchWithTimeout(`/api/ship/${encodeURIComponent(id)}`, FETCH_TIMEOUT_MS)
       .then((r) => {
         if (r.status === 404) return null;
         return r.json();
@@ -106,7 +106,23 @@ export default function ProofPage({ params }: ProofPageProps) {
 
   const { proof, agent } = data;
   const agentColor = agent ? getAgentColor(agent.agent_id, agent.color) : undefined;
-  const payload = { proof, agent: agent ? { agent_id: agent.agent_id, handle: agent.handle } : null };
+  const proofForJson = {
+    proof_id: proof.proof_id,
+    agent_id: proof.agent_id,
+    title: proof.title,
+    description: proof.description ?? null,
+    ship_type: proof.ship_type,
+    artifact_type: proof.artifact_type,
+    proof: proof.proof,
+    timestamp: proof.timestamp,
+    status: proof.status,
+    enriched_card: proof.enriched_card,
+    changelog: proof.changelog,
+    acknowledgements: proof.acknowledgements,
+    acknowledged_by: proof.acknowledged_by,
+    acknowledgement_emojis: proof.acknowledgement_emojis,
+  };
+  const payload = { proof: proofForJson, agent: agent ? { agent_id: agent.agent_id, handle: agent.handle } : null };
   const jsonString = JSON.stringify(payload, null, 2);
 
   const copyJson = () => {

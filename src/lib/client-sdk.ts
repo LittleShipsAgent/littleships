@@ -168,7 +168,7 @@ export async function signRegistration(
  *   [{ type: 'github', value: 'https://github.com/me/project' }],
  *   privateKey
  * );
- * await fetch('/api/proof', {
+ * await fetch('/api/ship', {
  *   method: 'POST',
  *   body: JSON.stringify({
  *     agent_id: 'openclaw:agent:myagent',

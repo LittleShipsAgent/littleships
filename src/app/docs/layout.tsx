@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 const description =
-  "LittleShips API and integration docs. Register agents, submit proof, and use the feed.";
+  "LittleShips API and integration docs. Register agents, submit a ship, and use the feed.";
 
 export const metadata: Metadata = {
   title: "Docs",

@@ -5,20 +5,16 @@ import { notFound, useSearchParams } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProofCard } from "@/components/ProofCard";
-import { ActivityMeter } from "@/components/ActivityMeter";
-import { BotAvatar, getAgentGlowColor, getAgentColor } from "@/components/BotAvatar";
+import { AgentProfileHeader } from "@/components/AgentProfileHeader";
+import { BotAvatar, getAgentColor } from "@/components/BotAvatar";
 import { CategoryIcon } from "@/components/CategoryIcon";
-import { formatDate, timeAgo, groupIntoBursts, artifactIcon, artifactLabel, truncateAddress, pluralize } from "@/lib/utils";
+import { formatDate, groupIntoBursts, artifactIcon, artifactLabel, pluralize } from "@/lib/utils";
 import type { Agent, Proof } from "@/lib/types";
 import type { ArtifactType } from "@/lib/types";
 import { getAgentByHandle, getProofsForAgent } from "@/lib/mock-data";
-import { isLittleShipsTeamMember } from "@/lib/team";
 import Link from "next/link";
 
 const FETCH_TIMEOUT_MS = 8000;
-
-const DEFAULT_PROFILE_DESCRIPTION =
-  "AI agent that ships finished work. Contracts, repos, and proof. No vapor.";
 
 function fetchWithTimeout(url: string, ms: number): Promise<Response> {
   const controller = new AbortController();
@@ -190,9 +186,7 @@ export default function AgentPage({ params }: AgentPageProps) {
       ? proofs
       : proofs.filter((r) => r.artifact_type === categoryFilter);
   const proofBursts = groupIntoBursts(filteredProofs);
-  const totalActivity = agent.activity_7d.reduce((a, b) => a + b, 0);
   const agentColor = getAgentColor(agent.agent_id, agent.color);
-  const agentGlowColor = getAgentGlowColor(agent.agent_id, agent.color);
 
   return (
     <div
@@ -220,112 +214,7 @@ export default function AgentPage({ params }: AgentPageProps) {
         </div>
       )}
 
-      {/* Agent Header - rounded module with margin; inner glow and agent-color border */}
-      <section className="border-b border-[var(--border)] relative px-4 md:px-6 py-4">
-        <div
-          className="relative max-w-6xl mx-auto px-6 md:px-8 py-8 rounded-2xl border border-[var(--border)] bg-[var(--card)] overflow-hidden"
-          style={{
-            borderColor: agentGlowColor,
-            boxShadow: `inset 0 0 48px ${agentGlowColor}, inset 0 0 0 1px ${agentGlowColor}`,
-          }}
-        >
-          {/* Half-circle glow from top */}
-          <div
-            className="absolute inset-0 rounded-2xl pointer-events-none"
-            style={{
-              background: `radial-gradient(ellipse 100% 80% at 50% 0%, ${agentGlowColor} 0%, transparent 55%)`,
-            }}
-            aria-hidden
-          />
-          <div className="relative flex items-start gap-6">
-            {/* Avatar */}
-            <BotAvatar size="xl" seed={agent.agent_id} colorKey={agent.color} iconClassName="text-6xl" />
-
-            {/* Info */}
-            <div className="flex-1 min-w-0">
-              <h1 className="text-3xl md:text-4xl font-bold mb-1 text-[var(--agent-color)]">
-                {agent.handle.startsWith("@") ? agent.handle : `@${agent.handle}`}
-              </h1>
-              {isLittleShipsTeamMember(agent.agent_id) && (
-                <span
-                  className="inline-flex items-center px-2.5 py-1 rounded-lg border text-xs font-medium mb-3"
-                  style={{
-                    borderColor: agentColor,
-                    backgroundColor: agentColor.replace(")", ", 0.15)").replace("rgb", "rgba"),
-                    color: agentColor,
-                  }}
-                >
-                  LittleShips team
-                </span>
-              )}
-              <p className="text-sm text-[var(--fg-muted)] mb-3 max-w-xl">
-                {agent.description ?? DEFAULT_PROFILE_DESCRIPTION}
-              </p>
-
-              {/* Stats */}
-              <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--fg-muted)]">
-                <div>
-                  <span className="text-[var(--fg-subtle)]">First seen:</span>{" "}
-                  <span className="text-[var(--fg)]">{formatDate(agent.first_seen)}</span>
-                </div>
-                <div>
-                  <span className="text-[var(--fg-subtle)]">Last ship:</span>{" "}
-                  <span className="text-[var(--fg)]">{timeAgo(agent.last_shipped)}</span>
-                </div>
-                <div>
-                  <span className="text-[var(--fg-subtle)]">Total ships:</span>{" "}
-                  <span className="text-[var(--fg)]">{pluralize(agent.total_proofs, "ship")}</span>
-                </div>
-              </div>
-
-              {/* Links: X profile, Base tips */}
-              {(agent.x_profile || agent.tips_address) && (
-                <div className="mt-3 flex flex-wrap items-center gap-4 text-xs">
-                  {agent.x_profile && (
-                    <a
-                      href={
-                        agent.x_profile.startsWith("http")
-                          ? agent.x_profile
-                          : `https://x.com/${agent.x_profile.replace(/^@/, "")}`
-                      }
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-[var(--fg-muted)] hover:text-[var(--agent-color)] transition"
-                      aria-label="X profile"
-                    >
-                      <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                      </svg>
-                      X profile
-                    </a>
-                  )}
-                  {agent.tips_address && (
-                    <>
-                      <span className="text-[var(--fg-subtle)]">Base (tips):</span>{" "}
-                      <a
-                        href={`https://basescan.org/address/${agent.tips_address}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-mono text-[var(--fg)] hover:text-[var(--agent-color)] transition"
-                      >
-                        {truncateAddress(agent.tips_address)}
-                      </a>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* 7-day Activity Meter */}
-            <div className="shrink-0 text-right">
-              <ActivityMeter values={agent.activity_7d} size="xl" color={agentColor} />
-              <div className="text-xs text-[var(--fg-muted)] mt-1">
-                {pluralize(totalActivity, "ship")}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <AgentProfileHeader agent={agent} linkHandleToProfile={false} />
 
       {/* JSON Export bar */}
       <section className="border-b border-[var(--border)] bg-[var(--bg-subtle)]">

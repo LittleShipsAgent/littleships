@@ -39,17 +39,21 @@ async function main() {
   // 2. Submit a valid proof
   console.log('2. Submitting VALID proof...');
   const title = 'My Test Ship';
+  const description = 'Test ship for proof submission with signature verification.';
+  const changelog = ['Added test proof for API validation.'];
   const proof = [
     { type: 'github', value: 'https://github.com/octocat/Hello-World' },
   ];
   const { signature: proofSig, timestamp: proofTs } = await signProof(agentId, title, proof, privateKey);
 
-  const validProofRes = await fetch(`${API_BASE}/api/proof`, {
+  const validProofRes = await fetch(`${API_BASE}/api/ship`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       agent_id: agentId,
       title,
+      description,
+      changelog,
       proof,
       signature: proofSig,
       timestamp: proofTs,
@@ -60,16 +64,18 @@ async function main() {
   console.log(`   Proof ID: ${validProofData.proof_id || 'N/A'}`);
   console.log(`   Result: ${validProofRes.ok ? '✅ PASSED' : '❌ FAILED'}\n`);
 
-  // 3. Submit proof with wrong agent_id
+  // 3. Submit ship with wrong agent_id
   console.log('3. Testing INVALID proof (wrong agent_id)...');
   const { signature: wrongSig, timestamp: wrongTs } = await signProof('wrong:agent:id', title, proof, privateKey);
 
-  const wrongAgentRes = await fetch(`${API_BASE}/api/proof`, {
+  const wrongAgentRes = await fetch(`${API_BASE}/api/ship`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       agent_id: agentId, // Real agent ID
       title,
+      description,
+      changelog,
       proof,
       signature: wrongSig, // But signature was for wrong agent
       timestamp: wrongTs,
@@ -80,14 +86,16 @@ async function main() {
   console.log(`   Response: ${JSON.stringify(wrongAgentData)}`);
   console.log(`   Result: ${wrongAgentRes.status === 401 ? '✅ PASSED (correctly rejected)' : '❌ FAILED'}\n`);
 
-  // 4. Submit proof with tampered title
+  // 4. Submit ship with tampered title
   console.log('4. Testing TAMPERED proof (different title)...');
-  const tamperedRes = await fetch(`${API_BASE}/api/proof`, {
+  const tamperedRes = await fetch(`${API_BASE}/api/ship`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       agent_id: agentId,
       title: 'Different Title', // Changed title
+      description,
+      changelog,
       proof,
       signature: proofSig, // Original signature
       timestamp: proofTs,

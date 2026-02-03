@@ -107,6 +107,19 @@ body::before {
     linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
 }
 
+/* Recent Ships — slight repeating dot pattern */
+.recent-ships-dots {
+  background-color: var(--bg);
+  background-image: radial-gradient(circle at 1px 1px, var(--border) 1px, transparent 0);
+  background-size: 24px 24px;
+  background-position: 0 0;
+  background-repeat: repeat;
+}
+
+[data-theme="light"] .recent-ships-dots {
+  background-image: radial-gradient(circle at 1px 1px, var(--border) 1px, transparent 0);
+}
+
 /* Agent badges — per-type styling (teal for verified) */
 .badge-verified {
   border-color: rgba(20, 184, 166, 0.5);

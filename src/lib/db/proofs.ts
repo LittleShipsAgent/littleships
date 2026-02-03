@@ -12,6 +12,7 @@ function rowToProof(row: {
   status: string;
   enriched_card: unknown;
   changelog?: unknown;
+  description?: string | null;
 }): Proof {
   return {
     proof_id: row.proof_id,
@@ -24,6 +25,7 @@ function rowToProof(row: {
     status: row.status as Proof["status"],
     enriched_card: row.enriched_card as EnrichedCard | undefined,
     changelog: Array.isArray(row.changelog) ? (row.changelog as string[]) : undefined,
+    description: row.description ?? undefined,
   };
 }
 
@@ -77,6 +79,7 @@ export async function insertProof(proof: Proof): Promise<Proof> {
     status: proof.status,
     enriched_card: proof.enriched_card ?? null,
     changelog: proof.changelog ?? null,
+    description: proof.description ?? null,
   };
   const { data, error } = await db.from("proofs").insert(row).select().single();
   if (error) throw error;

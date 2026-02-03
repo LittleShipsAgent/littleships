@@ -6,12 +6,13 @@ import { hasDb } from "@/lib/db/client";
 import { inferShipTypeFromArtifact } from "@/lib/utils";
 import { verifyProofSignature } from "@/lib/auth";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
-import { sanitizeTitle, detectPromptInjection } from "@/lib/sanitize";
+import { sanitizeTitle, sanitizeString, detectPromptInjection } from "@/lib/sanitize";
 import { isUrlSafe } from "@/lib/url-security";
 import type { ArtifactType } from "@/lib/types";
 
 // Input length limits
 const MAX_TITLE_LENGTH = 200;
+const MAX_DESCRIPTION_LENGTH = 500;
 const MAX_CHANGELOG_ITEM_LENGTH = 500;
 const MAX_PROOF_VALUE_LENGTH = 2000;
 
@@ -24,14 +25,16 @@ function inferArtifactType(value: string): ArtifactType {
   return "link";
 }
 
-// POST /api/proof - Submit a new proof (per SPEC §7.2); enriches proof per §3.3
+// POST /api/ship - Submit a new ship (per SPEC §7.2); enriches proof per §3.3
 export async function POST(request: Request) {
   try {
     const payload: SubmitProofPayload = await request.json();
 
-    if (!payload.agent_id || !payload.title || !payload.proof?.length) {
+    const hasDescription = typeof payload.description === "string" && payload.description.trim().length > 0;
+    const hasChangelog = Array.isArray(payload.changelog) && payload.changelog.length >= 1;
+    if (!payload.agent_id || !payload.title || !hasDescription || !hasChangelog || !payload.proof?.length) {
       return NextResponse.json(
-        { error: "Missing required fields: agent_id, title, proof" },
+        { error: "Missing required fields: agent_id, title, description, changelog, proof" },
         { status: 400 }
       );
     }
@@ -43,12 +46,12 @@ export async function POST(request: Request) {
     if (!rateResult.success) {
       return NextResponse.json(
         { error: "Too many proof submissions. Please try again later." },
-        { 
+        {
           status: 429,
           headers: {
             "Retry-After": String(Math.ceil(rateResult.resetIn / 1000)),
             "X-RateLimit-Remaining": "0",
-          }
+          },
         }
       );
     }
@@ -75,6 +78,24 @@ export async function POST(request: Request) {
         { error: `Title must be ${MAX_TITLE_LENGTH} characters or less` },
         { status: 400 }
       );
+    }
+
+    // Sanitize description (required)
+    const descResult = sanitizeString(payload.description, {
+      maxLength: MAX_DESCRIPTION_LENGTH,
+      stripHtml: true,
+      allowNewlines: true,
+    });
+    const sanitizedDescription = descResult.clean.trim();
+    if (!sanitizedDescription) {
+      return NextResponse.json(
+        { error: "Description is required and must be non-empty after sanitization" },
+        { status: 400 }
+      );
+    }
+    const descriptionInjections = detectPromptInjection(payload.description);
+    if (descriptionInjections.length > 0) {
+      console.warn(`Potential prompt injection in proof description from ${payload.agent_id}:`, descriptionInjections);
     }
 
     if (payload.proof.length > 10) {
@@ -106,16 +127,20 @@ export async function POST(request: Request) {
       }
     }
 
-    // Validate changelog lengths
-    if (payload.changelog) {
-      for (const item of payload.changelog) {
-        if (typeof item === "string" && item.length > MAX_CHANGELOG_ITEM_LENGTH) {
-          return NextResponse.json(
-            { error: `Changelog items must be ${MAX_CHANGELOG_ITEM_LENGTH} characters or less` },
-            { status: 400 }
-          );
-        }
+    // Validate changelog (required, non-empty; already checked above)
+    for (const item of payload.changelog) {
+      if (typeof item === "string" && item.length > MAX_CHANGELOG_ITEM_LENGTH) {
+        return NextResponse.json(
+          { error: `Changelog items must be ${MAX_CHANGELOG_ITEM_LENGTH} characters or less` },
+          { status: 400 }
+        );
       }
+    }
+    if (payload.changelog.length > 20) {
+      return NextResponse.json(
+        { error: "Changelog must be 1–20 items" },
+        { status: 400 }
+      );
     }
 
     const agent = await getAgent(payload.agent_id);
@@ -147,20 +172,21 @@ export async function POST(request: Request) {
     );
 
     const proof_id = `SHP-${crypto.randomUUID()}`;
-    const changelog = Array.isArray(payload.changelog) && payload.changelog.length > 0
-      ? payload.changelog.filter((s): s is string => typeof s === "string" && s.trim().length > 0).slice(0, 20)
-      : undefined;
+    const changelog = payload.changelog
+      .filter((s): s is string => typeof s === "string" && s.trim().length > 0)
+      .slice(0, 20);
     const proof = {
       proof_id,
       agent_id: payload.agent_id,
       title: sanitizedTitle,
+      description: sanitizedDescription,
       ship_type,
       artifact_type: primaryType,
       proof: proofItems,
       timestamp: new Date().toISOString(),
       status,
       enriched_card,
-      changelog: changelog?.length ? changelog : undefined,
+      changelog: changelog.length ? changelog : undefined,
     };
 
     if (hasDb()) {
@@ -175,10 +201,12 @@ export async function POST(request: Request) {
       }
     }
 
+    const baseUrl = new URL(request.url).origin;
     return NextResponse.json({
       success: true,
       proof_id,
       proof_url: `/proof/${proof_id}`,
+      proof_json_url: `${baseUrl}/api/ship/${proof_id}`,
       proof,
     });
   } catch {

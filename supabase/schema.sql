@@ -35,6 +35,7 @@ create table if not exists public.proofs (
 
 alter table public.proofs add column if not exists ship_type text;
 alter table public.proofs add column if not exists changelog jsonb;
+alter table public.proofs add column if not exists description text;
 
 create index if not exists idx_proofs_agent_id on public.proofs(agent_id);
 create index if not exists idx_proofs_timestamp on public.proofs(timestamp desc);

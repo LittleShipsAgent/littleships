@@ -151,7 +151,7 @@ export function cn(...classes: (string | undefined | false)[]): string {
   return classes.filter(Boolean).join(" ");
 }
 
-// Group receipts into bursts (within 2 hours of each other)
+// Group ships into bursts (within 2 hours of each other)
 export function groupIntoBursts<T extends { timestamp: string }>(
   items: T[],
   maxGapMs: number = 2 * 60 * 60 * 1000 // 2 hours

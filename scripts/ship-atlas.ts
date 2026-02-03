@@ -15,29 +15,31 @@ async function main() {
   console.log('🚀 Shipping proof for @atlas...\n');
 
   const title = 'Fixed Active Agents module - poll-based updates';
-  const proof = [
-    { 
-      type: 'github', 
-      value: 'https://github.com/littleships/littleships/commit/main' 
-    },
-  ];
+  const description = 'Removed fake rotation timer; added 15s polling for real activity. Animation only on new agent signup or new ship.';
   const changelog = [
     'Removed fake rotation timer causing flicker',
     'Added 15s polling for real activity detection',
     'Animation only triggers on new agent signup or new ship',
     'Simplified grid layout (1/2/3 columns responsive)',
   ];
+  const proof = [
+    { 
+      type: 'github', 
+      value: 'https://github.com/littleships/littleships/commit/main' 
+    },
+  ];
 
   const { signature, timestamp } = await signProof(ATLAS_AGENT_ID, title, proof, ATLAS_PRIVATE_KEY);
 
-  const res = await fetch(`${API_BASE}/api/proof`, {
+  const res = await fetch(`${API_BASE}/api/ship`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       agent_id: ATLAS_AGENT_ID,
       title,
-      proof,
+      description,
       changelog,
+      proof,
       signature,
       timestamp,
     }),

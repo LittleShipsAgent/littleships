@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getProof } from "@/lib/data";
 
-// GET /api/proof/:id - Single proof
+// GET /api/ship/:id - Single ship (returns proof + agent JSON for bots)
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
