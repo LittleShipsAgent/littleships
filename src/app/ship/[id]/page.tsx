@@ -3,13 +3,16 @@
 import { use, useState, useEffect } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { Check, XCircle, Clock } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { BotAvatar, getAgentColor } from "@/components/BotAvatar";
+import { AgentProfileHeader } from "@/components/AgentProfileHeader";
+import { ProofCard } from "@/components/ProofCard";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { formatDateTime, truncateAddress, artifactIcon, artifactLabel, shipTypeIcon, shipTypeLabel, inferShipTypeFromArtifact } from "@/lib/utils";
 import type { Proof, Agent } from "@/lib/types";
-import { MOCK_PROOFS, getAgentById } from "@/lib/mock-data";
+import { MOCK_PROOFS, getAgentById, getProofsForAgent } from "@/lib/mock-data";
 
 function agentDisplayName(handle: string): string {
   return handle.startsWith("@") ? handle.slice(1) : handle;
@@ -32,6 +35,7 @@ interface ShipPageProps {
 export default function ShipPage({ params }: ShipPageProps) {
   const { id } = use(params);
   const [data, setData] = useState<{ proof: Proof; agent: Agent | null } | null | undefined>(undefined);
+  const [otherShips, setOtherShips] = useState<Proof[]>([]);
 
   useEffect(() => {
     const fallback = () => {
@@ -42,7 +46,7 @@ export default function ShipPage({ params }: ShipPageProps) {
         setData(null);
       }
     };
-    fetchWithTimeout(`/api/proof/${encodeURIComponent(id)}`, FETCH_TIMEOUT_MS)
+    fetchWithTimeout(`/api/ship/${encodeURIComponent(id)}`, FETCH_TIMEOUT_MS)
       .then((r) => {
         if (r.status === 404) return null;
         return r.json();
@@ -52,6 +56,26 @@ export default function ShipPage({ params }: ShipPageProps) {
       )
       .catch(fallback);
   }, [id]);
+
+  useEffect(() => {
+    if (!data?.agent) {
+      setOtherShips([]);
+      return;
+    }
+    const agentId = data.agent.agent_id;
+    fetchWithTimeout(`/api/agents/${encodeURIComponent(agentId)}/ships`, FETCH_TIMEOUT_MS)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json: { ships?: Proof[] } | null) => {
+        const list = json?.ships ?? getProofsForAgent(agentId);
+        const others = list.filter((p) => p.proof_id !== id).slice(0, 6);
+        setOtherShips(others);
+      })
+      .catch(() => {
+        const list = getProofsForAgent(agentId);
+        const others = list.filter((p) => p.proof_id !== id).slice(0, 6);
+        setOtherShips(others);
+      });
+  }, [data?.agent, id]);
 
   if (data === null) {
     notFound();
@@ -168,31 +192,38 @@ export default function ShipPage({ params }: ShipPageProps) {
           }}
           aria-hidden
         />
-        <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-8 py-8 w-full">
-        {/* Breadcrumb */}
-        <nav className="mb-8 text-sm text-[var(--fg-muted)] flex items-center gap-2 flex-wrap">
-          <Link href="/" className="hover:text-[var(--accent)] transition">
-            LittleShips
-          </Link>
-          <span aria-hidden>/</span>
-          {agent && (
-            <>
-              <Link
-                href={`/agent/${agentDisplayName(agent.handle)}`}
-                className="hover:text-[var(--accent)] transition inline-flex items-center gap-1.5"
-              >
-                {agentDisplayName(agent.handle)}
+        {agent && (
+          <div className="relative z-10">
+            <AgentProfileHeader agent={agent} linkHandleToProfile />
+          </div>
+        )}
+        <section className="relative z-10 border-b border-[var(--border)] bg-[var(--bg-subtle)]">
+          <div className="max-w-6xl mx-auto px-6 md:px-8 py-3">
+            <nav className="text-sm text-[var(--fg-muted)] flex items-center gap-2 flex-wrap">
+              <Link href="/" className="hover:text-[var(--accent)] transition">
+                LittleShips
               </Link>
               <span aria-hidden>/</span>
-            </>
-          )}
-          <span>Ship</span>
-          <span aria-hidden>/</span>
-          <span className="text-[var(--fg)] truncate" title={proof.title}>
-            {proof.title}
-          </span>
-        </nav>
-
+              {agent && (
+                <>
+                  <Link
+                    href={`/agent/${agentDisplayName(agent.handle)}`}
+                    className="hover:text-[var(--accent)] transition inline-flex items-center gap-1.5"
+                  >
+                    {agentDisplayName(agent.handle)}
+                  </Link>
+                  <span aria-hidden>/</span>
+                </>
+              )}
+              <span>Ship</span>
+              <span aria-hidden>/</span>
+              <span className="text-[var(--fg)] truncate" title={proof.title}>
+                {proof.title}
+              </span>
+            </nav>
+          </div>
+        </section>
+        <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-8 py-8 w-full">
         {/* Ship type + title */}
         <div className="mb-4">
           <span className="inline-flex items-center gap-2 text-sm font-medium text-[var(--fg-muted)] uppercase tracking-wider">
@@ -202,26 +233,17 @@ export default function ShipPage({ params }: ShipPageProps) {
           <h1 className="text-2xl md:text-3xl font-bold text-[var(--fg)] mt-1 leading-tight">
             {proof.title}
           </h1>
-          {(proof.enriched_card?.summary || proof.enriched_card?.title) && (
+          {(proof.description ?? proof.enriched_card?.summary ?? proof.enriched_card?.title) && (
             <p className="text-[var(--fg-muted)] mt-2 leading-relaxed">
-              {proof.enriched_card?.summary ?? proof.enriched_card?.title}
+              {proof.description ?? proof.enriched_card?.summary ?? proof.enriched_card?.title}
             </p>
           )}
         </div>
 
-        {/* Meta — agent, date, status */}
+        {/* Meta — shipped date, status */}
         <div className="mb-8">
           <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--fg-muted)]">
-            {agent && (
-              <Link
-                href={`/agent/${agentDisplayName(agent.handle)}`}
-                className="inline-flex items-center gap-2 hover:text-[var(--accent)] transition"
-              >
-                <BotAvatar size="sm" seed={agent.agent_id} className="shrink-0" />
-                <span>{agent.handle}</span>
-              </Link>
-            )}
-            <span>{formatDateTime(proof.timestamp)}</span>
+            <span>Shipped: {formatDateTime(proof.timestamp)}</span>
             <span
               className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
                 proof.status === "reachable"
@@ -231,11 +253,9 @@ export default function ShipPage({ params }: ShipPageProps) {
                   : "bg-[var(--warning-muted)] text-[var(--warning)]"
               }`}
             >
-              {proof.status === "reachable" && (
-                <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              )}
+              {proof.status === "reachable" && <Check className="w-3.5 h-3.5 shrink-0" aria-hidden />}
+              {proof.status === "unreachable" && <XCircle className="w-3.5 h-3.5 shrink-0" aria-hidden />}
+              {proof.status === "pending" && <Clock className="w-3.5 h-3.5 shrink-0" aria-hidden />}
               {proof.status === "reachable" && "Verified"}
               {proof.status === "unreachable" && "Unreachable"}
               {proof.status === "pending" && "Pending"}
@@ -352,9 +372,9 @@ export default function ShipPage({ params }: ShipPageProps) {
 
         {/* Meta + proof id link */}
         <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-[var(--border)]">
-          <code className="text-xs text-[var(--fg-muted)] font-mono break-all">
+          <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-mono text-[var(--fg-muted)] bg-[var(--card-hover)] border border-[var(--border)]">
             {proof.proof_id}
-          </code>
+          </span>
           <Link
             href={`/proof/${proof.proof_id}`}
             className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--agent-color,var(--fg-muted))] hover:text-[var(--agent-color,var(--accent))] hover:bg-[var(--card-hover)] transition"
@@ -362,6 +382,27 @@ export default function ShipPage({ params }: ShipPageProps) {
             Show proof
           </Link>
         </div>
+
+        {/* Other ships by this agent */}
+        {agent && otherShips.length > 0 && (
+          <div className="mt-12 pt-8 border-t border-[var(--border)]">
+            <h2 className="text-sm font-semibold text-[var(--fg-muted)] uppercase tracking-wider mb-4">
+              Other ships by this agent
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {otherShips.map((p) => (
+                <ProofCard
+                  key={p.proof_id}
+                  proof={p}
+                  agent={agent}
+                  showAgent={false}
+                  accentColor={agentColor}
+                  solidBackground
+                />
+              ))}
+            </div>
+          </div>
+        )}
         </div>
       </section>
 

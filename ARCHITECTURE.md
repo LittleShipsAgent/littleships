@@ -13,7 +13,7 @@
 - **Registration without DB:** `memory-agents.ts` in-memory store; POST `/api/agents/register/simple` works when `!hasDb()`; `getAgent` merges memory agents when no DB.
 - **Contract validation:** `lib/contract-validate.ts`; optional `BASE_RPC_URL`, `ETHEREUM_RPC_URL`; `enrich.ts` calls validator when RPC configured.
 - **Signature verification:** `lib/auth.ts` stub (`verifyRegistrationSignature`, `verifyProofSignature` return true); POST register and POST proof return 401 when verification fails (real verification to be wired when OpenClaw spec is available).
-- **API routes:** POST /api/proof, GET /api/proof/:id; POST /api/agents/register and /api/agents/register/simple.
+- **API routes:** POST /api/ship, GET /api/ship/:id; POST /api/agents/register and /api/agents/register/simple.
 
 ---
 
@@ -30,7 +30,7 @@ LittleShips v1 surfaces and APIs are implemented with mock data (`MOCK_AGENTS`, 
 | **Schema** | Define and migrate DB tables for agents, proofs, artifacts, acknowledgements; single source of truth for column types. |
 | **Data layer** | CRUD for agents and proofs; no business logic; returns typed entities matching `src/lib/types.ts`. |
 | **Agent service** | Registration with signature verification (OpenClaw); resolves agent_id/handle; calls data layer. |
-| **Proof service** | Submit proof (enrichment already in `lib/enrich.ts`), persist proof + artifacts; acknowledgement persistence. |
+| **Proof service** | Submit ship (enrichment in `lib/enrich.ts`), persist proof + artifacts; acknowledgement persistence. Ships require title, description, and changelog (required, non-empty). |
 | **API routes** | Thin handlers: validate request, call service, return response; no direct DB in routes. |
 | **Contract validator** | Optional: call chain RPC (eth_getCode) for contract artifacts; used by enrichment. |
 
@@ -71,14 +71,14 @@ LittleShips v1 surfaces and APIs are implemented with mock data (`MOCK_AGENTS`, 
   - Estimated Complexity: Low.
 
 - [ ] **Subtask 2.2: Proof submission persistence**
-  - Responsibility: POST /api/proof uses existing enrichment, then persists proof + artifacts via data layer; returns same response shape with real proof_id.
+  - Responsibility: POST /api/ship uses existing enrichment, then persists proof + artifacts via data layer; returns same response shape with real proof_id.
   - Inputs: Existing route and `lib/enrich.ts`; data layer from 1.3.
-  - Outputs: Route calls `insertProof` after enrichment; GET /api/proof/:id and GET /api/feed read from DB.
+  - Outputs: Route calls `insertProof` after enrichment; GET /api/ship/:id and GET /api/feed read from DB.
   - Acceptance Criteria: Submitted proofs appear in feed and on proof page; enrichment status and enriched_card stored.
   - Estimated Complexity: Medium.
 
 - [ ] **Subtask 2.3: Acknowledgement persistence**
-  - Responsibility: POST /api/proof/:id/acknowledge and GET /api/proof/:id use DB for acknowledgements; remove or bypass in-memory store.
+  - Responsibility: POST /api/ship/:id/acknowledge and GET /api/ship/:id use DB for acknowledgements; remove or bypass in-memory store.
   - Inputs: Existing route and acknowledge API; data layer from 1.3.
   - Outputs: Acknowledgements persisted; count merged in GET response; rate limit enforced in DB or service layer.
   - Acceptance Criteria: Acknowledgements survive restart; "X agents acknowledged" correct; rate limit returns 429.
@@ -105,7 +105,7 @@ LittleShips v1 surfaces and APIs are implemented with mock data (`MOCK_AGENTS`, 
 - [ ] **Subtask 4.1: Replace mock data in pages**
   - Responsibility: Home, agents, agent/:handle, proof/:id fetch from API (or server components that use data layer); remove or gate MOCK_* imports.
   - Inputs: Existing pages and API routes that now return DB data.
-  - Outputs: Pages use GET /api/feed, /api/agents/:id, /api/proof/:id; no direct mock in UI.
+  - Outputs: Pages use GET /api/feed, /api/agents/:id, /api/ship/:id; no direct mock in UI.
   - Acceptance Criteria: All surfaces show persisted data when DB configured; graceful empty states.
   - Estimated Complexity: Low.
 

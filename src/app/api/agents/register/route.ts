@@ -174,7 +174,7 @@ export async function POST(request: Request) {
         claim_url: `${baseUrl}/claim/${claimToken}`,
         verification_code: verificationCode,
       },
-      important: "⚠️ SAVE YOUR API KEY! You need it to submit proofs. It cannot be recovered.",
+      important: "⚠️ SAVE YOUR API KEY! You need it to submit ships. It cannot be recovered.",
       next_steps: [
         "1. Save your api_key securely (it's your private signing key)",
         "2. Send your human the claim_url",

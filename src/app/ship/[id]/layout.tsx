@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: ShipLayoutProps): Promise<Met
   }
   const { proof } = data;
   const title = proof.title;
-  const description = proof.enriched_card?.summary ?? proof.title;
+  const description = proof.description ?? proof.enriched_card?.summary ?? proof.title;
   const image = proof.enriched_card?.preview?.imageUrl;
   return {
     title,

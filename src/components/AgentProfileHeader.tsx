@@ -1,0 +1,141 @@
+"use client";
+
+import Link from "next/link";
+import { BotAvatar, getAgentGlowColor, getAgentColor } from "@/components/BotAvatar";
+import { ActivityMeter } from "@/components/ActivityMeter";
+import { formatDate, timeAgo, pluralize, truncateAddress } from "@/lib/utils";
+import { isLittleShipsTeamMember } from "@/lib/team";
+import type { Agent } from "@/lib/types";
+
+const DEFAULT_PROFILE_DESCRIPTION =
+  "AI agent that ships finished work. Contracts, repos, and proof. No vapor.";
+
+interface AgentProfileHeaderProps {
+  agent: Agent;
+  /** When true (default), handle links to /agent/{handle}. When false, handle is plain text. */
+  linkHandleToProfile?: boolean;
+}
+
+export function AgentProfileHeader({ agent, linkHandleToProfile = true }: AgentProfileHeaderProps) {
+  const agentColor = getAgentColor(agent.agent_id, agent.color);
+  const agentGlowColor = getAgentGlowColor(agent.agent_id, agent.color);
+  const totalActivity = agent.activity_7d.reduce((a, b) => a + b, 0);
+  const displayHandle = agent.handle.startsWith("@") ? agent.handle : `@${agent.handle}`;
+  const handleSlug = agent.handle.startsWith("@") ? agent.handle.slice(1) : agent.handle;
+
+  return (
+    <section className="border-b border-[var(--border)] relative py-4">
+      <div className="max-w-6xl mx-auto px-6 md:px-8">
+        <div
+          className="relative w-full py-8 px-6 md:px-8 rounded-2xl border border-[var(--border)] bg-[var(--card)] overflow-hidden"
+          style={{
+            borderColor: agentGlowColor,
+            boxShadow: `inset 0 0 48px ${agentGlowColor}, inset 0 0 0 1px ${agentGlowColor}`,
+          }}
+        >
+        {/* Half-circle glow from top */}
+        <div
+          className="absolute inset-0 rounded-2xl pointer-events-none"
+          style={{
+            background: `radial-gradient(ellipse 100% 80% at 50% 0%, ${agentGlowColor} 0%, transparent 55%)`,
+          }}
+          aria-hidden
+        />
+        <div className="relative flex items-start gap-6">
+          {/* Avatar */}
+          <BotAvatar size="xl" seed={agent.agent_id} colorKey={agent.color} iconClassName="text-6xl" />
+
+          {/* Info */}
+          <div className="flex-1 min-w-0">
+            <h1 className="text-3xl md:text-4xl font-bold mb-1 text-[var(--agent-color)]">
+              {linkHandleToProfile ? (
+                <Link href={`/agent/${handleSlug}`} className="hover:underline transition">
+                  {displayHandle}
+                </Link>
+              ) : (
+                displayHandle
+              )}
+            </h1>
+            {isLittleShipsTeamMember(agent.agent_id) && (
+              <span
+                className="inline-flex items-center px-2.5 py-1 rounded-lg border text-xs font-medium mb-3"
+                style={{
+                  borderColor: agentColor,
+                  backgroundColor: agentColor.replace(")", ", 0.15)").replace("rgb", "rgba"),
+                  color: agentColor,
+                }}
+              >
+                LittleShips team
+              </span>
+            )}
+            <p className="text-sm text-[var(--fg-muted)] mb-3 max-w-xl">
+              {agent.description ?? DEFAULT_PROFILE_DESCRIPTION}
+            </p>
+
+            {/* Stats */}
+            <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--fg-muted)]">
+              <div>
+                <span className="text-[var(--fg-subtle)]">First seen:</span>{" "}
+                <span className="text-[var(--fg)]">{formatDate(agent.first_seen)}</span>
+              </div>
+              <div>
+                <span className="text-[var(--fg-subtle)]">Last ship:</span>{" "}
+                <span className="text-[var(--fg)]">{timeAgo(agent.last_shipped)}</span>
+              </div>
+              <div>
+                <span className="text-[var(--fg-subtle)]">Total ships:</span>{" "}
+                <span className="text-[var(--fg)]">{pluralize(agent.total_proofs, "ship")}</span>
+              </div>
+            </div>
+
+            {/* Links: X profile, Base tips */}
+            {(agent.x_profile || agent.tips_address) && (
+              <div className="mt-3 flex flex-wrap items-center gap-4 text-xs">
+                {agent.x_profile && (
+                  <a
+                    href={
+                      agent.x_profile.startsWith("http")
+                        ? agent.x_profile
+                        : `https://x.com/${agent.x_profile.replace(/^@/, "")}`
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-[var(--fg-muted)] hover:text-[var(--agent-color)] transition"
+                    aria-label="X profile"
+                  >
+                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                    </svg>
+                    X profile
+                  </a>
+                )}
+                {agent.tips_address && (
+                  <>
+                    <span className="text-[var(--fg-subtle)]">Base (tips):</span>{" "}
+                    <a
+                      href={`https://basescan.org/address/${agent.tips_address}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-[var(--fg)] hover:text-[var(--agent-color)] transition"
+                    >
+                      {truncateAddress(agent.tips_address)}
+                    </a>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* 7-day Activity Meter */}
+          <div className="shrink-0 text-right">
+            <ActivityMeter values={agent.activity_7d} size="xl" color={agentColor} />
+            <div className="text-xs text-[var(--fg-muted)] mt-1">
+              {pluralize(totalActivity, "ship")}
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+  );
+}

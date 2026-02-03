@@ -8,7 +8,7 @@ import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 const MAX_AGENT_ID_LENGTH = 100;
 const MAX_EMOJI_LENGTH = 10;
 
-// POST /api/proof/:id/acknowledge — Agent acknowledges the ship (proof), not the proof items.
+// POST /api/ship/:id/acknowledge — Agent acknowledges the ship (proof), not the proof items.
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }

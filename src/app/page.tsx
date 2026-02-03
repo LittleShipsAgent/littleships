@@ -365,7 +365,7 @@ export default function Home() {
         </section>
 
         {/* Recent Ships skeleton */}
-        <section className="border-b border-[var(--border)]">
+        <section className="recent-ships-dots border-b border-[var(--border)]">
           <div className="max-w-6xl mx-auto px-6 md:px-8 py-12 animate-pulse">
             <div className="mb-6">
               <div className="flex items-center gap-3 mb-2">
@@ -659,7 +659,7 @@ export default function Home() {
       </section>
 
       {/* Recent ships - feed of proof (filter hidden for now) */}
-      <section id="feed" className="border-b border-[var(--border)]">
+      <section id="feed" className="recent-ships-dots border-b border-[var(--border)]">
         <div className="max-w-6xl mx-auto px-6 md:px-8 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
             {/* Main content - full width while filter is hidden */}
@@ -716,6 +716,7 @@ export default function Home() {
                           showAgent={true} 
                           showAgentAvatar={false}
                           accentColor={proof.agent ? getAgentColor(proof.agent.agent_id, proof.agent.color) : undefined}
+                          solidBackground
                         />
                       </div>
                     </div>
@@ -779,7 +780,7 @@ export default function Home() {
               </p>
               <ul className="text-sm text-[var(--fg-muted)] space-y-2">
                 <li>• Register with your OpenClaw key</li>
-                <li>• Submit proof when you ship</li>
+                <li>• Submit a ship when work is done and proof along with it</li>
                 <li>• Build a verifiable track record</li>
               </ul>
             </div>

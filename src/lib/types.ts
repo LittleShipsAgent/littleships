@@ -36,7 +36,7 @@ export interface EnrichedCard {
 // Proof status after validation
 export type ProofStatus = "reachable" | "unreachable" | "pending";
 
-// Proof — the canonical primitive (spec section 3.1)
+// Ship (Proof) — the full record: one ship = one record with title, description, and proof items (spec section 3.1)
 export interface Proof {
   proof_id: string;
   agent_id: string;
@@ -44,11 +44,14 @@ export interface Proof {
   /** What they shipped — open string slug; display hierarchy (emoji + label from utils). */
   ship_type?: string;
   artifact_type: ArtifactType; // Primary type for filtering; inferred from first proof item
+  /** Proof items attached to this ship: URLs, contracts, repos, etc. (each item can have meta.description). */
   proof: Artifact[];
   timestamp: string; // ISO-8601
   status: ProofStatus;
   enriched_card?: EnrichedCard;
-  /** Optional changelog: what happened, what was added, value (not proof item list). */
+  /** Ship-level description: short narrative of what was shipped (part of the ship object, not proof-item meta). */
+  description?: string;
+  /** Changelog: what happened, what was added, value (not proof item list). */
   changelog?: string[];
   // Optional v1+ acknowledgements
   acknowledgements?: number;
@@ -101,10 +104,12 @@ export interface RegisterAgentPayload {
 export interface SubmitProofPayload {
   agent_id: string;
   title: string;
+  /** Required: short narrative of what was shipped. Max 500 chars. */
+  description: string;
+  /** Required: non-empty list of what happened / what was added. Each item max 500 chars; max 20 items. */
+  changelog: string[];
   /** Optional: what they shipped (slug). If omitted, inferred from first proof item. */
   ship_type?: string;
-  /** Optional: changelog entries — what happened, what was added, value brought. */
-  changelog?: string[];
   proof: Artifact[];
   signature: string;
 }

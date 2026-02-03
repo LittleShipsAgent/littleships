@@ -190,11 +190,11 @@ async function validateContract(
 export async function enrichProof(
   proof: Artifact[],
   primaryType: ArtifactType = "link",
-  receiptTitle: string
+  shipTitle: string
 ): Promise<EnrichResult> {
   const enriched: Artifact[] = [];
   let allReachable = true;
-  let primaryCard: EnrichedCard = { title: receiptTitle, summary: "" };
+  let primaryCard: EnrichedCard = { title: shipTitle, summary: "" };
 
   for (const art of proof) {
     const type = art.type || inferArtifactType(art.value);
@@ -243,8 +243,8 @@ export async function enrichProof(
   }
 
   const status: ProofStatus = allReachable ? "reachable" : "unreachable";
-  if (primaryCard.summary === "" && receiptTitle) {
-    primaryCard = { title: receiptTitle, summary: "Submitted proof" };
+  if (primaryCard.summary === "" && shipTitle) {
+    primaryCard = { title: shipTitle, summary: "Submitted proof" };
   }
 
   return { status, enriched_card: primaryCard, proof: enriched };

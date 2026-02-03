@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Check, XCircle, Clock, Bot } from "lucide-react";
 import { Proof, Agent } from "@/lib/types";
 import { timeAgo, shipTypeIcon, shipTypeLabel, inferShipTypeFromArtifact, pluralize } from "@/lib/utils";
 import { CategoryIcon } from "@/components/CategoryIcon";
@@ -14,9 +15,11 @@ interface ProofCardProps {
   showAgentAvatar?: boolean;
   /** Optional accent color for hover states (matches agent's profile color) */
   accentColor?: string;
+  /** When true, use opaque background so patterned section backgrounds (e.g. dots) don't show through */
+  solidBackground?: boolean;
 }
 
-export function ProofCard({ proof, agent, showAgent = true, showAgentAvatar = true, accentColor }: ProofCardProps) {
+export function ProofCard({ proof, agent, showAgent = true, showAgentAvatar = true, accentColor, solidBackground = false }: ProofCardProps) {
   const router = useRouter();
   const shipType = proof.ship_type ?? inferShipTypeFromArtifact(proof.artifact_type);
   const label = shipTypeLabel(shipType);
@@ -24,10 +27,15 @@ export function ProofCard({ proof, agent, showAgent = true, showAgentAvatar = tr
   const proofUrl = `/proof/${proof.proof_id}`;
   const proofCount = proof.proof.length;
   const ackCount = proof.acknowledgements ?? 0;
-  const description =
-    proof.enriched_card?.summary ||
-    proof.proof[0]?.meta?.description ||
+  const rawDescription =
+    proof.description ??
+    proof.enriched_card?.summary ??
+    proof.proof[0]?.meta?.description ??
     "";
+  const description =
+    rawDescription && rawDescription.trim().toLowerCase() !== proof.title.trim().toLowerCase()
+      ? rawDescription
+      : "";
   const reactionEmojis =
     proof.acknowledgement_emojis && Object.keys(proof.acknowledgement_emojis).length > 0
       ? Object.values(proof.acknowledgement_emojis).slice(0, 2)
@@ -44,7 +52,7 @@ export function ProofCard({ proof, agent, showAgent = true, showAgentAvatar = tr
           router.push(shipUrl);
         }
       }}
-      className="bg-[var(--card)] border border-[var(--border)] hover:border-[var(--border-hover)] rounded-2xl p-5 hover:bg-[var(--card-hover)] hover:shadow-lg hover:shadow-black/10 hover:-translate-y-0.5 transition-all duration-200 group w-full cursor-pointer"
+      className={`opacity-95 hover:opacity-100 border border-[var(--border)] hover:border-[var(--border-hover)] rounded-2xl p-5 hover:shadow-lg hover:shadow-black/10 hover:-translate-y-0.5 transition-all duration-200 group w-full cursor-pointer ${solidBackground ? "bg-[var(--bg-muted)] hover:bg-[var(--bg-subtle)]" : "bg-[var(--card)] hover:bg-[var(--card-hover)]"}`}
       style={
         accentColor ? ({ "--card-accent": accentColor } as React.CSSProperties) : undefined
       }
@@ -81,12 +89,12 @@ export function ProofCard({ proof, agent, showAgent = true, showAgentAvatar = tr
                   : "bg-[var(--warning-muted)] text-[var(--warning)] border-transparent"
               }`}
             >
-              {proof.status === "reachable" && (
-                <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              )}
-              {proof.status === "reachable" ? "Verified" : proof.status === "unreachable" ? "Unreachable" : "Pending"}
+              {proof.status === "reachable" && <Check className="w-3.5 h-3.5 shrink-0" aria-hidden />}
+              {proof.status === "unreachable" && <XCircle className="w-3.5 h-3.5 shrink-0" aria-hidden />}
+              {proof.status === "pending" && <Clock className="w-3.5 h-3.5 shrink-0" aria-hidden />}
+              {proof.status === "reachable" && "Verified"}
+              {proof.status === "unreachable" && "Unreachable"}
+              {proof.status === "pending" && "Pending"}
             </span>
           </div>
 
@@ -98,8 +106,8 @@ export function ProofCard({ proof, agent, showAgent = true, showAgentAvatar = tr
               onClick={(e) => e.stopPropagation()}
             >
               {showAgentAvatar && (
-                <span className="w-8 h-8 rounded-full bg-[var(--card-hover)] border border-[var(--border)] flex items-center justify-center text-lg leading-none" aria-hidden>
-                  🤖
+                <span className="w-8 h-8 rounded-full bg-[var(--card-hover)] border border-[var(--border)] flex items-center justify-center text-[var(--fg-muted)]" aria-hidden>
+                  <Bot className="w-4 h-4" />
                 </span>
               )}
               @{agent.handle.replace("@", "")}
