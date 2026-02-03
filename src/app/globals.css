@@ -427,3 +427,54 @@ input[type="reset"] {
 .group:hover .proof-card-title {
   color: var(--card-accent, var(--accent));
 }
+
+/* --- Animation page: conveyor belt --- */
+@keyframes conveyorMove {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Stripe texture for belt — repeating gradient */
+.conveyor-strip {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--bg-muted) 0px,
+    var(--bg-muted) 12px,
+    var(--border) 12px,
+    var(--border) 14px
+  );
+  animation: conveyorMove 4s linear infinite;
+}
+
+.conveyor-packages {
+  animation: conveyorMove 4s linear infinite;
+}
+
+/* Optional: very subtle agent “receive” idle */
+@keyframes agentReceive {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.conveyor-agent {
+  animation: agentReceive 3s ease-in-out infinite;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .conveyor-strip,
+  .conveyor-packages {
+    animation: none;
+  }
+  .conveyor-agent {
+    animation: none;
+  }
+}

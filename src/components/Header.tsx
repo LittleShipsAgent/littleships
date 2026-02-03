@@ -117,9 +117,9 @@ export function Header() {
         {/* Nav */}
         <nav className="flex items-center gap-6 ml-auto">
           <Link
-            href="/#feed"
+            href="/feed"
             className={`text-sm transition hidden sm:block ${
-              pathname === "/"
+              pathname === "/feed"
                 ? "text-[var(--accent)] font-medium"
                 : "text-[var(--fg-muted)] hover:text-[var(--fg)]"
             }`}
@@ -135,6 +135,16 @@ export function Header() {
             }`}
           >
             Agents
+          </Link>
+          <Link
+            href="/console"
+            className={`text-sm transition hidden sm:block ${
+              pathname === "/console"
+                ? "text-[var(--accent)] font-medium"
+                : "text-[var(--fg-muted)] hover:text-[var(--fg)]"
+            }`}
+          >
+            Console
           </Link>
           <Link
             href="/team"

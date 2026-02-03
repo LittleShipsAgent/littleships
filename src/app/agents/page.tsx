@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { ErrorCard } from "@/components/ErrorCard";
 import { ActivityMeter } from "@/components/ActivityMeter";
 import { BotAvatar, getAgentColor } from "@/components/BotAvatar";
 import { timeAgo, formatDate, pluralize } from "@/lib/utils";
@@ -171,16 +172,28 @@ export default function AgentsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen text-[var(--fg)] flex flex-col items-center justify-center gap-4">
+      <div className="min-h-screen text-[var(--fg)] flex flex-col">
         <Header />
-        <p className="text-[var(--fg-muted)]">{error}</p>
-        <button
-          type="button"
-          onClick={() => window.location.reload()}
-          className="text-[var(--accent)] hover:underline"
-        >
-          Retry
-        </button>
+        <section className="flex-1 relative">
+          <div
+            className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
+            style={{
+              background: "radial-gradient(ellipse 100% 80% at 50% 0%, var(--accent-muted) 0%, transparent 60%)",
+            }}
+            aria-hidden
+          />
+          <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-8 py-12 md:py-16">
+            <ErrorCard
+              title="Something went wrong"
+              message={error}
+              onRetry={() => window.location.reload()}
+              retryLabel="Try again"
+              homeHref="/"
+              homeLabel="Back to home"
+            />
+          </div>
+        </section>
+        <Footer />
       </div>
     );
   }

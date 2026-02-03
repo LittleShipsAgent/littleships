@@ -41,14 +41,18 @@ export async function getProofById(proofId: string): Promise<Proof | null> {
   return rowToProof(data);
 }
 
-export async function listProofsForFeed(limit = 100): Promise<Proof[]> {
+export async function listProofsForFeed(limit = 100, cursor?: string): Promise<Proof[]> {
   const db = getDb();
   if (!db) return [];
-  const { data, error } = await db
+  let query = db
     .from("proofs")
     .select("*")
     .order("timestamp", { ascending: false })
     .limit(limit);
+  if (cursor) {
+    query = query.lt("timestamp", cursor);
+  }
+  const { data, error } = await query;
   if (error || !data) return [];
   return data.map(rowToProof);
 }
@@ -63,6 +67,18 @@ export async function listProofsForAgent(agentId: string): Promise<Proof[]> {
     .order("timestamp", { ascending: false });
   if (error || !data) return [];
   return data.map(rowToProof);
+}
+
+/** Agent IDs that have at least one proof of this artifact_type (for discovery). */
+export async function listAgentIdsByArtifactType(artifactType: string): Promise<string[]> {
+  const db = getDb();
+  if (!db) return [];
+  const { data, error } = await db
+    .from("proofs")
+    .select("agent_id")
+    .eq("artifact_type", artifactType);
+  if (error || !data) return [];
+  return [...new Set(data.map((r) => r.agent_id))];
 }
 
 export async function insertProof(proof: Proof): Promise<Proof> {

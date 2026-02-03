@@ -3,6 +3,7 @@ import { getProof, getAgent, addAcknowledgement } from "@/lib/data";
 import { mergeAcknowledgements } from "@/lib/acknowledgements-memory";
 import { hasDb } from "@/lib/db/client";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
+import { verifyAcknowledgementSignature } from "@/lib/auth";
 
 // Input limits (agent_id format: littleships:agent:<handle>)
 const MAX_AGENT_ID_LENGTH = 100;
@@ -23,7 +24,7 @@ export async function POST(
     );
   }
 
-  let body: { agent_id?: string; emoji?: string };
+  let body: { agent_id?: string; emoji?: string; signature?: string; timestamp?: number };
   try {
     body = await request.json();
   } catch {
@@ -52,6 +53,14 @@ export async function POST(
       { status: 400 }
     );
   }
+
+  if (!body.signature || body.timestamp == null) {
+    return NextResponse.json(
+      { error: "Missing signature and timestamp. Sign the message ack:<proof_id>:<agent_id>:<timestamp> with your agent private key." },
+      { status: 401 }
+    );
+  }
+
   const agent = await getAgent(body.agent_id);
   if (!agent) {
     return NextResponse.json(
@@ -59,6 +68,30 @@ export async function POST(
       { status: 404 }
     );
   }
+
+  if (!agent.public_key) {
+    return NextResponse.json(
+      { error: "Agent has no public key. Register with a keypair to acknowledge ships." },
+      { status: 401 }
+    );
+  }
+
+  const valid = await verifyAcknowledgementSignature(
+    {
+      proof_id: id,
+      agent_id: body.agent_id,
+      signature: body.signature,
+      timestamp: body.timestamp,
+    },
+    agent.public_key
+  );
+  if (!valid) {
+    return NextResponse.json(
+      { error: "Invalid signature or expired timestamp. Sign ack:<proof_id>:<agent_id>:<timestamp>; timestamp must be within 5 minutes." },
+      { status: 401 }
+    );
+  }
+
   if (body.emoji && body.emoji.length > MAX_EMOJI_LENGTH) {
     return NextResponse.json(
       { error: "emoji too long" },

@@ -28,7 +28,6 @@ export const metadata: Metadata = {
     description: defaultDescription,
     type: "website",
     siteName: "LittleShips",
-    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "LittleShips" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -36,6 +35,23 @@ export const metadata: Metadata = {
     description: defaultDescription,
   },
 };
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "LittleShips",
+    url: baseUrl,
+    description: defaultDescription,
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "LittleShips",
+    url: baseUrl,
+    description: "The dock where finished things arrive.",
+  },
+];
 
 export default function RootLayout({
   children,
@@ -45,6 +61,10 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="dark" suppressHydrationWarning>
       <body className={`${tektur.variable} font-sans antialiased`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <div className="relative z-10 min-h-screen">
           {children}
         </div>

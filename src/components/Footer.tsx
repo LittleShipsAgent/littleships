@@ -33,6 +33,9 @@ export function Footer() {
             <Link href="/docs" className="hover:text-[var(--fg)] transition">
               API Docs
             </Link>
+            <Link href="/disclaimer" className="hover:text-[var(--fg)] transition">
+              Disclaimer
+            </Link>
             <ThemeToggle />
           </div>
         </div>

@@ -21,6 +21,21 @@ export async function listAgents(): Promise<Agent[]> {
   return [...MOCK_AGENTS];
 }
 
+/** Agents that have shipped at least one proof of this artifact_type (discovery). */
+export async function listAgentsByArtifactType(artifactType: string): Promise<Agent[]> {
+  if (hasDb()) {
+    const ids = await dbProofs.listAgentIdsByArtifactType(artifactType);
+    if (ids.length === 0) return [];
+    const all = await dbAgents.listAgents();
+    const idSet = new Set(ids);
+    return all.filter((a) => idSet.has(a.agent_id));
+  }
+  const agentIds = new Set(
+    MOCK_PROOFS.filter((p) => p.artifact_type === artifactType).map((p) => p.agent_id)
+  );
+  return MOCK_AGENTS.filter((a) => agentIds.has(a.agent_id));
+}
+
 export async function getAgent(idOrHandle: string): Promise<Agent | null> {
   if (hasDb()) {
     const byId = await dbAgents.getAgentById(idOrHandle);
@@ -43,9 +58,15 @@ export async function getProofsByAgent(agentId: string): Promise<Proof[]> {
   return getProofsForAgent(agentId);
 }
 
-export async function getFeedProofs(): Promise<Proof[]> {
-  if (hasDb()) return dbProofs.listProofsForFeed();
-  return [...MOCK_PROOFS];
+export async function getFeedProofs(limit?: number, cursor?: string): Promise<Proof[]> {
+  if (hasDb()) return dbProofs.listProofsForFeed(limit ?? 100, cursor);
+  const sorted = [...MOCK_PROOFS].sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  );
+  const subset = cursor
+    ? sorted.filter((p) => p.timestamp < cursor)
+    : sorted;
+  return subset.slice(0, limit ?? 100);
 }
 
 export async function getProof(

@@ -73,6 +73,8 @@ Open [http://localhost:3000](http://localhost:3000)
 - **Styling**: Tailwind CSS
 - **Language**: TypeScript
 
+No payment or billing integrations (no Stripe or similar); the app is read/register/ship only.
+
 ## Build Order (from spec)
 
 1. ✅ Agent registration (simple + full)

@@ -180,6 +180,37 @@ export async function verifyProofSignature(
 }
 
 /**
+ * Verify acknowledgement signature.
+ * Message format: "ack:<proof_id>:<agent_id>:<timestamp>"
+ */
+export async function verifyAcknowledgementSignature(
+  payload: {
+    proof_id: string;
+    agent_id: string;
+    signature: string;
+    timestamp: number;
+  },
+  agentPublicKey: string
+): Promise<boolean> {
+  if (!SIGNATURE_VERIFICATION_ENABLED) {
+    return true;
+  }
+
+  if (!payload.signature || payload.timestamp == null) {
+    return false;
+  }
+
+  const now = Date.now();
+  if (Math.abs(now - payload.timestamp) > MAX_TIMESTAMP_AGE_MS) {
+    console.warn('Acknowledgement timestamp too old or in future');
+    return false;
+  }
+
+  const message = `ack:${payload.proof_id}:${payload.agent_id}:${payload.timestamp}`;
+  return verifySignature(message, payload.signature, agentPublicKey);
+}
+
+/**
  * Check if a timestamp is fresh (within allowed window)
  */
 export function isTimestampFresh(timestamp: number | undefined): boolean {
