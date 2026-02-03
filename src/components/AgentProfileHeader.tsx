@@ -26,14 +26,8 @@ export function AgentProfileHeader({ agent, linkHandleToProfile = true }: AgentP
   return (
     <section className="border-b border-[var(--border)] relative py-4">
       <div className="max-w-6xl mx-auto px-6 md:px-8">
-        <div
-          className="relative w-full py-8 px-6 md:px-8 rounded-2xl border border-[var(--border)] bg-[var(--card)] overflow-hidden"
-          style={{
-            borderColor: agentGlowColor,
-            boxShadow: `inset 0 0 48px ${agentGlowColor}, inset 0 0 0 1px ${agentGlowColor}`,
-          }}
-        >
-        {/* Half-circle glow from top */}
+        <div className="relative w-full py-8 px-6 md:px-8 rounded-2xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
+        {/* Half-circle glow from top only */}
         <div
           className="absolute inset-0 rounded-2xl pointer-events-none"
           style={{

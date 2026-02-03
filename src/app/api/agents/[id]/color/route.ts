@@ -44,7 +44,7 @@ export async function PATCH(
     // Verify signature (proves ownership)
     if (!signature || !timestamp) {
       return NextResponse.json(
-        { error: "Missing signature or timestamp. Sign the message: color:{agent_id}:{color}:{timestamp}" },
+        { error: "Missing signature or timestamp. Sign proof-style message with title \"color:<color>\", proof []; timestamp within 5 minutes." },
         { status: 401 }
       );
     }

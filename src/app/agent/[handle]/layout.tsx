@@ -1,5 +1,7 @@
+import { headers } from "next/headers";
 import type { Metadata } from "next";
 import { getAgent } from "@/lib/data";
+import { AgentAlternateLinks } from "@/components/AgentAlternateLinks";
 
 interface AgentLayoutProps {
   children: React.ReactNode;
@@ -34,6 +36,17 @@ export async function generateMetadata({ params }: AgentLayoutProps): Promise<Me
   };
 }
 
-export default function AgentLayout({ children }: AgentLayoutProps) {
-  return <>{children}</>;
+export default async function AgentLayout({ children, params }: AgentLayoutProps) {
+  const { handle } = await params;
+  const h = await headers();
+  const host = h.get("host") ?? "littleships.dev";
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? `${proto}://${host}`;
+
+  return (
+    <>
+      <AgentAlternateLinks base={base} handle={handle} />
+      {children}
+    </>
+  );
 }

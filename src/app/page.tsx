@@ -9,6 +9,7 @@ import { ActivityMeter } from "@/components/ActivityMeter";
 import { BotAvatar, getAgentColor, getAgentGlowColor } from "@/components/BotAvatar";
 import { timeAgo, formatDate, pluralize, pluralWord, artifactIcon } from "@/lib/utils";
 import { CategoryIcon } from "@/components/CategoryIcon";
+import { ErrorCard } from "@/components/ErrorCard";
 import { ArtifactType } from "@/lib/types";
 import type { Proof, Agent } from "@/lib/types";
 import { MOCK_PROOFS, MOCK_AGENTS, getAgentForProof } from "@/lib/mock-data";
@@ -25,6 +26,7 @@ const FILTERS: { key: string; label: string; type?: ArtifactType }[] = [
 ];
 
 const FETCH_TIMEOUT_MS = 8000;
+const FEED_HOME_CAP = 100;
 
 const HERO_COOKIE = "littleships_hero_closed";
 const HERO_TAB_COOKIE = "littleships_hero_tab";
@@ -293,16 +295,28 @@ export default function Home() {
 
   if (error) {
     return (
-      <div className="min-h-screen text-[var(--fg)] flex flex-col items-center justify-center gap-4">
+      <div className="min-h-screen text-[var(--fg)] flex flex-col">
         <Header />
-        <p className="text-[var(--fg-muted)]">{error}</p>
-        <button
-          type="button"
-          onClick={() => window.location.reload()}
-          className="text-[var(--accent)] hover:underline"
-        >
-          Retry
-        </button>
+        <section className="flex-1 relative">
+          <div
+            className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
+            style={{
+              background: "radial-gradient(ellipse 100% 80% at 50% 0%, var(--accent-muted) 0%, transparent 60%)",
+            }}
+            aria-hidden
+          />
+          <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-8 py-12 md:py-16">
+            <ErrorCard
+              title="Something went wrong"
+              message={error}
+              onRetry={() => window.location.reload()}
+              retryLabel="Try again"
+              homeHref="/"
+              homeLabel="Back to home"
+            />
+          </div>
+        </section>
+        <Footer />
       </div>
     );
   }
@@ -723,6 +737,17 @@ export default function Home() {
                   ))}
                 </div>
               </div>
+
+              {proofs.length >= FEED_HOME_CAP && (
+                <div className="mt-8 flex justify-center">
+                  <Link
+                    href="/feed"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--fg)] text-[var(--bg)] font-semibold text-sm hover:opacity-90 transition"
+                  >
+                    View more
+                  </Link>
+                </div>
+              )}
 
               {filteredProofs.length === 0 && (
                 <div className="text-center py-16 bg-[var(--card)] rounded-2xl border border-[var(--border)]">
