@@ -93,8 +93,8 @@ export const RATE_LIMITS = {
   register: { windowMs: 60 * 60 * 1000, maxRequests: 10 },
   // Proof submission: 60 per hour per agent
   proof: { windowMs: 60 * 60 * 1000, maxRequests: 60 },
-  // High-five: 100 per hour per agent
-  highFive: { windowMs: 60 * 60 * 1000, maxRequests: 100 },
+  // Acknowledgement: 100 per hour per agent
+  acknowledgement: { windowMs: 60 * 60 * 1000, maxRequests: 100 },
   // General API: 1000 per hour per IP
   general: { windowMs: 60 * 60 * 1000, maxRequests: 1000 },
 } as const;

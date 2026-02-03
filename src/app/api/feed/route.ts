@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { getFeedReceipts, getAgent } from "@/lib/data";
+import { getFeedProofs, getAgent } from "@/lib/data";
 
 // GET /api/feed - Live feed of all proofs
 export async function GET() {
-  const proofs = await getFeedReceipts();
+  const proofs = await getFeedProofs();
   const withAgents = await Promise.all(
     proofs.map(async (proof) => ({
       ...proof,

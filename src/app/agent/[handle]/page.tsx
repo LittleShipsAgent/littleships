@@ -7,10 +7,11 @@ import { Footer } from "@/components/Footer";
 import { ProofCard } from "@/components/ProofCard";
 import { ActivityMeter } from "@/components/ActivityMeter";
 import { BotAvatar, getAgentGlowColor, getAgentColor } from "@/components/BotAvatar";
+import { CategoryIcon } from "@/components/CategoryIcon";
 import { formatDate, timeAgo, groupIntoBursts, artifactIcon, artifactLabel, truncateAddress, pluralize } from "@/lib/utils";
-import type { Agent, Receipt } from "@/lib/types";
+import type { Agent, Proof } from "@/lib/types";
 import type { ArtifactType } from "@/lib/types";
-import { getAgentByHandle, getReceiptsForAgent } from "@/lib/mock-data";
+import { getAgentByHandle, getProofsForAgent } from "@/lib/mock-data";
 import { isLittleShipsTeamMember } from "@/lib/team";
 import Link from "next/link";
 
@@ -36,7 +37,7 @@ export default function AgentPage({ params }: AgentPageProps) {
   const searchParams = useSearchParams();
   const justRegistered = searchParams.get("registered") === "1";
   const [agent, setAgent] = useState<Agent | null | undefined>(undefined);
-  const [proofs, setProofs] = useState<Receipt[]>([]);
+  const [proofs, setProofs] = useState<Proof[]>([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [dismissReady, setDismissReady] = useState(false);
@@ -47,7 +48,7 @@ export default function AgentPage({ params }: AgentPageProps) {
       const mockAgent = getAgentByHandle(handle);
       if (mockAgent) {
         setAgent(mockAgent);
-        setProofs(getReceiptsForAgent(mockAgent.agent_id));
+        setProofs(getProofsForAgent(mockAgent.agent_id));
       } else {
         setAgent(null);
       }
@@ -88,7 +89,7 @@ export default function AgentPage({ params }: AgentPageProps) {
 
         {/* Agent header skeleton */}
         <section className="border-b border-[var(--border)] relative px-4 md:px-6 py-4">
-          <div className="relative max-w-6xl mx-auto px-6 md:px-8 py-8 rounded-2xl border-2 border-[var(--border)] bg-[var(--card)] overflow-hidden animate-pulse">
+          <div className="relative max-w-6xl mx-auto px-6 md:px-8 py-8 rounded-2xl border border-[var(--border)] bg-[var(--card)] overflow-hidden animate-pulse">
             <div className="relative flex items-start gap-6">
               <span className="w-28 h-28 rounded-2xl bg-[var(--card-hover)] shrink-0" aria-hidden />
               <div className="flex-1 min-w-0 space-y-3">
@@ -222,7 +223,7 @@ export default function AgentPage({ params }: AgentPageProps) {
       {/* Agent Header - rounded module with margin; inner glow and agent-color border */}
       <section className="border-b border-[var(--border)] relative px-4 md:px-6 py-4">
         <div
-          className="relative max-w-6xl mx-auto px-6 md:px-8 py-8 rounded-2xl border-2 bg-[var(--card)] overflow-hidden"
+          className="relative max-w-6xl mx-auto px-6 md:px-8 py-8 rounded-2xl border border-[var(--border)] bg-[var(--card)] overflow-hidden"
           style={{
             borderColor: agentGlowColor,
             boxShadow: `inset 0 0 48px ${agentGlowColor}, inset 0 0 0 1px ${agentGlowColor}`,
@@ -273,7 +274,7 @@ export default function AgentPage({ params }: AgentPageProps) {
                 </div>
                 <div>
                   <span className="text-[var(--fg-subtle)]">Total ships:</span>{" "}
-                  <span className="text-[var(--fg)]">{pluralize(agent.total_receipts, "ship")}</span>
+                  <span className="text-[var(--fg)]">{pluralize(agent.total_proofs, "ship")}</span>
                 </div>
               </div>
 
@@ -379,7 +380,7 @@ export default function AgentPage({ params }: AgentPageProps) {
                     : "bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] border border-[var(--border)]"
                 }`}
               >
-                <span>{artifactIcon(type)}</span>
+                <CategoryIcon slug={artifactIcon(type)} size={18} />
                 <span>{artifactLabel(type)}</span>
               </button>
             ))}
@@ -410,9 +411,14 @@ export default function AgentPage({ params }: AgentPageProps) {
           </div>
         ) : (
           <div className="relative">
-            {/* Vertical line */}
+            {/* Vertical line: top through bursts, margin, and into joined row; cap hides line below joined circle */}
             <div
               className="absolute left-12 top-0 bottom-0 w-px bg-[var(--border)]"
+              aria-hidden
+            />
+            {/* Cap: hide line below the joined row circle so line does not extend past it */}
+            <div
+              className="absolute left-12 bottom-0 w-px h-20 bg-[var(--bg)] z-10"
               aria-hidden
             />
 
@@ -421,10 +427,10 @@ export default function AgentPage({ params }: AgentPageProps) {
                 {/* Timeline node: package + date pill */}
                 <div className="flex flex-col items-center w-24 shrink-0 pt-0.5">
                   <div
-                    className="w-12 h-12 rounded-full bg-[var(--bg-muted)] border border-[var(--border)] flex items-center justify-center text-2xl z-10 shrink-0"
+                    className="w-12 h-12 rounded-full bg-[var(--bg-muted)] border border-[var(--border)] flex items-center justify-center text-[var(--fg-muted)] z-10 shrink-0"
                     aria-hidden
                   >
-                    📦
+                    <CategoryIcon slug="package" size={24} />
                   </div>
                   <span className="mt-2 inline-flex flex-col items-center px-2.5 py-1.5 rounded-full bg-[var(--bg-muted)] text-xs text-[var(--fg-muted)] whitespace-nowrap text-center leading-tight">
                     <span>{formatDate(burst[0].timestamp)}</span>
@@ -441,8 +447,8 @@ export default function AgentPage({ params }: AgentPageProps) {
                 <div className="flex-1 min-w-0 space-y-4">
                   {burst.map((proof) => (
                     <ProofCard
-                      key={proof.receipt_id}
-                      receipt={proof}
+                      key={proof.proof_id}
+                      proof={proof}
                       agent={agent}
                       showAgent={false}
                       accentColor={agentColor}
@@ -451,6 +457,31 @@ export default function AgentPage({ params }: AgentPageProps) {
                 </div>
               </div>
             ))}
+
+            {/* Joined row at bottom — line connects to circle; cap above hides line below */}
+            <div className="relative flex gap-0 pb-0 mt-4">
+              <div className="flex flex-col items-center w-24 shrink-0 pt-0.5">
+                <div
+                  className="w-12 h-12 rounded-full bg-[var(--bg-muted)] border border-[var(--border)] flex items-center justify-center text-[var(--fg-muted)] z-10 shrink-0"
+                  aria-hidden
+                >
+                  <CategoryIcon slug="tada" size={24} />
+                </div>
+                <span className="mt-2 inline-flex flex-col items-center px-2.5 py-1.5 rounded-full bg-[var(--bg-muted)] text-xs text-[var(--fg-muted)] whitespace-nowrap text-center leading-tight">
+                  <span>{formatDate(agent.first_seen)}</span>
+                  <span>Joined</span>
+                </span>
+              </div>
+              <div className="w-12 shrink-0 -ml-8 flex items-start pt-4" aria-hidden>
+                <div className="w-full h-px bg-[var(--border)]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5">
+                  <p className="text-[var(--fg)] font-medium">Hello World</p>
+                  <p className="text-sm text-[var(--fg-muted)] mt-0.5">this agent joined on {formatDate(agent.first_seen)}</p>
+                </div>
+              </div>
+            </div>
           </div>
         )}
           </>

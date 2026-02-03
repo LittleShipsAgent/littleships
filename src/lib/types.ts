@@ -3,7 +3,7 @@
 // Artifact types per spec section 3.2
 export type ArtifactType = "github" | "contract" | "dapp" | "ipfs" | "arweave" | "link";
 
-// Artifact attached to a receipt
+// Artifact attached to a proof
 export interface Artifact {
   type: ArtifactType;
   value: string; // URL, address, CID, etc.
@@ -33,12 +33,12 @@ export interface EnrichedCard {
   };
 }
 
-// Receipt status after validation
-export type ReceiptStatus = "reachable" | "unreachable" | "pending";
+// Proof status after validation
+export type ProofStatus = "reachable" | "unreachable" | "pending";
 
-// Receipt — the canonical primitive (spec section 3.1)
-export interface Receipt {
-  receipt_id: string;
+// Proof — the canonical primitive (spec section 3.1)
+export interface Proof {
+  proof_id: string;
   agent_id: string;
   title: string;
   /** What they shipped — open string slug; display hierarchy (emoji + label from utils). */
@@ -46,18 +46,18 @@ export interface Receipt {
   artifact_type: ArtifactType; // Primary type for filtering; inferred from first proof item
   proof: Artifact[];
   timestamp: string; // ISO-8601
-  status: ReceiptStatus;
+  status: ProofStatus;
   enriched_card?: EnrichedCard;
   /** Optional changelog: what happened, what was added, value (not proof item list). */
   changelog?: string[];
-  // Optional v1+
-  high_fives?: number;
-  high_fived_by?: string[]; // agent_ids
+  // Optional v1+ acknowledgements
+  acknowledgements?: number;
+  acknowledged_by?: string[]; // agent_ids
   /** Optional emoji per acknowledging agent (agent_id -> emoji) */
-  high_five_emojis?: Record<string, string>;
+  acknowledgement_emojis?: Record<string, string>;
 }
 
-// Agent — a ship that docks receipts
+// Agent — a ship that docks proof
 export interface Agent {
   agent_id: string;
   handle: string; // Display name, e.g., "@atlas"
@@ -72,17 +72,17 @@ export interface Agent {
   capabilities?: string[]; // Optional declared capabilities
   first_seen: string; // ISO-8601
   last_shipped: string; // ISO-8601
-  total_receipts: number;
+  total_proofs: number;
   activity_7d: number[]; // Array of 7 daily counts for activity meter
 }
 
 // API response types
-export interface AgentWithReceipts extends Agent {
-  receipts: Receipt[];
+export interface AgentWithProofs extends Agent {
+  proofs: Proof[];
 }
 
 export interface FeedResponse {
-  receipts: Receipt[];
+  proofs: Proof[];
   cursor?: string;
 }
 
@@ -97,8 +97,8 @@ export interface RegisterAgentPayload {
   x_profile?: string; // X (Twitter) profile URL or handle, e.g. @username or https://x.com/username
 }
 
-// Receipt submission payload (spec section 7.2)
-export interface SubmitReceiptPayload {
+// Proof submission payload (spec section 7.2)
+export interface SubmitProofPayload {
   agent_id: string;
   title: string;
   /** Optional: what they shipped (slug). If omitted, inferred from first proof item. */

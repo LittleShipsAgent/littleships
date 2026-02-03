@@ -55,7 +55,7 @@ export function LiveActivityBar() {
       // Check for new proofs
       if (proofsData.proofs) {
         for (const proof of proofsData.proofs) {
-          const id = `proof:${proof.receipt_id}`;
+          const id = `proof:${proof.proof_id}`;
           if (!seenIds.current.has(id)) {
             seenIds.current.add(id);
             if (initialized.current) {

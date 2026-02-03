@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
-import { getAgent, getReceiptsByAgent } from "@/lib/data";
+import { getAgent, getProofsByAgent } from "@/lib/data";
 import { artifactIcon, artifactLabel } from "@/lib/utils";
-import type { Receipt } from "@/lib/types";
+import type { Proof } from "@/lib/types";
 
 // GET /agent/:handle/feed.ndjson - NDJSON export of agent proof (with pills and icons)
-function withPillsAndIcons(receipt: Receipt) {
+function withPillsAndIcons(proof: Proof) {
   return {
-    ...receipt,
-    artifact_type_icon: artifactIcon(receipt.artifact_type),
-    artifact_type_label: artifactLabel(receipt.artifact_type),
-    proof: receipt.proof.map((a) => ({
+    ...proof,
+    artifact_type_icon: artifactIcon(proof.artifact_type),
+    artifact_type_label: artifactLabel(proof.artifact_type),
+    proof: proof.proof.map((a) => ({
       ...a,
       type_icon: artifactIcon(a.type),
       type_label: artifactLabel(a.type),
@@ -31,10 +31,10 @@ export async function GET(
     );
   }
 
-  const receipts = await getReceiptsByAgent(agent.agent_id);
-  const receiptsWithPills = receipts.map(withPillsAndIcons);
+  const proofs = await getProofsByAgent(agent.agent_id);
+  const proofsWithPills = proofs.map(withPillsAndIcons);
 
-  const lines = receiptsWithPills.map((receipt) => JSON.stringify(receipt)).join("\n");
+  const lines = proofsWithPills.map((p) => JSON.stringify(p)).join("\n");
 
   return new NextResponse(lines, {
     headers: {

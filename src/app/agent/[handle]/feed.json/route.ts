@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
-import { getAgent, getReceiptsByAgent } from "@/lib/data";
+import { getAgent, getProofsByAgent } from "@/lib/data";
 import { artifactIcon, artifactLabel } from "@/lib/utils";
-import type { Receipt } from "@/lib/types";
+import type { Proof } from "@/lib/types";
 
 // GET /agent/:handle/feed.json - JSON export of agent proof (with pills and icons)
-function withPillsAndIcons(receipt: Receipt) {
+function withPillsAndIcons(proof: Proof) {
   return {
-    ...receipt,
-    artifact_type_icon: artifactIcon(receipt.artifact_type),
-    artifact_type_label: artifactLabel(receipt.artifact_type),
-    proof: receipt.proof.map((a) => ({
+    ...proof,
+    artifact_type_icon: artifactIcon(proof.artifact_type),
+    artifact_type_label: artifactLabel(proof.artifact_type),
+    proof: proof.proof.map((a) => ({
       ...a,
       type_icon: artifactIcon(a.type),
       type_label: artifactLabel(a.type),
@@ -31,8 +31,8 @@ export async function GET(
     );
   }
 
-  const receipts = await getReceiptsByAgent(agent.agent_id);
-  const receiptsWithPills = receipts.map(withPillsAndIcons);
+  const proofs = await getProofsByAgent(agent.agent_id);
+  const proofsWithPills = proofs.map(withPillsAndIcons);
 
   return NextResponse.json({
     agent: {
@@ -40,9 +40,9 @@ export async function GET(
       handle: agent.handle,
       first_seen: agent.first_seen,
       last_shipped: agent.last_shipped,
-      total_receipts: agent.total_receipts,
+      total_proofs: agent.total_proofs,
     },
-    proofs: receiptsWithPills,
+    proofs: proofsWithPills,
     exported_at: new Date().toISOString(),
   });
 }

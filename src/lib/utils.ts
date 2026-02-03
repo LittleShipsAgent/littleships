@@ -32,22 +32,23 @@ export function formatDateTime(iso: string): string {
   });
 }
 
+/** Icon key for CategoryIcon (Lucide); used by UI and feed API. */
 export function artifactIcon(type: ArtifactType): string {
   switch (type) {
     case "contract":
-      return "📜";
+      return "contract";
     case "github":
-      return "📂";
+      return "github";
     case "dapp":
-      return "🌐";
+      return "dapp";
     case "ipfs":
-      return "📁";
+      return "ipfs";
     case "arweave":
-      return "🗄️";
+      return "arweave";
     case "link":
-      return "🔗";
+      return "link";
     default:
-      return "📎";
+      return "link";
   }
 }
 
@@ -70,31 +71,34 @@ export function artifactLabel(type: ArtifactType): string {
   }
 }
 
-// Ship type (what they shipped) — open string; known slugs get emoji + label, unknown get fallback
-const SHIP_TYPE_MAP: Record<string, { icon: string; label: string }> = {
-  contract: { icon: "📜", label: "Contract" },
-  repo: { icon: "📂", label: "Repo" },
-  app: { icon: "🎁", label: "App" },
-  dapp: { icon: "🌐", label: "dApp" },
-  blog_post: { icon: "📝", label: "Blog post" },
-  website: { icon: "🔗", label: "Website" },
-  graphic: { icon: "🖼", label: "Graphic" },
-  feature: { icon: "✨", label: "Feature" },
-  doc: { icon: "📄", label: "Doc" },
-  podcast: { icon: "🎙", label: "Podcast" },
-  video: { icon: "🎬", label: "Video" },
-  dataset: { icon: "📊", label: "Dataset" },
-  tool: { icon: "🔧", label: "Tool" },
-  game: { icon: "🎮", label: "Game" },
-  ipfs: { icon: "📁", label: "IPFS" },
-  arweave: { icon: "🗄", label: "Arweave" },
-  link: { icon: "🔗", label: "Link" },
+// Ship type (what they shipped) — open string; known slugs get iconKey + label, unknown get fallback
+const SHIP_TYPE_MAP: Record<string, { iconKey: string; label: string }> = {
+  contract: { iconKey: "contract", label: "Contract" },
+  repo: { iconKey: "repo", label: "Repo" },
+  app: { iconKey: "app", label: "App" },
+  dapp: { iconKey: "dapp", label: "dApp" },
+  blog_post: { iconKey: "blog_post", label: "Blog post" },
+  website: { iconKey: "website", label: "Website" },
+  graphic: { iconKey: "graphic", label: "Graphic" },
+  feature: { iconKey: "feature", label: "Feature" },
+  doc: { iconKey: "doc", label: "Doc" },
+  docs: { iconKey: "docs", label: "Docs" },
+  documentation: { iconKey: "document", label: "Documentation" },
+  podcast: { iconKey: "podcast", label: "Podcast" },
+  video: { iconKey: "video", label: "Video" },
+  dataset: { iconKey: "dataset", label: "Dataset" },
+  tool: { iconKey: "tool", label: "Tool" },
+  game: { iconKey: "game", label: "Game" },
+  ipfs: { iconKey: "ipfs", label: "IPFS" },
+  arweave: { iconKey: "arweave", label: "Arweave" },
+  link: { iconKey: "link", label: "Link" },
 };
-const SHIP_TYPE_FALLBACK = { icon: "📦", label: "Ship" };
+const SHIP_TYPE_FALLBACK = { iconKey: "package", label: "Ship" };
 
+/** Icon key for CategoryIcon (Lucide); used by UI and feed API. */
 export function shipTypeIcon(shipType: string): string {
   const slug = (shipType || "").trim().toLowerCase();
-  return slug ? (SHIP_TYPE_MAP[slug]?.icon ?? SHIP_TYPE_FALLBACK.icon) : SHIP_TYPE_FALLBACK.icon;
+  return slug ? (SHIP_TYPE_MAP[slug]?.iconKey ?? SHIP_TYPE_FALLBACK.iconKey) : SHIP_TYPE_FALLBACK.iconKey;
 }
 
 export function shipTypeLabel(shipType: string): string {

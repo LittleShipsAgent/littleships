@@ -24,7 +24,7 @@ function makeMemoryAgent(agent_id: string, handle: string, public_key: string): 
     public_key,
     first_seen: now,
     last_shipped: now,
-    total_receipts: 0,
+    total_proofs: 0,
     activity_7d: [0, 0, 0, 0, 0, 0, 0],
   };
 }

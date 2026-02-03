@@ -1,7 +1,7 @@
 import { getDb } from "./client";
 import type { Agent } from "@/lib/types";
 
-/** Compute 7-day activity counts from receipts: [day6ago, day5ago, ..., today] (UTC). */
+/** Compute 7-day activity counts from proofs: [day6ago, day5ago, ..., today] (UTC). */
 export async function computeActivity7d(agentId: string): Promise<number[]> {
   const db = getDb();
   if (!db) return [0, 0, 0, 0, 0, 0, 0];
@@ -10,16 +10,16 @@ export async function computeActivity7d(agentId: string): Promise<number[]> {
   sevenDaysAgo.setUTCDate(sevenDaysAgo.getUTCDate() - 6);
   sevenDaysAgo.setUTCHours(0, 0, 0, 0);
   const isoFrom = sevenDaysAgo.toISOString();
-  const { data: receipts } = await db
-    .from("receipts")
+  const { data: proofs } = await db
+    .from("proofs")
     .select("timestamp")
     .eq("agent_id", agentId)
     .gte("timestamp", isoFrom);
   const counts = [0, 0, 0, 0, 0, 0, 0];
-  if (!receipts?.length) return counts;
+  if (!proofs?.length) return counts;
   const today = new Date(now);
   today.setUTCHours(0, 0, 0, 0);
-  for (const r of receipts) {
+  for (const r of proofs) {
     const d = new Date(r.timestamp);
     d.setUTCHours(0, 0, 0, 0);
     const diffDays = Math.floor((today.getTime() - d.getTime()) / (24 * 60 * 60 * 1000));
@@ -39,7 +39,7 @@ function rowToAgent(row: {
   capabilities: string[] | null;
   first_seen: string;
   last_shipped: string;
-  total_receipts: number;
+  total_proofs: number;
   activity_7d: number[] | null;
 }): Agent {
   return {
@@ -53,7 +53,7 @@ function rowToAgent(row: {
     capabilities: row.capabilities ?? undefined,
     first_seen: row.first_seen,
     last_shipped: row.last_shipped,
-    total_receipts: row.total_receipts,
+    total_proofs: row.total_proofs,
     activity_7d: row.activity_7d ?? [0, 0, 0, 0, 0, 0, 0],
   };
 }
@@ -105,7 +105,7 @@ export async function insertAgent(agent: {
   capabilities?: string[];
   first_seen?: string;
   last_shipped?: string;
-  total_receipts?: number;
+  total_proofs?: number;
   activity_7d?: number[];
 }): Promise<Agent> {
   const db = getDb();
@@ -121,7 +121,7 @@ export async function insertAgent(agent: {
     capabilities: agent.capabilities ?? null,
     first_seen: agent.first_seen ?? now,
     last_shipped: agent.last_shipped ?? now,
-    total_receipts: agent.total_receipts ?? 0,
+    total_proofs: agent.total_proofs ?? 0,
     activity_7d: agent.activity_7d ?? [0, 0, 0, 0, 0, 0, 0],
   };
   // Only include color if provided (column may not exist in older schemas)
@@ -141,7 +141,7 @@ export async function updateAgentLastShipped(
   if (!db) return;
   const { data: agent } = await db
     .from("agents")
-    .select("total_receipts")
+    .select("total_proofs")
     .eq("agent_id", agentId)
     .single();
   const activity_7d = await computeActivity7d(agentId);
@@ -149,7 +149,7 @@ export async function updateAgentLastShipped(
     .from("agents")
     .update({
       last_shipped: timestamp,
-      total_receipts: (agent?.total_receipts ?? 0) + 1,
+      total_proofs: (agent?.total_proofs ?? 0) + 1,
       activity_7d,
     })
     .eq("agent_id", agentId);

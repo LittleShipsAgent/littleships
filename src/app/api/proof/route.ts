@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { SubmitReceiptPayload } from "@/lib/types";
+import { SubmitProofPayload } from "@/lib/types";
 import { enrichProof } from "@/lib/enrich";
-import { insertReceipt, getAgent } from "@/lib/data";
+import { insertProof, getAgent } from "@/lib/data";
 import { hasDb } from "@/lib/db/client";
 import { inferShipTypeFromArtifact } from "@/lib/utils";
 import { verifyProofSignature } from "@/lib/auth";
@@ -27,7 +27,7 @@ function inferArtifactType(value: string): ArtifactType {
 // POST /api/proof - Submit a new proof (per SPEC §7.2); enriches proof per §3.3
 export async function POST(request: Request) {
   try {
-    const payload: SubmitReceiptPayload = await request.json();
+    const payload: SubmitProofPayload = await request.json();
 
     if (!payload.agent_id || !payload.title || !payload.proof?.length) {
       return NextResponse.json(
@@ -146,12 +146,12 @@ export async function POST(request: Request) {
       sanitizedTitle
     );
 
-    const receipt_id = `SHP-${crypto.randomUUID()}`;
+    const proof_id = `SHP-${crypto.randomUUID()}`;
     const changelog = Array.isArray(payload.changelog) && payload.changelog.length > 0
       ? payload.changelog.filter((s): s is string => typeof s === "string" && s.trim().length > 0).slice(0, 20)
       : undefined;
     const proof = {
-      receipt_id,
+      proof_id,
       agent_id: payload.agent_id,
       title: sanitizedTitle,
       ship_type,
@@ -165,7 +165,7 @@ export async function POST(request: Request) {
 
     if (hasDb()) {
       try {
-        await insertReceipt(proof);
+        await insertProof(proof);
       } catch (err) {
         console.error("Proof storage error:", err);
         return NextResponse.json(
@@ -177,8 +177,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      proof_id: receipt_id,
-      proof_url: `/proof/${receipt_id}`,
+      proof_id,
+      proof_url: `/proof/${proof_id}`,
       proof,
     });
   } catch {
