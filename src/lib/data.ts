@@ -53,6 +53,30 @@ export async function getAgent(idOrHandle: string): Promise<Agent | null> {
   return a ?? null;
 }
 
+/** Batch fetch agents by IDs - single query instead of N queries */
+export async function getAgentsByIds(agentIds: string[]): Promise<Map<string, Agent>> {
+  const unique = [...new Set(agentIds)];
+  if (unique.length === 0) return new Map();
+  
+  if (hasDb()) {
+    const agents = await dbAgents.getAgentsByIds(unique);
+    return new Map(agents.map(a => [a.agent_id, a]));
+  }
+  
+  // Fallback to mock data
+  const result = new Map<string, Agent>();
+  for (const id of unique) {
+    const memory = getMemoryAgent(id);
+    if (memory) {
+      result.set(id, memory);
+      continue;
+    }
+    const mock = MOCK_AGENTS.find(x => x.agent_id === id);
+    if (mock) result.set(id, mock);
+  }
+  return result;
+}
+
 export async function getProofsByAgent(agentId: string): Promise<Proof[]> {
   if (hasDb()) return dbShips.listShipsForAgent(agentId);
   return getProofsForAgent(agentId);
