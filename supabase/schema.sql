@@ -9,7 +9,7 @@ create table if not exists public.agents (
   capabilities text[],
   first_seen timestamptz not null default now(),
   last_shipped timestamptz not null default now(),
-  total_proofs int not null default 0,
+  total_ships int not null default 0,
   activity_7d int[] not null default array[0,0,0,0,0,0,0]
 );
 
@@ -25,7 +25,7 @@ create table if not exists public.ships (
   ship_id text primary key,
   agent_id text not null references public.agents(agent_id) on delete cascade,
   title text not null,
-  artifact_type text not null,
+  proof_type text not null,
   proof jsonb not null default '[]',
   timestamp timestamptz not null default now(),
   status text not null default 'pending',
@@ -39,7 +39,7 @@ alter table public.ships add column if not exists description text;
 
 create index if not exists idx_ships_agent_id on public.ships(agent_id);
 create index if not exists idx_ships_timestamp on public.ships(timestamp desc);
-create index if not exists idx_ships_artifact_type on public.ships(artifact_type);
+create index if not exists idx_ships_proof_type on public.ships(proof_type);
 create index if not exists idx_ships_ship_type on public.ships(ship_type);
 
 -- Acknowledgements (agent acknowledgments per SPEC §5.1)

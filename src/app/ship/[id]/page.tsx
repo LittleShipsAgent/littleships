@@ -11,7 +11,7 @@ import { BotAvatar, getAgentColor } from "@/components/BotAvatar";
 import { AgentProfileHeader } from "@/components/AgentProfileHeader";
 import { ShipCard } from "@/components/ShipCard";
 import { CategoryIcon } from "@/components/CategoryIcon";
-import { formatDateTime, truncateAddress, artifactIcon, artifactLabel, shipTypeIcon, shipTypeLabel, inferShipTypeFromArtifact } from "@/lib/utils";
+import { formatDateTime, truncateAddress, proofIcon, proofLabel, shipTypeIcon, shipTypeLabel, inferShipTypeFromProof } from "@/lib/utils";
 import type { Proof, Agent } from "@/lib/types";
 import { MOCK_PROOFS, getAgentById, getProofsForAgent } from "@/lib/mock-data";
 
@@ -230,8 +230,8 @@ export default function ShipPage({ params }: ShipPageProps) {
         {/* Ship type + title */}
         <div className="mb-4">
           <span className="inline-flex items-center gap-2 text-sm font-medium text-[var(--fg-muted)] uppercase tracking-wider">
-            <CategoryIcon slug={shipTypeIcon(proof.ship_type ?? inferShipTypeFromArtifact(proof.artifact_type))} size={20} />
-            {shipTypeLabel(proof.ship_type ?? inferShipTypeFromArtifact(proof.artifact_type))}
+            <CategoryIcon slug={shipTypeIcon(proof.ship_type ?? inferShipTypeFromProof(proof.proof_type))} size={20} />
+            {shipTypeLabel(proof.ship_type ?? inferShipTypeFromProof(proof.proof_type))}
           </span>
           <h1 className="text-2xl md:text-3xl font-bold text-[var(--fg)] mt-1 leading-tight">
             {proof.title}
@@ -300,39 +300,39 @@ export default function ShipPage({ params }: ShipPageProps) {
             Proof ({proof.proof.length})
           </h2>
           <div className="space-y-3">
-            {proof.proof.map((artifact, i) => (
+            {proof.proof.map((item, i) => (
               <a
                 key={i}
-                href={artifact.value}
+                href={item.value}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-4 py-3 px-4 rounded-xl border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--card-hover)] hover:border-[var(--border-hover)] transition group"
               >
                 <span className="shrink-0 text-[var(--fg-muted)]">
-                  <CategoryIcon slug={artifactIcon(artifact.type)} size={20} />
+                  <CategoryIcon slug={proofIcon(item.type)} size={20} />
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[var(--fg)] font-medium text-sm">
-                      {artifact.meta?.name || artifactLabel(artifact.type)}
+                      {item.meta?.name || proofLabel(item.type)}
                     </span>
-                    {artifact.meta?.verified && (
+                    {item.meta?.verified && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-500/15 text-teal-600 dark:text-teal-400 text-xs font-medium shrink-0">
                         Verified
                       </span>
                     )}
                   </div>
                   <div className="text-xs text-[var(--fg-muted)] truncate font-mono mt-0.5">
-                    {artifact.type === "contract" && artifact.chain && (
-                      <span className="text-[var(--fg-subtle)]">{artifact.chain}: </span>
+                    {item.type === "contract" && item.chain && (
+                      <span className="text-[var(--fg-subtle)]">{item.chain}: </span>
                     )}
-                    {artifact.type === "contract"
-                      ? truncateAddress(artifact.value)
-                      : artifact.value}
+                    {item.type === "contract"
+                      ? truncateAddress(item.value)
+                      : item.value}
                   </div>
-                  {artifact.meta?.description && (
+                  {item.meta?.description && (
                     <p className="text-xs text-[var(--fg-subtle)] mt-1 line-clamp-2">
-                      {artifact.meta.description}
+                      {item.meta.description}
                     </p>
                   )}
                 </div>

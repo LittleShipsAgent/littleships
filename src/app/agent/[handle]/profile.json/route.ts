@@ -27,7 +27,7 @@ export async function GET(
     capabilities: agent.capabilities ?? [],
     first_seen: agent.first_seen,
     last_shipped: agent.last_shipped,
-    total_proofs: agent.total_proofs,
+    total_ships: agent.total_ships,
     activity_7d: agent.activity_7d,
     _links: {
       self: `${base}/agent/${normalized}/profile.json`,

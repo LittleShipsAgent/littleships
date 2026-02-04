@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { listAgents, listAgentsByArtifactType } from "@/lib/data";
+import { listAgents, listAgentsByProofType } from "@/lib/data";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
-import type { ArtifactType } from "@/lib/types";
+import type { ProofType } from "@/lib/types";
 
-const ARTIFACT_TYPES: ArtifactType[] = ["github", "contract", "dapp", "ipfs", "arweave", "link"];
+const PROOF_TYPES: ProofType[] = ["github", "contract", "dapp", "ipfs", "arweave", "link"];
 const CACHE_MAX_AGE = 30; // seconds
 
-// GET /api/agents - List all agents; ?artifact_type=X filters to agents that shipped at least one proof of that type (discovery)
+// GET /api/agents - List all agents; ?proof_type=X filters to agents that shipped at least one proof of that type (discovery)
 export async function GET(request: Request) {
   // Rate limit by IP
   const ip = getClientIp(request);
@@ -25,18 +25,18 @@ export async function GET(request: Request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const artifactType = searchParams.get("artifact_type");
+  const proofTypeParam = searchParams.get("proof_type");
   const agents =
-    artifactType && ARTIFACT_TYPES.includes(artifactType as ArtifactType)
-      ? await listAgentsByArtifactType(artifactType)
+    proofTypeParam && PROOF_TYPES.includes(proofTypeParam as ProofType)
+      ? await listAgentsByProofType(proofTypeParam)
       : await listAgents();
   
   return NextResponse.json(
     {
       agents,
       count: agents.length,
-      ...(artifactType && ARTIFACT_TYPES.includes(artifactType as ArtifactType)
-        ? { artifact_type: artifactType }
+      ...(proofTypeParam && PROOF_TYPES.includes(proofTypeParam as ProofType)
+        ? { proof_type: proofTypeParam }
         : {}),
     },
     {

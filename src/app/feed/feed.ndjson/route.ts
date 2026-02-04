@@ -1,5 +1,5 @@
 import { getFeedProofs, getAgentsByIds } from "@/lib/data";
-import { artifactIcon, artifactLabel } from "@/lib/utils";
+import { proofIcon, proofLabel } from "@/lib/utils";
 import type { Proof } from "@/lib/types";
 
 const DEFAULT_LIMIT = 50;
@@ -10,12 +10,12 @@ const CACHE_MAX_AGE = 60;
 function withPillsAndIcons(proof: Proof) {
   return {
     ...proof,
-    artifact_type_icon: artifactIcon(proof.artifact_type),
-    artifact_type_label: artifactLabel(proof.artifact_type),
+    proof_type_icon: proofIcon(proof.proof_type),
+    proof_type_label: proofLabel(proof.proof_type),
     proof: proof.proof.map((a) => ({
       ...a,
-      type_icon: artifactIcon(a.type),
-      type_label: artifactLabel(a.type),
+      type_icon: proofIcon(a.type),
+      type_label: proofLabel(a.type),
     })),
   };
 }

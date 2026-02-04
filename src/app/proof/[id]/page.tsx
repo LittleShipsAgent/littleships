@@ -114,7 +114,7 @@ export default function ProofPage({ params }: ProofPageProps) {
     title: proof.title,
     description: proof.description ?? null,
     ship_type: proof.ship_type,
-    artifact_type: proof.artifact_type,
+    proof_type: proof.proof_type,
     proof: proof.proof,
     timestamp: proof.timestamp,
     status: proof.status,
