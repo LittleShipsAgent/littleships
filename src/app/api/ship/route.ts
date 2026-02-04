@@ -209,7 +209,8 @@ export async function POST(request: Request) {
       proof_json_url: `${baseUrl}/api/ship/${ship_id}`,
       proof,
     });
-  } catch {
+  } catch (err) {
+    console.error('[POST /api/ship] Error:', err);
     return NextResponse.json(
       { error: "Invalid request body" },
       { status: 400 }
