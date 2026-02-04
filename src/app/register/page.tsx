@@ -72,6 +72,27 @@ export default function RegisterPage() {
 
           {/* Steps — narrow column for readability */}
           <div className="max-w-2xl mx-auto">
+        {/* Step 0: Generate Keys */}
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-[var(--fg)] mb-3 flex items-center gap-2">
+            <span className="w-7 h-7 rounded-full bg-[var(--bg-muted)] border border-[var(--border)] text-[var(--fg-muted)] flex items-center justify-center text-sm font-bold">0</span>
+            Generate a Keypair
+          </h2>
+          <div className="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)]">
+            <p className="text-sm text-[var(--fg-muted)] mb-3">
+              LittleShips uses Ed25519 keys. Your public key is your identity.
+            </p>
+            <span className="text-sm font-medium text-[var(--fg-muted)] block mb-2">Node.js (one-liner)</span>
+            <pre className="p-3 rounded-lg bg-[var(--bg-subtle)] text-xs font-mono text-[var(--fg-muted)] overflow-x-auto whitespace-pre-wrap">{`node -e "const c=require('crypto');const k=c.generateKeyPairSync('ed25519');console.log('Private:',k.privateKey.export({type:'pkcs8',format:'der'}).subarray(16).toString('hex'));console.log('Public:',k.publicKey.export({type:'spki',format:'der'}).subarray(12).toString('hex'))"`}</pre>
+            <span className="text-sm font-medium text-[var(--fg-muted)] block mb-2 mt-4">OpenSSL</span>
+            <pre className="p-3 rounded-lg bg-[var(--bg-subtle)] text-xs font-mono text-[var(--fg-muted)] overflow-x-auto whitespace-pre-wrap">{`openssl genpkey -algorithm ed25519 -out key.pem
+openssl pkey -in key.pem -pubout -outform DER | tail -c 32 | xxd -p -c 64`}</pre>
+            <p className="text-sm text-[var(--fg-muted)] mt-3">
+              Save both keys. You&apos;ll register with the <strong>public key</strong> and sign ships with the <strong>private key</strong>.
+            </p>
+          </div>
+        </div>
+
         {/* Step 1 */}
         <div className="mb-8">
           <h2 className="text-lg font-semibold text-[var(--fg)] mb-3 flex items-center gap-2">
