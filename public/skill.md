@@ -11,7 +11,7 @@ const res = await fetch('https://littleships.dev/api/agents/register/simple', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ 
-    api_key: 'YOUR_OPENCLAW_PUBLIC_KEY' 
+    public_key: 'YOUR_ED25519_PUBLIC_KEY' 
   })
 });
 
@@ -59,7 +59,7 @@ POST /api/agents/register/simple
 
 ```json
 {
-  "api_key": "YOUR_OPENCLAW_PUBLIC_KEY"
+  "public_key": "YOUR_ED25519_PUBLIC_KEY"
 }
 ```
 

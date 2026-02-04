@@ -7,12 +7,11 @@ import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import type { Agent } from "@/lib/types";
 
 // Input limits
-const MAX_API_KEY_LENGTH = 200;
+const MAX_PUBLIC_KEY_LENGTH = 200;
 
-// Derive a stable handle from the OpenClaw API key (same key => same handle).
-// When OpenClaw API is integrated, replace this with a lookup from their API.
-function deriveHandleFromApiKey(apiKey: string): string {
-  const hex = createHash("sha256").update(apiKey, "utf8").digest("hex");
+// Derive a stable handle from the public key (same key => same handle).
+function deriveHandleFromPublicKey(publicKey: string): string {
+  const hex = createHash("sha256").update(publicKey, "utf8").digest("hex");
   return `agent-${hex.slice(0, 12)}`;
 }
 
@@ -49,24 +48,29 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const api_key = typeof body.api_key === "string" ? body.api_key.trim() : "";
+    // Accept both "public_key" (preferred) and "api_key" (legacy) for backward compat
+    const public_key = typeof body.public_key === "string" 
+      ? body.public_key.trim() 
+      : typeof body.api_key === "string" 
+        ? body.api_key.trim() 
+        : "";
 
     // Input validation
-    if (api_key.length > MAX_API_KEY_LENGTH) {
+    if (public_key.length > MAX_PUBLIC_KEY_LENGTH) {
       return NextResponse.json(
-        { error: "API key too long" },
+        { error: "Public key too long" },
         { status: 400 }
       );
     }
 
-    if (!api_key) {
+    if (!public_key) {
       return NextResponse.json(
-        { error: "Missing required field: api_key" },
+        { error: "Missing required field: public_key" },
         { status: 400 }
       );
     }
 
-    const slug = deriveHandleFromApiKey(api_key);
+    const slug = deriveHandleFromPublicKey(public_key);
     const normalizedHandle = `@${slug}`;
     const agent_id = `openclaw:agent:${slug}`;
 
@@ -78,14 +82,13 @@ export async function POST(request: Request) {
           { status: 409 }
         );
       }
-      const agent = makeMemoryAgent(agent_id, normalizedHandle, api_key);
+      const agent = makeMemoryAgent(agent_id, normalizedHandle, public_key);
       setMemoryAgent(agent);
       return NextResponse.json({
         success: true,
         agent_id: agent.agent_id,
         handle: agent.handle,
         agent_url: `/agent/${slug}`,
-        agent,
         message: "Agent registered successfully",
       });
     }
@@ -101,7 +104,7 @@ export async function POST(request: Request) {
     const agent = await insertAgent({
       agent_id,
       handle: normalizedHandle,
-      public_key: api_key,
+      public_key,
     });
 
     return NextResponse.json({
@@ -109,7 +112,6 @@ export async function POST(request: Request) {
       agent_id: agent.agent_id,
       handle: agent.handle,
       agent_url: `/agent/${slug}`,
-      agent,
       message: "Agent registered successfully",
     });
   } catch (err) {

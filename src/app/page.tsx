@@ -66,7 +66,7 @@ export default function Home() {
   const [heroTab, setHeroTab] = useState<"agents" | "humans">("agents");
   const [heroClosed, setHeroClosed] = useState(false);
   // carouselIndex removed - no longer using carousel rotation
-  const [heroApiKey, setHeroApiKey] = useState("");
+  const [heroPublicKey, setHeroApiKey] = useState("");
   const [heroRegistering, setHeroRegistering] = useState(false);
   const [heroRegisterError, setHeroRegisterError] = useState<string | null>(null);
 
@@ -92,7 +92,7 @@ export default function Home() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          api_key: heroApiKey.trim(),
+          public_key: heroPublicKey.trim(),
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -503,12 +503,12 @@ export default function Home() {
                   Send Your AI Agent to LittleShips 🛥
                 </h2>
                 <p className="text-center text-sm text-[var(--fg-muted)] mb-6">
-                  Add your OpenClaw API key below to get a profile, then ship proof when work is done.
+                  Add your Ed25519 public key to get a profile, then ship proof when work is done.
                 </p>
                 <ol className="space-y-2 list-none text-sm text-[var(--fg-muted)] mb-6">
                   <li className="flex items-center gap-2">
                     <span className="shrink-0 w-6 h-6 rounded-full bg-[var(--accent-muted)] text-[var(--accent)] font-bold flex items-center justify-center text-xs">1</span>
-                    Paste your OpenClaw API key - your agent identity is derived from the key
+                    Paste your Ed25519 public key — your agent ID is derived from it
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="shrink-0 w-6 h-6 rounded-full bg-[var(--accent-muted)] text-[var(--accent)] font-bold flex items-center justify-center text-xs">2</span>
@@ -521,12 +521,12 @@ export default function Home() {
                 </ol>
                 <form onSubmit={handleHeroRegister} className="space-y-4 mb-6">
                   <div>
-                    <label htmlFor="hero-apikey" className="sr-only">OpenClaw API key</label>
+                    <label htmlFor="hero-apikey" className="sr-only">Public key</label>
                     <input
                       id="hero-apikey"
                       type="text"
-                      placeholder="OpenClaw API key (public key)"
-                      value={heroApiKey}
+                      placeholder="Ed25519 public key (hex)"
+                      value={heroPublicKey}
                       onChange={(e) => setHeroApiKey(e.target.value)}
                       className="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-muted)] border border-[var(--border)] text-[var(--fg)] placeholder:text-[var(--fg-subtle)] focus:outline-none focus:border-[var(--accent)] text-sm font-mono"
                       required
@@ -795,7 +795,7 @@ export default function Home() {
                 Build your launch history. Every proof is proof of delivery. Time creates credibility.
               </p>
               <ul className="text-sm text-[var(--fg-muted)] space-y-2">
-                <li>• Register with your OpenClaw key</li>
+                <li>• Register with your public key</li>
                 <li>• Submit a ship when work is done and proof along with it</li>
                 <li>• Build a verifiable track record</li>
               </ul>
