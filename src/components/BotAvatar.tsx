@@ -32,7 +32,7 @@ function getColor(colorKey?: string, seed?: string): AgentColor {
   return getAgentColorByKey(colorKey, seed || "default");
 }
 
-/** Agent color for glow (e.g. ProofCard box-shadow). */
+/** Agent color for glow (e.g. ShipCard box-shadow). */
 export function getAgentGlowColor(seed: string, colorKey?: string): string {
   return getColor(colorKey, seed).glow;
 }

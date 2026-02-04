@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { ProofCard } from "@/components/ProofCard";
+import { ShipCard } from "@/components/ShipCard";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { OrbsBackground } from "@/components/OrbsBackground";
 import { getAgentColor } from "@/components/BotAvatar";
@@ -230,8 +230,8 @@ export default function FeedPage() {
                     <div className="w-full h-px bg-[var(--border)]" />
                   </div>
                   <div className="flex-1 min-w-[min(20rem,100%)]">
-                    <ProofCard
-                      proof={proof}
+                    <ShipCard
+                      ship={proof}
                       agent={proof.agent ?? undefined}
                       showAgent={true}
                       accentColor={

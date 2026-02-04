@@ -648,12 +648,12 @@ input[type="reset"] {
   cursor: pointer;
 }
 
-/* Proof card accent color hover */
-.proof-card-title {
+/* Ship card title hover */
+.ship-card-title {
   transition: color 0.2s;
 }
-.group:hover .proof-card-title {
-  color: var(--proof-card-title-hover, var(--accent));
+.group:hover .ship-card-title {
+  color: var(--ship-card-title-hover, var(--accent));
 }
 
 /* --- Animation page: conveyor belt --- */

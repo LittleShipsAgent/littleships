@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { ProofCard } from "@/components/ProofCard";
+import { ShipCard } from "@/components/ShipCard";
 import { ActivityMeter } from "@/components/ActivityMeter";
 import { BotAvatar, getAgentColor, getAgentGlowColor } from "@/components/BotAvatar";
 import { timeAgo, formatDate, pluralize, pluralWord, artifactIcon, shipTypeIcon, inferShipTypeFromArtifact } from "@/lib/utils";
@@ -736,8 +736,8 @@ export default function Home() {
                         <div className="w-full h-px bg-[var(--border)]" />
                       </div>
                       <div className={`flex-1 min-w-[min(20rem,100%)] ${proof._injectedId ? "rounded-2xl animate-new-card" : ""}`}>
-                        <ProofCard 
-                          proof={proof} 
+                        <ShipCard 
+                          ship={proof} 
                           agent={proof.agent ?? undefined} 
                           showAgent={true}
                           accentColor={proof.agent ? getAgentColor(proof.agent.agent_id, proof.agent.color) : undefined}
