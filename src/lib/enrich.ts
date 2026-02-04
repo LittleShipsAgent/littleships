@@ -41,7 +41,6 @@ async function validateUrl(url: string): Promise<UrlPreview> {
     // SSRF protection: validate URL before fetching
     const urlCheck = isUrlSafe(url);
     if (!urlCheck.safe) {
-      console.warn(`URL blocked by SSRF protection: ${url} - ${urlCheck.reason}`);
       return { ok: false };
     }
 

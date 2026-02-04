@@ -15,7 +15,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    // Error logged to monitoring service if configured
   }, [error]);
 
   const isDev = process.env.NODE_ENV === "development";

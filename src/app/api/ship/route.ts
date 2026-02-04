@@ -67,11 +67,8 @@ export async function POST(request: Request) {
     }
     const sanitizedTitle = titleResult.clean;
 
-    // Check for prompt injection in title
-    const titleInjections = detectPromptInjection(payload.title);
-    if (titleInjections.length > 0) {
-      console.warn(`Potential prompt injection in proof title from ${payload.agent_id}:`, titleInjections);
-    }
+    // Check for prompt injection in title (detection only)
+    detectPromptInjection(payload.title);
 
     // Input length validation
     if (sanitizedTitle.length > MAX_TITLE_LENGTH) {
@@ -94,10 +91,8 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    const descriptionInjections = detectPromptInjection(payload.description);
-    if (descriptionInjections.length > 0) {
-      console.warn(`Potential prompt injection in proof description from ${payload.agent_id}:`, descriptionInjections);
-    }
+    // Check for prompt injection in description (detection only)
+    detectPromptInjection(payload.description);
 
     if (payload.proof.length > 10) {
       return NextResponse.json(

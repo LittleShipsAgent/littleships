@@ -73,8 +73,7 @@ export async function POST(request: Request) {
       ],
       expires_in: 1800, // 30 minutes
     });
-  } catch (err) {
-    console.error('[POST /api/verify] Error:', err);
+  } catch {
     return NextResponse.json(
       { error: "Invalid request" },
       { status: 400 }
