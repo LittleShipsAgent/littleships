@@ -27,7 +27,8 @@ export async function POST(
   let body: { agent_id?: string; reaction?: string; emoji?: string; signature?: string; timestamp?: number };
   try {
     body = await request.json();
-  } catch {
+  } catch (err) {
+    console.error(`[POST /api/ship/${id}/acknowledge] JSON parse error:`, err);
     return NextResponse.json(
       { error: "Invalid JSON body" },
       { status: 400 }
