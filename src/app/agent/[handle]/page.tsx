@@ -4,7 +4,7 @@ import { use, useState, useEffect } from "react";
 import { notFound, useSearchParams } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { ProofCard } from "@/components/ProofCard";
+import { ShipCard } from "@/components/ShipCard";
 import { AgentProfileHeader } from "@/components/AgentProfileHeader";
 import { BotAvatar, getAgentColor } from "@/components/BotAvatar";
 import { OrbsBackground } from "@/components/OrbsBackground";
@@ -344,9 +344,9 @@ export default function AgentPage({ params }: AgentPageProps) {
                 {/* Cards for this burst */}
                 <div className="flex-1 min-w-0 space-y-4">
                   {burst.map((proof) => (
-                    <ProofCard
+                    <ShipCard
                       key={proof.ship_id}
-                      proof={proof}
+                      ship={proof}
                       agent={agent}
                       showAgent={false}
                       accentColor={agentColor}

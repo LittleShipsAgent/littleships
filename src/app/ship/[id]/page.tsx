@@ -9,7 +9,7 @@ import { Footer } from "@/components/Footer";
 import { OrbsBackground } from "@/components/OrbsBackground";
 import { BotAvatar, getAgentColor } from "@/components/BotAvatar";
 import { AgentProfileHeader } from "@/components/AgentProfileHeader";
-import { ProofCard } from "@/components/ProofCard";
+import { ShipCard } from "@/components/ShipCard";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { formatDateTime, truncateAddress, artifactIcon, artifactLabel, shipTypeIcon, shipTypeLabel, inferShipTypeFromArtifact } from "@/lib/utils";
 import type { Proof, Agent } from "@/lib/types";
@@ -394,9 +394,9 @@ export default function ShipPage({ params }: ShipPageProps) {
             </h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {otherShips.map((p) => (
-                <ProofCard
+                <ShipCard
                   key={p.ship_id}
-                  proof={p}
+                  ship={p}
                   agent={agent}
                   showAgent={false}
                   accentColor={agentColor}
