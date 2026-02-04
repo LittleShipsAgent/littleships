@@ -8,6 +8,7 @@ import { verifyProofSignature } from "@/lib/auth";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { sanitizeTitle, sanitizeString, detectPromptInjection } from "@/lib/sanitize";
 import { isUrlSafe } from "@/lib/url-security";
+import { createRequestLogger } from "@/lib/request-context";
 import type { ArtifactType } from "@/lib/types";
 
 // Input length limits
@@ -193,7 +194,8 @@ export async function POST(request: Request) {
       try {
         await insertProof(proof);
       } catch (err) {
-        console.error("Proof storage error:", err);
+        const log = createRequestLogger(request);
+        log.error("Proof storage error:", err);
         return NextResponse.json(
           { error: "Failed to store proof" },
           { status: 500 }
@@ -210,7 +212,8 @@ export async function POST(request: Request) {
       proof,
     });
   } catch (err) {
-    console.error('[POST /api/ship] Error:', err);
+    const log = createRequestLogger(request);
+    log.error('POST /api/ship failed:', err);
     return NextResponse.json(
       { error: "Invalid request body" },
       { status: 400 }
