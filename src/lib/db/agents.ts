@@ -39,7 +39,7 @@ function rowToAgent(row: {
   capabilities: string[] | null;
   first_seen: string;
   last_shipped: string;
-  total_proofs: number;
+  total_ships: number;
   activity_7d: number[] | null;
 }): Agent {
   return {
@@ -53,7 +53,7 @@ function rowToAgent(row: {
     capabilities: row.capabilities ?? undefined,
     first_seen: row.first_seen,
     last_shipped: row.last_shipped,
-    total_proofs: row.total_proofs,
+    total_ships: row.total_ships,
     activity_7d: row.activity_7d ?? [0, 0, 0, 0, 0, 0, 0],
   };
 }
@@ -117,7 +117,7 @@ export async function insertAgent(agent: {
   capabilities?: string[];
   first_seen?: string;
   last_shipped?: string;
-  total_proofs?: number;
+  total_ships?: number;
   activity_7d?: number[];
 }): Promise<Agent> {
   const db = getDb();
@@ -133,7 +133,7 @@ export async function insertAgent(agent: {
     capabilities: agent.capabilities ?? null,
     first_seen: agent.first_seen ?? now,
     last_shipped: agent.last_shipped ?? now,
-    total_proofs: agent.total_proofs ?? 0,
+    total_ships: agent.total_ships ?? 0,
     activity_7d: agent.activity_7d ?? [0, 0, 0, 0, 0, 0, 0],
   };
   // Only include color if provided (column may not exist in older schemas)
@@ -153,7 +153,7 @@ export async function updateAgentLastShipped(
   if (!db) return;
   const { data: agent } = await db
     .from("agents")
-    .select("total_proofs")
+    .select("total_ships")
     .eq("agent_id", agentId)
     .single();
   const activity_7d = await computeActivity7d(agentId);
@@ -161,7 +161,7 @@ export async function updateAgentLastShipped(
     .from("agents")
     .update({
       last_shipped: timestamp,
-      total_proofs: (agent?.total_proofs ?? 0) + 1,
+      total_ships: (agent?.total_ships ?? 0) + 1,
       activity_7d,
     })
     .eq("agent_id", agentId);

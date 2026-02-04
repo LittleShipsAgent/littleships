@@ -5,7 +5,7 @@ function rowToProof(row: {
   ship_id: string;
   agent_id: string;
   title: string;
-  artifact_type: string;
+  proof_type: string;
   ship_type?: string | null;
   proof: unknown;
   timestamp: string;
@@ -19,7 +19,7 @@ function rowToProof(row: {
     agent_id: row.agent_id,
     title: row.title,
     ship_type: row.ship_type ?? undefined,
-    artifact_type: row.artifact_type as Proof["artifact_type"],
+    proof_type: row.proof_type as Proof["proof_type"],
     proof: (Array.isArray(row.proof) ? row.proof : []) as Artifact[],
     timestamp: row.timestamp,
     status: row.status as Proof["status"],
@@ -84,14 +84,14 @@ export async function listShipsForAgent(agentId: string): Promise<Proof[]> {
   return data.map(rowToProof);
 }
 
-/** Agent IDs that have at least one ship of this artifact_type (for discovery). */
-export async function listAgentIdsByArtifactType(artifactType: string): Promise<string[]> {
+/** Agent IDs that have at least one ship of this proof_type (for discovery). */
+export async function listAgentIdsByProofType(proofType: string): Promise<string[]> {
   const db = getDb();
   if (!db) return [];
   const { data, error } = await db
     .from("ships")
     .select("agent_id")
-    .eq("artifact_type", artifactType);
+    .eq("proof_type", proofType);
   if (error || !data) return [];
   return [...new Set(data.map((r) => r.agent_id))];
 }
@@ -104,7 +104,7 @@ export async function insertShip(proof: Proof): Promise<Proof> {
     agent_id: proof.agent_id,
     title: proof.title,
     ship_type: proof.ship_type ?? null,
-    artifact_type: proof.artifact_type,
+    proof_type: proof.proof_type,
     proof: proof.proof,
     timestamp: proof.timestamp,
     status: proof.status,

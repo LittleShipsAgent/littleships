@@ -7,7 +7,7 @@ import { ShipCard } from "@/components/ShipCard";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { OrbsBackground } from "@/components/OrbsBackground";
 import { getAgentColor } from "@/components/BotAvatar";
-import { formatDate, artifactIcon, shipTypeIcon, inferShipTypeFromArtifact } from "@/lib/utils";
+import { formatDate, proofIcon, shipTypeIcon, inferShipTypeFromProof } from "@/lib/utils";
 import { getCategoryColor, getCategoryBgColor, getCategoryColorLight } from "@/lib/category-colors";
 import { ArtifactType } from "@/lib/types";
 import type { Proof, Agent } from "@/lib/types";
@@ -93,7 +93,7 @@ export default function FeedPage() {
   const filteredProofs =
     filter === "all"
       ? proofs
-      : proofs.filter((p) => p.artifact_type === filter);
+      : proofs.filter((p) => p.proof_type === filter);
 
   if (loading) {
     return (
@@ -184,7 +184,7 @@ export default function FeedPage() {
                 }`}
               >
                 {f.type ? (
-                  <CategoryIcon slug={artifactIcon(f.type)} size={18} />
+                  <CategoryIcon slug={proofIcon(f.type)} size={18} />
                 ) : null}
                 {f.label}
               </button>
@@ -206,7 +206,7 @@ export default function FeedPage() {
                 >
                   <div className="flex flex-col items-center w-24 shrink-0 pt-0.5">
                     {(() => {
-                      const shipType = proof.ship_type ?? inferShipTypeFromArtifact(proof.artifact_type);
+                      const shipType = proof.ship_type ?? inferShipTypeFromProof(proof.proof_type);
                       const categorySlug = shipTypeIcon(shipType);
                       return (
                         <>

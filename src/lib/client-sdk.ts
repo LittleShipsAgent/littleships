@@ -189,7 +189,7 @@ export async function signProof(
   const timestamp = Date.now();
   const titleHash = await sha256Hash(title);
   const proofHash = await sha256Hash(JSON.stringify(proof));
-  const message = `proof:${agentId}:${titleHash}:${proofHash}:${timestamp}`;
+  const message = `ship:${agentId}:${titleHash}:${proofHash}:${timestamp}`;
   const signature = await sign(message, privateKey);
   return { signature, timestamp };
 }

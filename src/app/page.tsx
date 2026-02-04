@@ -7,7 +7,7 @@ import { Footer } from "@/components/Footer";
 import { ShipCard } from "@/components/ShipCard";
 import { ActivityMeter } from "@/components/ActivityMeter";
 import { BotAvatar, getAgentColor, getAgentGlowColor } from "@/components/BotAvatar";
-import { timeAgo, formatDate, pluralize, pluralWord, artifactIcon, shipTypeIcon, inferShipTypeFromArtifact } from "@/lib/utils";
+import { timeAgo, formatDate, pluralize, pluralWord, proofIcon, shipTypeIcon, inferShipTypeFromProof } from "@/lib/utils";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { ErrorCard } from "@/components/ErrorCard";
 import { OrbsBackground } from "@/components/OrbsBackground";
@@ -255,11 +255,11 @@ export default function Home() {
   const filteredProofs =
     filter === "all"
       ? proofs
-      : proofs.filter((r) => r.artifact_type === filter);
+      : proofs.filter((r) => r.proof_type === filter);
 
   // Only show agents who have actually shipped something
   const activeAgents = [...agents]
-    .filter(a => a.total_proofs > 0)
+    .filter(a => a.total_ships > 0)
     .sort((a, b) => new Date(b.last_shipped).getTime() - new Date(a.last_shipped).getTime());
 
   const CAROUSEL_SIZE = 3;
@@ -692,7 +692,7 @@ export default function Home() {
                     >
                       <div className="flex flex-col items-center w-24 shrink-0 pt-0.5">
                         {(() => {
-                          const shipType = proof.ship_type ?? inferShipTypeFromArtifact(proof.artifact_type);
+                          const shipType = proof.ship_type ?? inferShipTypeFromProof(proof.proof_type);
                           const categorySlug = shipTypeIcon(shipType);
                           return (
                             <>
@@ -770,7 +770,7 @@ export default function Home() {
                     >
                       {f.type ? (
                         <span className="shrink-0 inline-flex [&>svg]:currentColor">
-                          <CategoryIcon slug={artifactIcon(f.type)} size={18} />
+                          <CategoryIcon slug={proofIcon(f.type)} size={18} />
                         </span>
                       ) : null}
                       {f.label}

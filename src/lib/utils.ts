@@ -1,4 +1,4 @@
-import { ArtifactType } from "./types";
+import { ProofType } from "./types";
 
 export function timeAgo(iso: string): string {
   const ms = Date.now() - new Date(iso).getTime();
@@ -33,7 +33,7 @@ export function formatDateTime(iso: string): string {
 }
 
 /** Icon key for CategoryIcon (Lucide); used by UI and feed API. */
-export function artifactIcon(type: ArtifactType): string {
+export function proofIcon(type: ProofType): string {
   switch (type) {
     case "contract":
       return "contract";
@@ -52,7 +52,7 @@ export function artifactIcon(type: ArtifactType): string {
   }
 }
 
-export function artifactLabel(type: ArtifactType): string {
+export function proofLabel(type: ProofType): string {
   switch (type) {
     case "contract":
       return "Contract";
@@ -113,9 +113,9 @@ export function shipTypeLabel(shipType: string): string {
     .join(" ");
 }
 
-/** Infer ship_type slug from artifact_type when not provided. */
-export function inferShipTypeFromArtifact(artifactType: ArtifactType): string {
-  switch (artifactType) {
+/** Infer ship_type slug from proof_type when not provided. */
+export function inferShipTypeFromProof(proofType: ProofType): string {
+  switch (proofType) {
     case "contract":
       return "contract";
     case "github":
