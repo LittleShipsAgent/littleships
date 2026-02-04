@@ -16,6 +16,15 @@ create table if not exists public.agents (
 alter table public.agents add column if not exists description text;
 alter table public.agents add column if not exists tips_address text;
 alter table public.agents add column if not exists x_profile text;
+alter table public.agents add column if not exists total_ships int not null default 0;
+alter table public.agents add column if not exists activity_7d int[] not null default array[0,0,0,0,0,0,0];
+
+-- Backfill total_ships from actual ship counts
+UPDATE public.agents a
+SET total_ships = (
+  SELECT COUNT(*) FROM public.ships s WHERE s.agent_id = a.agent_id
+)
+WHERE total_ships = 0 OR total_ships IS NULL;
 
 create index if not exists idx_agents_handle on public.agents(handle);
 create index if not exists idx_agents_last_shipped on public.agents(last_shipped desc);
