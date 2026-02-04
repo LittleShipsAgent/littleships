@@ -2,13 +2,13 @@ import { getDb } from "./client";
 
 const MAX_PER_AGENT_PER_DAY = 20;
 
-export async function getAcknowledgementsCount(proofId: string): Promise<number> {
+export async function getAcknowledgementsCount(shipId: string): Promise<number> {
   const db = getDb();
   if (!db) return 0;
   const { count, error } = await db
     .from("acknowledgements")
     .select("*", { count: "exact", head: true })
-    .eq("proof_id", proofId);
+    .eq("ship_id", shipId);
   if (error) return 0;
   return count ?? 0;
 }
@@ -19,7 +19,7 @@ export interface AcknowledgementDetail {
 }
 
 export interface AcknowledgementRow {
-  proof_id: string;
+  ship_id: string;
   agent_id: string;
   emoji: string | null;
   created_at: string;
@@ -30,25 +30,25 @@ export async function listRecentAcknowledgements(limit = 50): Promise<Acknowledg
   if (!db) return [];
   const { data, error } = await db
     .from("acknowledgements")
-    .select("proof_id, agent_id, emoji, created_at")
+    .select("ship_id, agent_id, emoji, created_at")
     .order("created_at", { ascending: false })
     .limit(limit);
   if (error || !data) return [];
-  return data.map((row: { proof_id: string; agent_id: string; emoji: string | null; created_at: string }) => ({
-    proof_id: row.proof_id,
+  return data.map((row: { ship_id: string; agent_id: string; emoji: string | null; created_at: string }) => ({
+    ship_id: row.ship_id,
     agent_id: row.agent_id,
     emoji: row.emoji ?? null,
     created_at: row.created_at,
   }));
 }
 
-export async function getAcknowledgementsDetail(proofId: string): Promise<AcknowledgementDetail[]> {
+export async function getAcknowledgementsDetail(shipId: string): Promise<AcknowledgementDetail[]> {
   const db = getDb();
   if (!db) return [];
   const { data, error } = await db
     .from("acknowledgements")
     .select("agent_id, emoji")
-    .eq("proof_id", proofId);
+    .eq("ship_id", shipId);
   if (error || !data) return [];
   return data.map((row: { agent_id: string; emoji: string | null }) => ({
     agent_id: row.agent_id,
@@ -57,7 +57,7 @@ export async function getAcknowledgementsDetail(proofId: string): Promise<Acknow
 }
 
 export async function addAcknowledgement(
-  proofId: string,
+  shipId: string,
   agentId: string,
   emoji?: string | null
 ): Promise<
@@ -69,8 +69,8 @@ export async function addAcknowledgement(
   // Check if already acknowledged this ship
   const { data: existing } = await db
     .from("acknowledgements")
-    .select("proof_id")
-    .eq("proof_id", proofId)
+    .select("ship_id")
+    .eq("ship_id", shipId)
     .eq("agent_id", agentId)
     .maybeSingle();
   if (existing)
@@ -90,11 +90,11 @@ export async function addAcknowledgement(
     };
 
   await db.from("acknowledgements").insert({
-    proof_id: proofId,
+    ship_id: shipId,
     agent_id: agentId,
     emoji: emoji ?? null,
   });
 
-  const total = await getAcknowledgementsCount(proofId);
+  const total = await getAcknowledgementsCount(shipId);
   return { success: true, count: total };
 }

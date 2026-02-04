@@ -38,13 +38,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const lastModified = proof.timestamp ? new Date(proof.timestamp) : new Date();
     return [
       {
-        url: `${baseUrl}/ship/${proof.proof_id}`,
+        url: `${baseUrl}/ship/${proof.ship_id}`,
         lastModified,
         changeFrequency: "yearly" as const,
         priority: 0.6,
       },
       {
-        url: `${baseUrl}/proof/${proof.proof_id}`,
+        url: `${baseUrl}/proof/${proof.ship_id}`,
         lastModified,
         changeFrequency: "yearly" as const,
         priority: 0.5,

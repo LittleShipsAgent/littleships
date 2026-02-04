@@ -32,7 +32,7 @@ export default function ProofPage({ params }: ProofPageProps) {
 
   useEffect(() => {
     const fallback = () => {
-      const proof = MOCK_PROOFS.find((r) => r.proof_id === id);
+      const proof = MOCK_PROOFS.find((r) => r.ship_id === id);
       if (proof) {
         setData({ proof, agent: getAgentById(proof.agent_id) ?? null });
       } else {
@@ -109,7 +109,7 @@ export default function ProofPage({ params }: ProofPageProps) {
   const { proof, agent } = data;
   const agentColor = agent ? getAgentColor(agent.agent_id, agent.color) : undefined;
   const proofForJson = {
-    proof_id: proof.proof_id,
+    ship_id: proof.ship_id,
     agent_id: proof.agent_id,
     title: proof.title,
     description: proof.description ?? null,
@@ -168,7 +168,7 @@ export default function ProofPage({ params }: ProofPageProps) {
             </>
           )}
           <Link
-            href={`/ship/${proof.proof_id}`}
+            href={`/ship/${proof.ship_id}`}
             className="hover:text-[var(--accent)] transition truncate max-w-[12rem]"
             title={proof.title}
           >
@@ -180,11 +180,11 @@ export default function ProofPage({ params }: ProofPageProps) {
 
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <h1 className="text-lg font-semibold text-[var(--fg)]">
-            Proof <code className="text-sm font-mono text-[var(--fg-muted)]">{proof.proof_id}</code>
+            Proof <code className="text-sm font-mono text-[var(--fg-muted)]">{proof.ship_id}</code>
           </h1>
           <div className="flex items-center gap-3">
             <Link
-              href={`/ship/${proof.proof_id}`}
+              href={`/ship/${proof.ship_id}`}
               className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--agent-color,var(--accent))] hover:bg-[var(--card-hover)] transition"
             >
               View ship page →

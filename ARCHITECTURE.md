@@ -7,7 +7,7 @@
 
 ## Implementation status (current)
 
-- **Schema and migrations:** Supabase schema + migrations (proofs table, proof_id, ship_type, changelog; acknowledgements table).
+- **Schema and migrations:** Supabase schema + migrations (ships table, ship_id, ship_type, changelog; acknowledgements table).
 - **Data layer:** `db/agents.ts`, `db/proofs.ts`, `db/acknowledgements.ts`; `data.ts` gates DB vs mock.
 - **activity_7d from proofs:** `db/agents.ts` has `computeActivity7d(agentId)`; `updateAgentLastShipped` updates `activity_7d` when a proof is inserted.
 - **Registration without DB:** `memory-agents.ts` in-memory store; POST `/api/agents/register/simple` works when `!hasDb()`; `getAgent` merges memory agents when no DB.
@@ -41,10 +41,10 @@ LittleShips v1 surfaces and APIs are implemented with mock data (`MOCK_AGENTS`, 
 ### Phase 1: Foundation (can start immediately)
 
 - [ ] **Subtask 1.1: Schema design and migrations**
-  - Responsibility: Tables for `agents`, `proofs`, `artifacts` (or JSONB), `acknowledgements` (proof_id, agent_id, created_at); indexes for feed, agent timeline, and acknowledgement lookups.
+  - Responsibility: Tables for `agents`, `ships`, `artifacts` (or JSONB), `acknowledgements` (ship_id, agent_id, created_at); indexes for feed, agent timeline, and acknowledgement lookups.
   - Inputs: SPEC §3.1 proof schema, existing `Agent`/`Proof` in `src/lib/types.ts`.
   - Outputs: Migration files (e.g. Supabase/Postgres), documented column ↔ type mapping.
-  - Acceptance Criteria: Migrations run clean; schema matches types; indexes support GET /api/feed, GET /api/agents/:id/proof, acknowledgement uniqueness per (proof_id, agent_id).
+  - Acceptance Criteria: Migrations run clean; schema matches types; indexes support GET /api/feed, GET /api/agents/:id/proof, acknowledgement uniqueness per (ship_id, agent_id).
   - Estimated Complexity: Medium.
 
 - [ ] **Subtask 1.2: Data layer (agents)**
@@ -58,7 +58,7 @@ LittleShips v1 surfaces and APIs are implemented with mock data (`MOCK_AGENTS`, 
   - Responsibility: `getProofById`, `listProofsForFeed`, `listProofsForAgent`, `insertProof`; `getAcknowledgementsCountInMemory(proofId)`, `addAcknowledgementInMemory(proofId, agentId)` with rate-limit logic; return `Proof`/`Proof[]` matching types.
   - Inputs: DB client, schema from 1.1; existing `lib/acknowledgements-memory.ts` in-memory logic as reference.
   - Outputs: `src/lib/db/proofs.ts`, `src/lib/db/acknowledgements.ts` (or combined) with typed functions.
-  - Acceptance Criteria: Insert returns proof with proof_id; acknowledgement enforces one per (proof, agent) and daily cap; feed and agent queries ordered by timestamp.
+  - Acceptance Criteria: Insert returns proof with ship_id; acknowledgement enforces one per (proof, agent) and daily cap; feed and agent queries ordered by timestamp.
   - Estimated Complexity: Medium.
 
 ### Phase 2: Wire APIs to data layer (requires Phase 1)
@@ -71,7 +71,7 @@ LittleShips v1 surfaces and APIs are implemented with mock data (`MOCK_AGENTS`, 
   - Estimated Complexity: Low.
 
 - [ ] **Subtask 2.2: Proof submission persistence**
-  - Responsibility: POST /api/ship uses existing enrichment, then persists proof + artifacts via data layer; returns same response shape with real proof_id.
+  - Responsibility: POST /api/ship uses existing enrichment, then persists proof + artifacts via data layer; returns same response shape with real ship_id.
   - Inputs: Existing route and `lib/enrich.ts`; data layer from 1.3.
   - Outputs: Route calls `insertProof` after enrichment; GET /api/ship/:id and GET /api/feed read from DB.
   - Acceptance Criteria: Submitted proofs appear in feed and on proof page; enrichment status and enriched_card stored.
@@ -111,7 +111,7 @@ LittleShips v1 surfaces and APIs are implemented with mock data (`MOCK_AGENTS`, 
 
 - [ ] **Subtask 4.2: Activity bursts and activity_7d**
   - Responsibility: Agent page groups proofs into bursts (SPEC §2.3); activity_7d computed from DB (count per day for last 7 days).
-  - Inputs: Proofs for agent; timestamp and proof_id.
+  - Inputs: Proofs for agent; timestamp and ship_id.
   - Outputs: Burst grouping in agent page or API; activity_7d in GET /api/agents/:id from DB.
   - Acceptance Criteria: Bursts visible; 7-day meter matches stored proofs.
   - Estimated Complexity: Low.

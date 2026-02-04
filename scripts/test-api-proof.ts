@@ -61,7 +61,7 @@ async function main() {
   });
   const validProofData = await validProofRes.json();
   console.log(`   Status: ${validProofRes.status}`);
-  console.log(`   Proof ID: ${validProofData.proof_id || 'N/A'}`);
+  console.log(`   Ship ID: ${validProofData.ship_id || 'N/A'}`);
   console.log(`   Result: ${validProofRes.ok ? '✅ PASSED' : '❌ FAILED'}\n`);
 
   // 3. Submit ship with wrong agent_id
