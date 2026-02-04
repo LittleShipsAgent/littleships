@@ -26,8 +26,8 @@ export function ProofCard({ proof, agent, showAgent = true, showAgentAvatar = tr
   const router = useRouter();
   const shipType = proof.ship_type ?? inferShipTypeFromArtifact(proof.artifact_type);
   const label = shipTypeLabel(shipType);
-  const shipUrl = `/ship/${proof.proof_id}`;
-  const proofUrl = `/proof/${proof.proof_id}`;
+  const shipUrl = `/ship/${proof.ship_id}`;
+  const proofUrl = `/proof/${proof.ship_id}`;
   const proofCount = proof.proof.length;
   const ackCount = proof.acknowledgements ?? 0;
   const rawDescription =

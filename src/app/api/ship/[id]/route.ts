@@ -10,7 +10,7 @@ export async function GET(
   const data = await getProof(id);
   if (!data) {
     return NextResponse.json(
-      { error: "Proof not found" },
+      { error: "Ship not found" },
       { status: 404 }
     );
   }

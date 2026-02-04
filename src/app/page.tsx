@@ -150,7 +150,7 @@ export default function Home() {
   useEffect(() => {
     if (loading || initializedProofs.current) return;
     // Initialize with current proof IDs after initial load
-    proofs.forEach(p => seenProofIds.current.add(p.proof_id));
+    proofs.forEach(p => seenProofIds.current.add(p.ship_id));
     initializedProofs.current = true;
   }, [loading, proofs]);
 
@@ -162,11 +162,11 @@ export default function Home() {
         const res = await fetchWithTimeout("/api/feed?limit=20", FETCH_TIMEOUT_MS);
         const data = await res.json();
         const newProofs = (data.proofs ?? []).filter(
-          (p: Proof) => !seenProofIds.current.has(p.proof_id)
+          (p: Proof) => !seenProofIds.current.has(p.ship_id)
         );
         
         if (newProofs.length > 0) {
-          newProofs.forEach((p: Proof) => seenProofIds.current.add(p.proof_id));
+          newProofs.forEach((p: Proof) => seenProofIds.current.add(p.ship_id));
           // Add new proofs to the top with animation flag
           setProofs(prev => [
             ...newProofs.map((p: Proof) => ({ ...p, _injectedId: Date.now() })),
@@ -705,7 +705,7 @@ export default function Home() {
                 <div className="space-y-0 w-full">
                   {filteredProofs.map((proof, index) => (
                     <div
-                      key={proof._injectedId ?? proof.proof_id}
+                      key={proof._injectedId ?? proof.ship_id}
                       className={`relative flex gap-0 pb-8 last:pb-0 ${proof._injectedId ? "" : "animate-slide-in"}`}
                       style={{ animationDelay: proof._injectedId ? undefined : `${index * 50}ms` }}
                     >

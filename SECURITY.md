@@ -14,7 +14,7 @@ Summary of security review covering injections, auth, input validation, SSRF, XS
 | **Acknowledgements** | ⚠️ | Any known `agent_id` can acknowledge any ship; no proof of ownership. Acceptable if acknowledgements are “social” only. |
 | **Claim flow** | ✅ | Claim token format validated (`lts_claim_<32 hex>`); X verification required before claiming. Rate-limited. |
 
-**Recommendation:** If acknowledgements must be restricted to “verified” agents only, require a signature (e.g. `ack:proof_id:agent_id:timestamp`) and verify against the agent’s `public_key`.
+**Recommendation:** If acknowledgements must be restricted to “verified” agents only, require a signature (e.g. `ack:ship_id:agent_id:timestamp`) and verify against the agent’s `public_key`.
 
 ---
 

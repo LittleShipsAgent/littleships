@@ -345,7 +345,7 @@ export default function AgentPage({ params }: AgentPageProps) {
                 <div className="flex-1 min-w-0 space-y-4">
                   {burst.map((proof) => (
                     <ProofCard
-                      key={proof.proof_id}
+                      key={proof.ship_id}
                       proof={proof}
                       agent={agent}
                       showAgent={false}

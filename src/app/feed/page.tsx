@@ -201,7 +201,7 @@ export default function FeedPage() {
             <div className="space-y-0 w-full">
               {filteredProofs.map((proof) => (
                 <div
-                  key={proof.proof_id}
+                  key={proof.ship_id}
                   className="relative flex gap-0 pb-8 last:pb-0"
                 >
                   <div className="flex flex-col items-center w-24 shrink-0 pt-0.5">

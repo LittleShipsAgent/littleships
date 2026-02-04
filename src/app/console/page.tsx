@@ -15,7 +15,7 @@ type ProofRow = {
 };
 
 type AckRow = {
-  proof_id: string;
+  ship_id: string;
   agent_id: string;
   from_handle: string | null;
   to_handle: string | null;
@@ -23,8 +23,8 @@ type AckRow = {
   created_at: string;
 };
 
-function ackKey(a: { proof_id: string; agent_id: string }) {
-  return `${a.proof_id}\n${a.agent_id}`;
+function ackKey(a: { ship_id: string; agent_id: string }) {
+  return `${a.ship_id}\n${a.agent_id}`;
 }
 
 export default function ConsolePage() {
@@ -46,14 +46,14 @@ export default function ConsolePage() {
         if (!res.ok) throw new Error(res.statusText);
         const data = await res.json();
         const proofs = data.proofs ?? [];
-        const newRows = proofs.map((p: { proof_id: string; agent_id: string; timestamp: string; status?: string; handle?: string | null; agent?: { handle?: string } }) => ({
-          ship_id: p.proof_id,
+        const newRows = proofs.map((p: { ship_id: string; agent_id: string; timestamp: string; status?: string; handle?: string | null; agent?: { handle?: string } }) => ({
+          ship_id: p.ship_id,
           agent_id: p.agent_id,
           handle: p.handle ?? p.agent?.handle ?? null,
           verified: p.status === "reachable",
           timestamp: p.timestamp,
         }));
-        const newIds = new Set(newRows.map((r) => r.ship_id));
+        const newIds = new Set<string>(newRows.map((r: ProofRow) => r.ship_id));
         const prev = prevFeedIdsRef.current;
         const added = [...newIds].filter((id) => !prev.has(id));
         if (prev.size > 0 && added.length > 0) {
@@ -88,15 +88,15 @@ export default function ConsolePage() {
         if (!res.ok) throw new Error(res.statusText);
         const data = await res.json();
         const list = data.acknowledgements ?? [];
-        const newRows = list.map((a: { proof_id: string; agent_id: string; from_handle?: string | null; to_handle?: string | null; emoji?: string | null; created_at: string }) => ({
-          proof_id: a.proof_id,
+        const newRows = list.map((a: { ship_id: string; agent_id: string; from_handle?: string | null; to_handle?: string | null; emoji?: string | null; created_at: string }) => ({
+          ship_id: a.ship_id,
           agent_id: a.agent_id,
           from_handle: a.from_handle ?? null,
           to_handle: a.to_handle ?? null,
           emoji: a.emoji ?? null,
           created_at: a.created_at,
         }));
-        const newKeys = new Set(newRows.map((a) => ackKey(a)));
+        const newKeys = new Set<string>(newRows.map((a: AckRow) => ackKey(a)));
         const prev = prevAckKeysRef.current;
         const added = [...newKeys].filter((k) => !prev.has(k));
         if (prev.size > 0 && added.length > 0) {
@@ -289,7 +289,7 @@ export default function ConsolePage() {
                   <tbody className="divide-y divide-[var(--border)]">
                     {ackRows.map((a, i) => (
                       <tr
-                        key={`${a.proof_id}-${a.agent_id}-${i}`}
+                        key={`${a.ship_id}-${a.agent_id}-${i}`}
                         className={`hover:bg-[var(--card)] transition transition-colors duration-500 ${
                           highlightedAckKeys.has(ackKey(a))
                             ? "bg-emerald-500/25 dark:bg-emerald-400/20"
@@ -298,11 +298,11 @@ export default function ConsolePage() {
                       >
                         <td className="px-4 py-2 truncate">
                           <Link
-                            href={`/ship/${a.proof_id}`}
+                            href={`/ship/${a.ship_id}`}
                             className="text-[var(--accent-muted)] hover:text-[var(--accent)] hover:underline"
-                            title={a.proof_id}
+                            title={a.ship_id}
                           >
-                            {a.proof_id}
+                            {a.ship_id}
                           </Link>
                         </td>
                         <td className="px-4 py-2 truncate text-[var(--fg-muted)]" title={a.from_handle ?? a.agent_id}>

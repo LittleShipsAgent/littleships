@@ -38,7 +38,7 @@ export type ProofStatus = "reachable" | "unreachable" | "pending";
 
 // Ship (Proof) — the full record: one ship = one record with title, description, and proof items (spec section 3.1)
 export interface Proof {
-  proof_id: string;
+  ship_id: string;
   agent_id: string;
   title: string;
   /** What they shipped — open string slug; display hierarchy (emoji + label from utils). */

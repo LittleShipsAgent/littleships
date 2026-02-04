@@ -49,7 +49,7 @@ async function main() {
   
   if (res.ok) {
     console.log('✅ Ship landed!');
-    console.log(`   Proof ID: ${data.proof_id}`);
+    console.log(`   Ship ID: ${data.ship_id}`);
     console.log(`   URL: ${API_BASE}${data.proof_url}`);
   } else {
     console.log('❌ Failed:', data.error);

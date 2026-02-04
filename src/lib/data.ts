@@ -2,7 +2,7 @@
 
 import { hasDb } from "@/lib/db/client";
 import * as dbAgents from "@/lib/db/agents";
-import * as dbProofs from "@/lib/db/proofs";
+import * as dbShips from "@/lib/db/ships";
 import * as dbAcknowledgements from "@/lib/db/acknowledgements";
 import { getMemoryAgent } from "@/lib/memory-agents";
 import {
@@ -24,7 +24,7 @@ export async function listAgents(): Promise<Agent[]> {
 /** Agents that have shipped at least one proof of this artifact_type (discovery). */
 export async function listAgentsByArtifactType(artifactType: string): Promise<Agent[]> {
   if (hasDb()) {
-    const ids = await dbProofs.listAgentIdsByArtifactType(artifactType);
+    const ids = await dbShips.listAgentIdsByArtifactType(artifactType);
     if (ids.length === 0) return [];
     const all = await dbAgents.listAgents();
     const idSet = new Set(ids);
@@ -54,12 +54,12 @@ export async function getAgent(idOrHandle: string): Promise<Agent | null> {
 }
 
 export async function getProofsByAgent(agentId: string): Promise<Proof[]> {
-  if (hasDb()) return dbProofs.listProofsForAgent(agentId);
+  if (hasDb()) return dbShips.listShipsForAgent(agentId);
   return getProofsForAgent(agentId);
 }
 
 export async function getFeedProofs(limit?: number, cursor?: string): Promise<Proof[]> {
-  if (hasDb()) return dbProofs.listProofsForFeed(limit ?? 100, cursor);
+  if (hasDb()) return dbShips.listShipsForFeed(limit ?? 100, cursor);
   const sorted = [...MOCK_PROOFS].sort(
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
   );
@@ -74,7 +74,7 @@ export async function getProof(
 ): Promise<{ proof: Proof; agent: Agent | null } | null> {
   let p: Proof | null = null;
   if (hasDb()) {
-    p = await dbProofs.getProofById(proofId);
+    p = await dbShips.getShipById(proofId);
     if (p) {
       const count = await dbAcknowledgements.getAcknowledgementsCount(proofId);
       const detail = await dbAcknowledgements.getAcknowledgementsDetail(proofId);
@@ -86,7 +86,7 @@ export async function getProof(
       p = { ...p, acknowledgements: count, acknowledged_by, acknowledgement_emojis: Object.keys(acknowledgement_emojis).length ? acknowledgement_emojis : undefined };
     }
   } else {
-    p = MOCK_PROOFS.find((x) => x.proof_id === proofId) ?? null;
+    p = MOCK_PROOFS.find((x) => x.ship_id === proofId) ?? null;
     if (p)
       p = {
         ...p,
@@ -140,7 +140,7 @@ export async function insertAgent(agent: {
 
 export async function insertProof(proof: Proof): Promise<Proof> {
   if (!hasDb()) throw new Error("Database not configured");
-  const inserted = await dbProofs.insertProof(proof);
+  const inserted = await dbShips.insertShip(proof);
   await dbAgents.updateAgentLastShipped(proof.agent_id, proof.timestamp);
   return inserted;
 }

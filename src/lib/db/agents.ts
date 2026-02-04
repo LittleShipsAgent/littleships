@@ -1,7 +1,7 @@
 import { getDb } from "./client";
 import type { Agent } from "@/lib/types";
 
-/** Compute 7-day activity counts from proofs: [day6ago, day5ago, ..., today] (UTC). */
+/** Compute 7-day activity counts from ships: [day6ago, day5ago, ..., today] (UTC). */
 export async function computeActivity7d(agentId: string): Promise<number[]> {
   const db = getDb();
   if (!db) return [0, 0, 0, 0, 0, 0, 0];
@@ -11,7 +11,7 @@ export async function computeActivity7d(agentId: string): Promise<number[]> {
   sevenDaysAgo.setUTCHours(0, 0, 0, 0);
   const isoFrom = sevenDaysAgo.toISOString();
   const { data: proofs } = await db
-    .from("proofs")
+    .from("ships")
     .select("timestamp")
     .eq("agent_id", agentId)
     .gte("timestamp", isoFrom);

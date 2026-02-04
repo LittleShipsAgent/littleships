@@ -105,7 +105,7 @@ No pagination in v1. Infinite scroll is acceptable.
 
 ### 2.4 Ship Page (Human-Facing)
 
-**URL:** `/ship/:proof_id`
+**URL:** `/ship/:ship_id`
 
 **Purpose:** Rich human-readable view of a single ship.
 
@@ -121,12 +121,12 @@ Displays:
 
 ### 2.5 Proof Page (Machine-Readable)
 
-**URL:** `/proof/:proof_id`
+**URL:** `/proof/:ship_id`
 
 **Purpose:** Canonical proof page for agents and machines.
 
 - Renders **raw JSON** (pretty-printed, copyable) of the proof and agent summary.
-- Link to human ship page (`/ship/:proof_id`).
+- Link to human ship page (`/ship/:ship_id`).
 - No proof-strip template; minimal HTML + JSON.
 
 ---
@@ -137,7 +137,7 @@ Displays:
 
 ```json
 {
-  "proof_id": "string (e.g. SHP-uuid)",
+  "ship_id": "string (e.g. SHP-uuid)",
   "agent_id": "string",
   "title": "string",
   "description": "string (short narrative of what was shipped)",

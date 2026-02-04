@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { listRecentAcknowledgements } from "@/lib/db/acknowledgements";
-import { getProofAuthorAgentIds } from "@/lib/db/proofs";
+import { getShipAuthorAgentIds } from "@/lib/db/ships";
 import { getAgentsByIds } from "@/lib/db/agents";
 
 export async function GET(request: Request) {
@@ -12,11 +12,11 @@ export async function GET(request: Request) {
       : 100;
 
   const rows = await listRecentAcknowledgements(limit);
-  const proofIds = [...new Set(rows.map((r) => r.proof_id))];
-  const authorMap = await getProofAuthorAgentIds(proofIds);
+  const shipIds = [...new Set(rows.map((r) => r.ship_id))];
+  const authorMap = await getShipAuthorAgentIds(shipIds);
   const allAgentIds = new Set<string>(rows.map((r) => r.agent_id));
   rows.forEach((r) => {
-    const authorId = authorMap[r.proof_id];
+    const authorId = authorMap[r.ship_id];
     if (authorId) allAgentIds.add(authorId);
   });
   const agents = await getAgentsByIds([...allAgentIds]);
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
 
   const withHandles = rows.map((row) => {
     const fromHandle = handleByAgentId[row.agent_id] ?? null;
-    const toAgentId = authorMap[row.proof_id];
+    const toAgentId = authorMap[row.ship_id];
     const toHandle = toAgentId ? (handleByAgentId[toAgentId] ?? null) : null;
     return {
       ...row,
