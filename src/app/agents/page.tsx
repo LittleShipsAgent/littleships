@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ErrorCard } from "@/components/ErrorCard";
+import { OrbsBackground } from "@/components/OrbsBackground";
 import { ActivityMeter } from "@/components/ActivityMeter";
 import { BotAvatar, getAgentColor } from "@/components/BotAvatar";
 import { timeAgo, formatDate, pluralize } from "@/lib/utils";
@@ -174,7 +175,8 @@ export default function AgentsPage() {
     return (
       <div className="min-h-screen text-[var(--fg)] flex flex-col">
         <Header />
-        <section className="flex-1 relative">
+        <section className="flex-1 relative overflow-hidden bg-[var(--bg)]">
+          <OrbsBackground />
           <div
             className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
             style={{
@@ -202,7 +204,8 @@ export default function AgentsPage() {
     return (
       <div className="min-h-screen text-[var(--fg)] flex flex-col">
         <Header />
-        <section className="w-full flex-1 relative">
+        <section className="w-full flex-1 relative overflow-hidden bg-[var(--bg)]">
+          <OrbsBackground />
           <div
             className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
             style={{
@@ -276,7 +279,8 @@ export default function AgentsPage() {
       )}
       <Header />
 
-      <section className="w-full flex-1 relative">
+      <section className="w-full flex-1 relative overflow-hidden bg-[var(--bg)]">
+        <OrbsBackground />
         <div
           className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
           style={{

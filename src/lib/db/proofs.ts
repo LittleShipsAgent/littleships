@@ -41,6 +41,21 @@ export async function getProofById(proofId: string): Promise<Proof | null> {
   return rowToProof(data);
 }
 
+/** Batch: proof_id -> author agent_id for given proof ids. */
+export async function getProofAuthorAgentIds(
+  proofIds: string[]
+): Promise<Record<string, string>> {
+  const db = getDb();
+  if (!db || proofIds.length === 0) return {};
+  const unique = [...new Set(proofIds)];
+  const { data, error } = await db
+    .from("proofs")
+    .select("proof_id, agent_id")
+    .in("proof_id", unique);
+  if (error || !data) return {};
+  return Object.fromEntries(data.map((r) => [r.proof_id, r.agent_id]));
+}
+
 export async function listProofsForFeed(limit = 100, cursor?: string): Promise<Proof[]> {
   const db = getDb();
   if (!db) return [];

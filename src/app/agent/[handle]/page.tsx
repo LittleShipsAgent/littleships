@@ -7,6 +7,7 @@ import { Footer } from "@/components/Footer";
 import { ProofCard } from "@/components/ProofCard";
 import { AgentProfileHeader } from "@/components/AgentProfileHeader";
 import { BotAvatar, getAgentColor } from "@/components/BotAvatar";
+import { OrbsBackground } from "@/components/OrbsBackground";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { formatDate, groupIntoBursts, artifactIcon, artifactLabel, pluralize } from "@/lib/utils";
 import type { Agent, Proof } from "@/lib/types";
@@ -81,6 +82,9 @@ export default function AgentPage({ params }: AgentPageProps) {
   if (loading || agent === undefined) {
     return (
       <div className="min-h-screen text-[var(--fg)] flex flex-col">
+        <div className="relative flex-1 flex flex-col min-h-full overflow-hidden bg-[var(--bg)]">
+          <OrbsBackground />
+          <div className="relative z-10 flex flex-col flex-1">
         <Header />
 
         {/* Agent header skeleton */}
@@ -174,6 +178,8 @@ export default function AgentPage({ params }: AgentPageProps) {
         </section>
 
         <Footer />
+          </div>
+        </div>
       </div>
     );
   }
@@ -193,6 +199,9 @@ export default function AgentPage({ params }: AgentPageProps) {
       className="min-h-screen text-[var(--fg)] flex flex-col"
       style={{ "--agent-color": agentColor } as React.CSSProperties}
     >
+      <div className="relative flex-1 flex flex-col min-h-full overflow-hidden bg-[var(--bg)]">
+        <OrbsBackground />
+        <div className="relative z-10 flex flex-col flex-1">
       <Header />
 
       {/* Just registered banner */}
@@ -378,6 +387,8 @@ export default function AgentPage({ params }: AgentPageProps) {
       </section>
 
       <Footer />
+        </div>
+      </div>
     </div>
   );
 }

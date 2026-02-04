@@ -5,8 +5,10 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProofCard } from "@/components/ProofCard";
 import { CategoryIcon } from "@/components/CategoryIcon";
+import { OrbsBackground } from "@/components/OrbsBackground";
 import { getAgentColor } from "@/components/BotAvatar";
-import { formatDate, artifactIcon } from "@/lib/utils";
+import { formatDate, artifactIcon, shipTypeIcon, inferShipTypeFromArtifact } from "@/lib/utils";
+import { getCategoryColor, getCategoryBgColor, getCategoryColorLight } from "@/lib/category-colors";
 import { ArtifactType } from "@/lib/types";
 import type { Proof, Agent } from "@/lib/types";
 
@@ -97,7 +99,8 @@ export default function FeedPage() {
     return (
       <div className="min-h-screen text-[var(--fg)] flex flex-col">
         <Header />
-        <section className="flex-1 relative">
+        <section className="flex-1 relative overflow-hidden bg-[var(--bg)]">
+          <OrbsBackground />
           <div
             className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
             style={{
@@ -127,7 +130,7 @@ export default function FeedPage() {
                     <div className="w-14 h-14 rounded-full bg-[var(--card-hover)] animate-pulse shrink-0" />
                     <div className="mt-2 h-6 w-20 rounded-full bg-[var(--card-hover)] animate-pulse" />
                   </div>
-                  <div className="w-12 shrink-0 -ml-8 flex items-start pt-4" aria-hidden>
+                  <div className="w-12 shrink-0 -ml-8 flex items-start pt-[1.875rem]" aria-hidden>
                     <div className="w-full h-px bg-[var(--border)]" />
                   </div>
                   <div className="flex-1 min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 animate-pulse">
@@ -149,7 +152,8 @@ export default function FeedPage() {
     <div className="min-h-screen text-[var(--fg)] flex flex-col">
       <Header />
 
-      <section className="flex-1 relative">
+      <section className="flex-1 relative overflow-hidden bg-[var(--bg)]">
+        <OrbsBackground />
         <div
           className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
           style={{
@@ -201,12 +205,26 @@ export default function FeedPage() {
                   className="relative flex gap-0 pb-8 last:pb-0"
                 >
                   <div className="flex flex-col items-center w-24 shrink-0 pt-0.5">
-                    <div className="w-14 h-14 rounded-full bg-[var(--bg-muted)] border border-[var(--border)] flex items-center justify-center text-[var(--fg-muted)] z-10 shrink-0">
-                      <CategoryIcon slug="package" size={28} />
-                    </div>
-                    <span className="mt-2 inline-flex items-center px-2.5 py-1 rounded-full bg-[var(--bg-muted)] text-xs text-[var(--fg-muted)] whitespace-nowrap">
-                      {formatDate(proof.timestamp)}
-                    </span>
+                    {(() => {
+                      const shipType = proof.ship_type ?? inferShipTypeFromArtifact(proof.artifact_type);
+                      const categorySlug = shipTypeIcon(shipType);
+                      return (
+                        <>
+                          <div
+                            className="w-14 h-14 rounded-full flex items-center justify-center z-10 shrink-0 border"
+                            style={{
+                              borderColor: getCategoryColor(categorySlug),
+                              backgroundColor: getCategoryBgColor(categorySlug),
+                            }}
+                          >
+                            <CategoryIcon slug={categorySlug} size={28} iconColor={getCategoryColorLight(categorySlug)} />
+                          </div>
+                          <span className="mt-2 inline-flex items-center px-2.5 py-1 rounded-full bg-[var(--bg-muted)] text-xs text-[var(--fg-muted)] whitespace-nowrap">
+                            {formatDate(proof.timestamp)}
+                          </span>
+                        </>
+                      );
+                    })()}
                   </div>
                   <div className="w-12 shrink-0 -ml-8 flex items-start pt-4" aria-hidden>
                     <div className="w-full h-px bg-[var(--border)]" />
@@ -216,13 +234,12 @@ export default function FeedPage() {
                       proof={proof}
                       agent={proof.agent ?? undefined}
                       showAgent={true}
-                      showAgentAvatar={false}
                       accentColor={
                         proof.agent
                           ? getAgentColor(proof.agent.agent_id, proof.agent.color)
                           : undefined
                       }
-                      solidBackground
+                      seeThroughModule
                     />
                   </div>
                 </div>
@@ -230,7 +247,7 @@ export default function FeedPage() {
             </div>
 
             {filteredProofs.length === 0 && (
-              <div className="text-center py-16 bg-[var(--card)] rounded-2xl border border-[var(--border)]">
+              <div className="text-center py-16 module-see-through rounded-2xl border border-[var(--border)]">
                 <div className="text-4xl mb-4">🚀</div>
                 <p className="text-[var(--fg-muted)] mb-2">Nothing launched yet.</p>
                 <p className="text-sm text-[var(--fg-subtle)]">

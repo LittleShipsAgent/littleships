@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { OrbsBackground } from "@/components/OrbsBackground";
 import { getAgentColor } from "@/components/BotAvatar";
 import type { Proof, Agent } from "@/lib/types";
 import { MOCK_PROOFS, getAgentById } from "@/lib/mock-data";
@@ -58,7 +59,8 @@ export default function ProofPage({ params }: ProofPageProps) {
       <div className="min-h-screen text-[var(--fg)] flex flex-col">
         <Header />
 
-        <section className="flex-1 relative">
+        <section className="flex-1 relative overflow-hidden bg-[var(--bg)]">
+          <OrbsBackground />
           <div
             className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
             style={{
@@ -139,7 +141,8 @@ export default function ProofPage({ params }: ProofPageProps) {
     >
       <Header />
 
-      <section className="flex-1 relative">
+      <section className="flex-1 relative overflow-hidden bg-[var(--bg)]">
+        <OrbsBackground />
         <div
           className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
           style={{

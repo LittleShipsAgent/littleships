@@ -7,9 +7,11 @@ import { Footer } from "@/components/Footer";
 import { ProofCard } from "@/components/ProofCard";
 import { ActivityMeter } from "@/components/ActivityMeter";
 import { BotAvatar, getAgentColor, getAgentGlowColor } from "@/components/BotAvatar";
-import { timeAgo, formatDate, pluralize, pluralWord, artifactIcon } from "@/lib/utils";
+import { timeAgo, formatDate, pluralize, pluralWord, artifactIcon, shipTypeIcon, inferShipTypeFromArtifact } from "@/lib/utils";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { ErrorCard } from "@/components/ErrorCard";
+import { OrbsBackground } from "@/components/OrbsBackground";
+import { getCategoryColor, getCategoryBgColor, getCategoryColorLight } from "@/lib/category-colors";
 import { ArtifactType } from "@/lib/types";
 import type { Proof, Agent } from "@/lib/types";
 import { MOCK_PROOFS, MOCK_AGENTS, getAgentForProof } from "@/lib/mock-data";
@@ -459,7 +461,8 @@ export default function Home() {
 
       {/* Hero + How it works - merged */}
       {!heroClosed && (
-      <section className="hero-pattern border-b border-[var(--border)] relative">
+      <section className="hero-pattern page-orbs-wrap border-b border-[var(--border)] relative">
+        <OrbsBackground />
         {/* Half-circle glow from top of hero */}
         <div
           className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
@@ -592,7 +595,7 @@ export default function Home() {
           const middleIndex = Math.floor(displayAgents.length / 2);
           const middleAgent = displayAgents[middleIndex];
           const glowBase = middleAgent ? getAgentGlowColor(middleAgent.agent_id, middleAgent.color) : "rgba(240, 244, 248, 0.15)";
-          const glowBrighter = glowBase.replace(/[\d.]+\)$/, "0.35)");
+          const glowBrighter = glowBase.replace(/[\d.]+\)$/, "0.32)");
           return (
             <div
               className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(100%,42rem)] h-64 pointer-events-none z-0"
@@ -638,7 +641,7 @@ export default function Home() {
                   <Link
                     key={agent.agent_id}
                     href={`/agent/${agent.handle.replace("@", "")}`}
-                    className={`min-w-0 bg-[var(--bg-muted)] border border-[var(--border)] rounded-2xl p-3 hover:border-[var(--border-hover)] hover:bg-[var(--bg-muted)] hover:shadow-md hover:shadow-black/10 hover:-translate-y-0.5 transition-all duration-200 group flex items-center gap-3 ${
+                    className={`min-w-0 home-active-agent-card border border-[var(--border)] rounded-2xl p-3 hover:border-[var(--border-hover)] hover:shadow-md hover:shadow-black/10 hover:-translate-y-0.5 transition-all duration-200 group flex items-center gap-3 ${
                       isNewCard ? "animate-new-card" : ""
                     }`}
                   >
@@ -674,7 +677,8 @@ export default function Home() {
 
       {/* Recent ships - feed of proof (filter hidden for now) */}
       <section id="feed" className="recent-ships-dots border-b border-[var(--border)]">
-        <div className="max-w-6xl mx-auto px-6 md:px-8 py-12">
+        <OrbsBackground />
+        <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-8 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
             {/* Main content - full width while filter is hidden */}
             <div className="lg:col-span-3 min-w-0 w-full">
@@ -690,9 +694,8 @@ export default function Home() {
                 </p>
               </div>
 
-              {/* Timeline: package icon out, date, vertical line, connector (like profile) */}
+              {/* Timeline: package icon, date, vertical line, connector */}
               <div className="relative w-full">
-                {/* Vertical line - runs through package circle centers */}
                 {filteredProofs.length > 0 && (
                   <div
                     className="absolute left-12 top-0 bottom-0 w-px bg-[var(--border)]"
@@ -706,31 +709,38 @@ export default function Home() {
                       className={`relative flex gap-0 pb-8 last:pb-0 ${proof._injectedId ? "" : "animate-slide-in"}`}
                       style={{ animationDelay: proof._injectedId ? undefined : `${index * 50}ms` }}
                     >
-                      {/* Timeline node: package + date pill (like profile) */}
                       <div className="flex flex-col items-center w-24 shrink-0 pt-0.5">
-                        <div
-                          className="w-14 h-14 rounded-full bg-[var(--bg-muted)] border border-[var(--border)] flex items-center justify-center text-[var(--fg-muted)] z-10 shrink-0"
-                          aria-hidden
-                        >
-                          <CategoryIcon slug="package" size={28} />
-                        </div>
-                        <span className="mt-2 inline-flex items-center px-2.5 py-1 rounded-full bg-[var(--bg-muted)] text-xs text-[var(--fg-muted)] whitespace-nowrap">
-                          {formatDate(proof.timestamp)}
-                        </span>
+                        {(() => {
+                          const shipType = proof.ship_type ?? inferShipTypeFromArtifact(proof.artifact_type);
+                          const categorySlug = shipTypeIcon(shipType);
+                          return (
+                            <>
+                              <div
+                                className="w-14 h-14 rounded-full flex items-center justify-center z-10 shrink-0 border"
+                                aria-hidden
+                                style={{
+                                  borderColor: getCategoryColor(categorySlug),
+                                  backgroundColor: getCategoryBgColor(categorySlug),
+                                }}
+                              >
+                                <CategoryIcon slug={categorySlug} size={28} iconColor={getCategoryColorLight(categorySlug)} />
+                              </div>
+                              <span className="mt-2 inline-flex items-center px-2.5 py-1 rounded-full bg-[var(--bg-muted)] text-xs text-[var(--fg-muted)] whitespace-nowrap">
+                                {formatDate(proof.timestamp)}
+                              </span>
+                            </>
+                          );
+                        })()}
                       </div>
-                      {/* Connector line: from package circle to card */}
                       <div className="w-12 shrink-0 -ml-8 flex items-start pt-4" aria-hidden>
                         <div className="w-full h-px bg-[var(--border)]" />
                       </div>
-                      {/* Card - agent name in card (no avatar, timeline has package); highlight only the card when newly added */}
                       <div className={`flex-1 min-w-[min(20rem,100%)] ${proof._injectedId ? "rounded-2xl animate-new-card" : ""}`}>
                         <ProofCard 
                           proof={proof} 
                           agent={proof.agent ?? undefined} 
-                          showAgent={true} 
-                          showAgentAvatar={false}
+                          showAgent={true}
                           accentColor={proof.agent ? getAgentColor(proof.agent.agent_id, proof.agent.color) : undefined}
-                          solidBackground
                         />
                       </div>
                     </div>
