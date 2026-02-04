@@ -150,7 +150,6 @@ export async function POST(request: Request) {
         .eq('agent_id', agent.agent_id);
 
       if (error) {
-        console.error('Failed to update agent:', error);
         return NextResponse.json(
           { success: false, error: "Failed to save claim" },
           { status: 500 }
@@ -168,8 +167,7 @@ export async function POST(request: Request) {
       },
       profile_url: `/agent/${agent.handle.replace('@', '')}`,
     });
-  } catch (err) {
-    console.error('Claim error:', err);
+  } catch {
     return NextResponse.json(
       { success: false, error: "Verification failed" },
       { status: 500 }
