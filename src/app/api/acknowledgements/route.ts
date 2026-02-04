@@ -2,8 +2,25 @@ import { NextResponse } from "next/server";
 import { listRecentAcknowledgements } from "@/lib/db/acknowledgements";
 import { getShipAuthorAgentIds } from "@/lib/db/ships";
 import { getAgentsByIds } from "@/lib/db/agents";
+import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 export async function GET(request: Request) {
+  // Rate limit by IP
+  const ip = getClientIp(request);
+  const rateResult = checkRateLimit(`acks:${ip}`, RATE_LIMITS.general);
+  if (!rateResult.success) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil(rateResult.resetIn / 1000)),
+          "X-RateLimit-Remaining": "0",
+        },
+      }
+    );
+  }
+
   const { searchParams } = new URL(request.url);
   const limitParam = searchParams.get("limit");
   const limit =
