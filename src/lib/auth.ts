@@ -50,15 +50,17 @@ function normalizeSignature(sig: string): Uint8Array<ArrayBuffer> {
   return base64ToBytes(cleaned);
 }
 
-// Simple hash for message components
-function simpleHash(str: string): string {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash).toString(16).padStart(8, '0');
+/**
+ * Cryptographic hash for message components using SHA-256.
+ * Returns first 16 hex chars (64 bits) for compact signatures.
+ */
+async function sha256Hash(str: string): Promise<string> {
+  const data = new TextEncoder().encode(str);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  // Return first 16 chars (64 bits) - sufficient for collision resistance in this context
+  return hashHex.slice(0, 16);
 }
 
 /**
@@ -172,8 +174,8 @@ export async function verifyProofSignature(
     }
   }
 
-  const titleHash = simpleHash(payload.title);
-  const proofHash = simpleHash(JSON.stringify(payload.proof));
+  const titleHash = await sha256Hash(payload.title);
+  const proofHash = await sha256Hash(JSON.stringify(payload.proof));
   const message = `proof:${payload.agent_id}:${titleHash}:${proofHash}:${payload.timestamp || 0}`;
 
   return verifySignature(message, payload.signature, agentPublicKey);
