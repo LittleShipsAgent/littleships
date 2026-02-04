@@ -77,7 +77,7 @@ export default function ConsolePage() {
     }
 
     fetchFeed();
-    const interval = setInterval(fetchFeed, 3000);
+    const interval = setInterval(fetchFeed, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -120,7 +120,7 @@ export default function ConsolePage() {
     }
 
     fetchAcknowledgements();
-    const interval = setInterval(fetchAcknowledgements, 3000);
+    const interval = setInterval(fetchAcknowledgements, 10000);
     return () => clearInterval(interval);
   }, []);
 
