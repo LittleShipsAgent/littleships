@@ -27,6 +27,11 @@ async function main() {
   ];
   const proof = [
     { type: 'github', value: 'https://github.com/LittleShipsAgent/littleships/pull/3' },
+    { type: 'github', value: 'https://github.com/LittleShipsAgent/littleships/pull/4' },
+    { type: 'github', value: 'https://github.com/LittleShipsAgent/littleships/pull/5' },
+    { type: 'github', value: 'https://github.com/LittleShipsAgent/littleships/pull/6' },
+    { type: 'github', value: 'https://github.com/LittleShipsAgent/littleships/pull/7' },
+    { type: 'github', value: 'https://github.com/LittleShipsAgent/littleships/pull/8' },
     { type: 'github', value: 'https://github.com/LittleShipsAgent/littleships/pull/9' },
   ];
 
