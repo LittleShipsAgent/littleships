@@ -6,9 +6,10 @@ import Link from "next/link";
 import { Check, XCircle, Clock } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { OrbsBackground } from "@/components/OrbsBackground";
 import { BotAvatar, getAgentColor } from "@/components/BotAvatar";
 import { AgentProfileHeader } from "@/components/AgentProfileHeader";
-import { ProofCard } from "@/components/ProofCard";
+import { ShipCard } from "@/components/ShipCard";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { formatDateTime, truncateAddress, artifactIcon, artifactLabel, shipTypeIcon, shipTypeLabel, inferShipTypeFromArtifact } from "@/lib/utils";
 import type { Proof, Agent } from "@/lib/types";
@@ -39,7 +40,7 @@ export default function ShipPage({ params }: ShipPageProps) {
 
   useEffect(() => {
     const fallback = () => {
-      const proof = MOCK_PROOFS.find((r) => r.proof_id === id);
+      const proof = MOCK_PROOFS.find((r) => r.ship_id === id);
       if (proof) {
         setData({ proof, agent: getAgentById(proof.agent_id) ?? null });
       } else {
@@ -67,12 +68,12 @@ export default function ShipPage({ params }: ShipPageProps) {
       .then((r) => (r.ok ? r.json() : null))
       .then((json: { ships?: Proof[] } | null) => {
         const list = json?.ships ?? getProofsForAgent(agentId);
-        const others = list.filter((p) => p.proof_id !== id).slice(0, 6);
+        const others = list.filter((p) => p.ship_id !== id).slice(0, 6);
         setOtherShips(others);
       })
       .catch(() => {
         const list = getProofsForAgent(agentId);
-        const others = list.filter((p) => p.proof_id !== id).slice(0, 6);
+        const others = list.filter((p) => p.ship_id !== id).slice(0, 6);
         setOtherShips(others);
       });
   }, [data?.agent, id]);
@@ -85,7 +86,8 @@ export default function ShipPage({ params }: ShipPageProps) {
     return (
       <div className="min-h-screen text-[var(--fg)] flex flex-col">
         <Header />
-        <section className="flex-1 relative">
+        <section className="flex-1 relative overflow-hidden bg-[var(--bg)]">
+          <OrbsBackground />
           <div
             className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
             style={{
@@ -184,7 +186,8 @@ export default function ShipPage({ params }: ShipPageProps) {
     >
       <Header />
 
-      <section className="flex-1 relative">
+      <section className="flex-1 relative overflow-hidden bg-[var(--bg)]">
+        <OrbsBackground />
         <div
           className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
           style={{
@@ -373,10 +376,10 @@ export default function ShipPage({ params }: ShipPageProps) {
         {/* Meta + proof id link */}
         <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-[var(--border)]">
           <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-mono text-[var(--fg-muted)] bg-[var(--card-hover)] border border-[var(--border)]">
-            {proof.proof_id}
+            {proof.ship_id}
           </span>
           <Link
-            href={`/proof/${proof.proof_id}`}
+            href={`/proof/${proof.ship_id}`}
             className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--agent-color,var(--fg-muted))] hover:text-[var(--agent-color,var(--accent))] hover:bg-[var(--card-hover)] transition"
           >
             Show proof
@@ -391,9 +394,9 @@ export default function ShipPage({ params }: ShipPageProps) {
             </h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {otherShips.map((p) => (
-                <ProofCard
-                  key={p.proof_id}
-                  proof={p}
+                <ShipCard
+                  key={p.ship_id}
+                  ship={p}
                   agent={agent}
                   showAgent={false}
                   accentColor={agentColor}

@@ -19,6 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/register`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
     { url: `${baseUrl}/animation`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
     { url: `${baseUrl}/console`, lastModified: new Date(), changeFrequency: "daily", priority: 0.6 },
+    { url: `${baseUrl}/badges`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
   ];
 
   const agents = await listAgents();
@@ -37,13 +38,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const lastModified = proof.timestamp ? new Date(proof.timestamp) : new Date();
     return [
       {
-        url: `${baseUrl}/ship/${proof.proof_id}`,
+        url: `${baseUrl}/ship/${proof.ship_id}`,
         lastModified,
         changeFrequency: "yearly" as const,
         priority: 0.6,
       },
       {
-        url: `${baseUrl}/proof/${proof.proof_id}`,
+        url: `${baseUrl}/proof/${proof.ship_id}`,
         lastModified,
         changeFrequency: "yearly" as const,
         priority: 0.5,

@@ -181,11 +181,11 @@ export async function verifyProofSignature(
 
 /**
  * Verify acknowledgement signature.
- * Message format: "ack:<proof_id>:<agent_id>:<timestamp>"
+ * Message format: "ack:<ship_id>:<agent_id>:<timestamp>"
  */
 export async function verifyAcknowledgementSignature(
   payload: {
-    proof_id: string;
+    ship_id: string;
     agent_id: string;
     signature: string;
     timestamp: number;
@@ -206,7 +206,7 @@ export async function verifyAcknowledgementSignature(
     return false;
   }
 
-  const message = `ack:${payload.proof_id}:${payload.agent_id}:${payload.timestamp}`;
+  const message = `ack:${payload.ship_id}:${payload.agent_id}:${payload.timestamp}`;
   return verifySignature(message, payload.signature, agentPublicKey);
 }
 

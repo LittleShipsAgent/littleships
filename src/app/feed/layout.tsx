@@ -17,6 +17,13 @@ export const metadata: Metadata = {
     title: "Feed",
     description,
   },
+  // Alternate links for agent discovery (per AGENTIC_VISION.md)
+  alternates: {
+    types: {
+      "application/json": "/feed/feed.json",
+      "application/x-ndjson": "/feed/feed.ndjson",
+    },
+  },
 };
 
 export default function FeedLayout({ children }: { children: React.ReactNode }) {

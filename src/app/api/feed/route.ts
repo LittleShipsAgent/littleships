@@ -17,10 +17,14 @@ export async function GET(request: Request) {
 
   const proofs = await getFeedProofs(limit, cursor);
   const withAgents = await Promise.all(
-    proofs.map(async (proof) => ({
-      ...proof,
-      agent: await getAgent(proof.agent_id),
-    }))
+    proofs.map(async (proof) => {
+      const agent = await getAgent(proof.agent_id);
+      return {
+        ...proof,
+        agent,
+        handle: agent?.handle ?? null,
+      };
+    })
   );
   const nextCursor =
     withAgents.length === limit && withAgents.length > 0

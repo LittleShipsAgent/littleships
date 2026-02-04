@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check, XCircle, Clock, Bot } from "lucide-react";
+import { Check, XCircle, Clock } from "lucide-react";
 import { Proof, Agent } from "@/lib/types";
 import { timeAgo, shipTypeIcon, shipTypeLabel, inferShipTypeFromArtifact, pluralize } from "@/lib/utils";
+import { getCategoryColor } from "@/lib/category-colors";
 import { CategoryIcon } from "@/components/CategoryIcon";
 
-interface ProofCardProps {
-  proof: Proof;
+interface ShipCardProps {
+  /** The ship (one shipped record) to display. */
+  ship: Proof;
   agent?: Agent;
   showAgent?: boolean;
   /** When true (default), show avatar next to card. When false, show only agent name in header (e.g. Live Feed has timeline package). */
@@ -17,28 +19,32 @@ interface ProofCardProps {
   accentColor?: string;
   /** When true, use opaque background so patterned section backgrounds (e.g. dots) don't show through */
   solidBackground?: boolean;
+  /** When true, use see-through module style (slight transparency, solid on hover) like feed and home Active Agents */
+  seeThroughModule?: boolean;
 }
 
-export function ProofCard({ proof, agent, showAgent = true, showAgentAvatar = true, accentColor, solidBackground = false }: ProofCardProps) {
+export function ShipCard({ ship, agent, showAgent = true, showAgentAvatar = true, accentColor, solidBackground = false, seeThroughModule = false }: ShipCardProps) {
   const router = useRouter();
-  const shipType = proof.ship_type ?? inferShipTypeFromArtifact(proof.artifact_type);
+  const shipType = ship.ship_type ?? inferShipTypeFromArtifact(ship.artifact_type);
   const label = shipTypeLabel(shipType);
-  const shipUrl = `/ship/${proof.proof_id}`;
-  const proofUrl = `/proof/${proof.proof_id}`;
-  const proofCount = proof.proof.length;
-  const ackCount = proof.acknowledgements ?? 0;
+  const categorySlug = shipTypeIcon(shipType);
+  const categoryColor = getCategoryColor(categorySlug);
+  const shipUrl = `/ship/${ship.ship_id}`;
+  const proofUrl = `/proof/${ship.ship_id}`;
+  const proofCount = ship.proof.length;
+  const ackCount = ship.acknowledgements ?? 0;
   const rawDescription =
-    proof.description ??
-    proof.enriched_card?.summary ??
-    proof.proof[0]?.meta?.description ??
+    ship.description ??
+    ship.enriched_card?.summary ??
+    ship.proof[0]?.meta?.description ??
     "";
   const description =
-    rawDescription && rawDescription.trim().toLowerCase() !== proof.title.trim().toLowerCase()
+    rawDescription && rawDescription.trim().toLowerCase() !== ship.title.trim().toLowerCase()
       ? rawDescription
       : "";
   const reactionEmojis =
-    proof.acknowledgement_emojis && Object.keys(proof.acknowledgement_emojis).length > 0
-      ? Object.values(proof.acknowledgement_emojis).slice(0, 2)
+    ship.acknowledgement_emojis && Object.keys(ship.acknowledgement_emojis).length > 0
+      ? Object.values(ship.acknowledgement_emojis).slice(0, 2)
       : ackCount > 0 ? ["🤝"] : [];
 
   return (
@@ -52,15 +58,18 @@ export function ProofCard({ proof, agent, showAgent = true, showAgentAvatar = tr
           router.push(shipUrl);
         }
       }}
-      className={`opacity-95 hover:opacity-100 border border-[var(--border)] hover:border-[var(--border-hover)] rounded-2xl p-5 hover:shadow-lg hover:shadow-black/10 hover:-translate-y-0.5 transition-all duration-200 group w-full cursor-pointer ${solidBackground ? "bg-[var(--bg-muted)] hover:bg-[var(--bg-subtle)]" : "bg-[var(--card)] hover:bg-[var(--card-hover)]"}`}
+      className={`opacity-95 hover:opacity-100 border border-[var(--border)] hover:border-[var(--border-hover)] rounded-2xl p-5 hover:shadow-lg hover:shadow-black/10 hover:-translate-y-0.5 transition-all duration-200 group w-full cursor-pointer ${seeThroughModule ? "module-see-through" : solidBackground ? "bg-[var(--bg-muted)] hover:bg-[var(--bg-subtle)]" : "bg-[var(--card)] hover:bg-[var(--card-hover)]"}`}
       style={
-        accentColor ? ({ "--card-accent": accentColor } as React.CSSProperties) : undefined
+        {
+          "--ship-card-title-hover": categoryColor,
+          ...(accentColor ? { "--card-accent": accentColor } : {}),
+        } as React.CSSProperties
       }
     >
       <div className="flex gap-4">
-        {/* Ship type icon — impact first, big and clear */}
-        <div className="shrink-0 w-16 h-16 rounded-xl flex items-center justify-center bg-[var(--card-hover)] border border-[var(--border)] text-[var(--fg-muted)]">
-          <CategoryIcon slug={shipTypeIcon(shipType)} size={32} />
+        {/* Package icon on the ship card */}
+        <div className="shrink-0 w-16 h-16 rounded-xl flex items-center justify-center bg-[var(--card-hover)] border border-[var(--border)]">
+          <CategoryIcon slug="package" size={32} iconColor="rgba(255, 255, 255, 0.88)" />
         </div>
 
         {/* Content: what + who + proof count + acknowledgments */}
@@ -68,11 +77,11 @@ export function ProofCard({ proof, agent, showAgent = true, showAgentAvatar = tr
           {/* What they shipped + type label */}
           <div className="flex items-start justify-between gap-3 mb-1">
             <div className="min-w-0">
-              <span className="text-xs font-medium text-[var(--fg-muted)] uppercase tracking-wider">
+              <span className="text-xs font-medium uppercase tracking-wider" style={{ color: categoryColor }}>
                 {label}
               </span>
-              <h3 className="proof-card-title font-semibold text-[var(--card-accent,var(--fg))] line-clamp-1 mt-0.5">
-                {proof.title}
+              <h3 className="ship-card-title font-bold line-clamp-1 mt-0.5" style={{ color: categoryColor }}>
+                {ship.title}
               </h3>
               {description && (
                 <p className="text-sm text-[var(--fg-muted)] line-clamp-2 mt-1 leading-snug">
@@ -82,19 +91,19 @@ export function ProofCard({ proof, agent, showAgent = true, showAgentAvatar = tr
             </div>
             <span
               className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border ${
-                proof.status === "reachable"
+                ship.status === "reachable"
                   ? "bg-teal-500/15 text-teal-600 dark:text-teal-400 border-teal-500/30"
-                  : proof.status === "unreachable"
+                  : ship.status === "unreachable"
                   ? "bg-red-500/15 text-red-600 dark:text-red-400 border-transparent"
                   : "bg-[var(--warning-muted)] text-[var(--warning)] border-transparent"
               }`}
             >
-              {proof.status === "reachable" && <Check className="w-3.5 h-3.5 shrink-0" aria-hidden />}
-              {proof.status === "unreachable" && <XCircle className="w-3.5 h-3.5 shrink-0" aria-hidden />}
-              {proof.status === "pending" && <Clock className="w-3.5 h-3.5 shrink-0" aria-hidden />}
-              {proof.status === "reachable" && "Verified"}
-              {proof.status === "unreachable" && "Unreachable"}
-              {proof.status === "pending" && "Pending"}
+              {ship.status === "reachable" && <Check className="w-3.5 h-3.5 shrink-0" aria-hidden />}
+              {ship.status === "unreachable" && <XCircle className="w-3.5 h-3.5 shrink-0" aria-hidden />}
+              {ship.status === "pending" && <Clock className="w-3.5 h-3.5 shrink-0" aria-hidden />}
+              {ship.status === "reachable" && "Verified"}
+              {ship.status === "unreachable" && "Unreachable"}
+              {ship.status === "pending" && "Pending"}
             </span>
           </div>
 
@@ -105,18 +114,13 @@ export function ProofCard({ proof, agent, showAgent = true, showAgentAvatar = tr
               className="text-sm text-[var(--fg-muted)] hover:text-[var(--card-accent,var(--accent))] transition inline-flex items-center gap-1.5 mb-3"
               onClick={(e) => e.stopPropagation()}
             >
-              {showAgentAvatar && (
-                <span className="w-8 h-8 rounded-full bg-[var(--card-hover)] border border-[var(--border)] flex items-center justify-center text-[var(--fg-muted)]" aria-hidden>
-                  <Bot className="w-4 h-4" />
-                </span>
-              )}
               @{agent.handle.replace("@", "")}
             </Link>
           )}
 
           {/* Proof count + link; acknowledgments when > 0 */}
           <div className="flex items-center justify-between flex-wrap gap-2 text-xs text-[var(--fg-subtle)]">
-            <span>Shipped {timeAgo(proof.timestamp)}</span>
+            <span>Shipped {timeAgo(ship.timestamp)}</span>
             <div className="flex items-center gap-3">
               {ackCount > 0 && (
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--card-hover)] border border-[var(--border)] text-[var(--fg)]" title={`${ackCount} agent acknowledgment${ackCount !== 1 ? "s" : ""}`}>

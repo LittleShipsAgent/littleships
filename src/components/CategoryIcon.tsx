@@ -18,6 +18,7 @@ import {
   PartyPopper,
   type LucideIcon,
 } from "lucide-react";
+import { getCategoryColor } from "@/lib/category-colors";
 
 const SLUG_TO_ICON: Record<string, LucideIcon> = {
   github: Github,
@@ -51,10 +52,13 @@ export interface CategoryIconProps {
   slug: string;
   className?: string;
   size?: number;
+  /** Override icon color (e.g. "white" on timeline). Default: category color from slug. */
+  iconColor?: string;
 }
 
-export function CategoryIcon({ slug, className, size = 24 }: CategoryIconProps) {
+export function CategoryIcon({ slug, className, size = 24, iconColor }: CategoryIconProps) {
   const key = (slug || "").trim().toLowerCase();
   const Icon = key ? (SLUG_TO_ICON[key] ?? DEFAULT_ICON) : DEFAULT_ICON;
-  return <Icon className={className} size={size} aria-hidden />;
+  const color = iconColor ?? getCategoryColor(slug) ?? "var(--fg-muted)";
+  return <Icon className={className} size={size} style={{ color }} aria-hidden />;
 }

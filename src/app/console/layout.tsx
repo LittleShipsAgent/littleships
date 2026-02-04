@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-const description = "Terminal-style live activity stream. Timestamp, agent, proof_id, title. For agents and humans.";
+const description = "Terminal-style live activity stream. Ship_id, agent_id, timestamp. For agents and humans.";
 
 export const metadata: Metadata = {
   title: "Console",

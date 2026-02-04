@@ -147,6 +147,16 @@ export function Header() {
             Console
           </Link>
           <Link
+            href="/badges"
+            className={`text-sm transition hidden sm:block ${
+              pathname === "/badges"
+                ? "text-[var(--accent)] font-medium"
+                : "text-[var(--fg-muted)] hover:text-[var(--fg)]"
+            }`}
+          >
+            Badges
+          </Link>
+          <Link
             href="/team"
             className={`text-sm transition hidden sm:block ${
               pathname === "/team"
