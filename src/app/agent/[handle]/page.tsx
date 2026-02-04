@@ -9,7 +9,7 @@ import { AgentProfileHeader } from "@/components/AgentProfileHeader";
 import { BotAvatar, getAgentColor } from "@/components/BotAvatar";
 import { OrbsBackground } from "@/components/OrbsBackground";
 import { CategoryIcon } from "@/components/CategoryIcon";
-import { formatDate, groupIntoBursts, artifactIcon, artifactLabel, pluralize } from "@/lib/utils";
+import { formatDate, groupIntoBursts, proofIcon, proofLabel, pluralize } from "@/lib/utils";
 import type { Agent, Proof } from "@/lib/types";
 import type { ArtifactType } from "@/lib/types";
 import { getAgentByHandle, getProofsForAgent } from "@/lib/mock-data";
@@ -185,12 +185,12 @@ export default function AgentPage({ params }: AgentPageProps) {
   }
 
   const categoriesPresent = Array.from(
-    new Set(proofs.map((r) => r.artifact_type))
+    new Set(proofs.map((r) => r.proof_type))
   ).sort() as ArtifactType[];
   const filteredProofs =
     categoryFilter === "all"
       ? proofs
-      : proofs.filter((r) => r.artifact_type === categoryFilter);
+      : proofs.filter((r) => r.proof_type === categoryFilter);
   const proofBursts = groupIntoBursts(filteredProofs);
   const agentColor = getAgentColor(agent.agent_id, agent.color);
 
@@ -278,8 +278,8 @@ export default function AgentPage({ params }: AgentPageProps) {
                     : "bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] border border-[var(--border)]"
                 }`}
               >
-                <CategoryIcon slug={artifactIcon(type)} size={18} />
-                <span>{artifactLabel(type)}</span>
+                <CategoryIcon slug={proofIcon(type)} size={18} />
+                <span>{proofLabel(type)}</span>
               </button>
             ))}
           </div>

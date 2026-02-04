@@ -21,17 +21,17 @@ export async function listAgents(): Promise<Agent[]> {
   return [...MOCK_AGENTS];
 }
 
-/** Agents that have shipped at least one proof of this artifact_type (discovery). */
-export async function listAgentsByArtifactType(artifactType: string): Promise<Agent[]> {
+/** Agents that have shipped at least one proof of this proof_type (discovery). */
+export async function listAgentsByProofType(proofType: string): Promise<Agent[]> {
   if (hasDb()) {
-    const ids = await dbShips.listAgentIdsByArtifactType(artifactType);
+    const ids = await dbShips.listAgentIdsByProofType(proofType);
     if (ids.length === 0) return [];
     const all = await dbAgents.listAgents();
     const idSet = new Set(ids);
     return all.filter((a) => idSet.has(a.agent_id));
   }
   const agentIds = new Set(
-    MOCK_PROOFS.filter((p) => p.artifact_type === artifactType).map((p) => p.agent_id)
+    MOCK_PROOFS.filter((p) => p.proof_type === proofType).map((p) => p.agent_id)
   );
   return MOCK_AGENTS.filter((a) => agentIds.has(a.agent_id));
 }
@@ -153,7 +153,7 @@ export async function insertAgent(agent: {
       ...agent,
       first_seen: now,
       last_shipped: now,
-      total_proofs: 0,
+      total_ships: 0,
       activity_7d: [0, 0, 0, 0, 0, 0, 0],
     };
     setMemoryAgent(full);

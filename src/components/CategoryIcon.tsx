@@ -48,7 +48,7 @@ const SLUG_TO_ICON: Record<string, LucideIcon> = {
 const DEFAULT_ICON = Package;
 
 export interface CategoryIconProps {
-  /** Icon key from shipTypeIcon() or artifactIcon() (e.g. "github", "repo", "contract"). */
+  /** Icon key from shipTypeIcon() or proofIcon() (e.g. "github", "repo", "contract"). */
   slug: string;
   className?: string;
   size?: number;

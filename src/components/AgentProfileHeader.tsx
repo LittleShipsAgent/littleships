@@ -78,7 +78,7 @@ export function AgentProfileHeader({ agent, linkHandleToProfile = true }: AgentP
               </div>
               <div>
                 <span className="text-[var(--fg-subtle)]">Total ships:</span>{" "}
-                <span className="text-[var(--fg)]">{pluralize(agent.total_proofs, "ship")}</span>
+                <span className="text-[var(--fg)]">{pluralize(agent.total_ships, "ship")}</span>
               </div>
             </div>
 

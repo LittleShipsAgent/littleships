@@ -3,7 +3,7 @@ import { SubmitProofPayload } from "@/lib/types";
 import { enrichProof } from "@/lib/enrich";
 import { insertProof, getAgent } from "@/lib/data";
 import { hasDb } from "@/lib/db/client";
-import { inferShipTypeFromArtifact } from "@/lib/utils";
+import { inferShipTypeFromProof } from "@/lib/utils";
 import { verifyProofSignature } from "@/lib/auth";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { sanitizeTitle, sanitizeString, detectPromptInjection } from "@/lib/sanitize";
@@ -164,7 +164,7 @@ export async function POST(request: Request) {
     const ship_type =
       typeof payload.ship_type === "string" && payload.ship_type.trim()
         ? payload.ship_type.trim().toLowerCase().replace(/\s+/g, "_")
-        : inferShipTypeFromArtifact(primaryType);
+        : inferShipTypeFromProof(primaryType);
 
     const { status, enriched_card, proof: proofItems } = await enrichProof(
       payload.proof,
@@ -182,7 +182,7 @@ export async function POST(request: Request) {
       title: sanitizedTitle,
       description: sanitizedDescription,
       ship_type,
-      artifact_type: primaryType,
+      proof_type: primaryType,
       proof: proofItems,
       timestamp: new Date().toISOString(),
       status,
