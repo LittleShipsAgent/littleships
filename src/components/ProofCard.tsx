@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check, XCircle, Clock, Bot } from "lucide-react";
+import { Check, XCircle, Clock } from "lucide-react";
 import { Proof, Agent } from "@/lib/types";
 import { timeAgo, shipTypeIcon, shipTypeLabel, inferShipTypeFromArtifact, pluralize } from "@/lib/utils";
+import { getCategoryColor } from "@/lib/category-colors";
 import { CategoryIcon } from "@/components/CategoryIcon";
 
 interface ProofCardProps {
@@ -17,9 +18,11 @@ interface ProofCardProps {
   accentColor?: string;
   /** When true, use opaque background so patterned section backgrounds (e.g. dots) don't show through */
   solidBackground?: boolean;
+  /** When true, use see-through module style (slight transparency, solid on hover) like feed and home Active Agents */
+  seeThroughModule?: boolean;
 }
 
-export function ProofCard({ proof, agent, showAgent = true, showAgentAvatar = true, accentColor, solidBackground = false }: ProofCardProps) {
+export function ProofCard({ proof, agent, showAgent = true, showAgentAvatar = true, accentColor, solidBackground = false, seeThroughModule = false }: ProofCardProps) {
   const router = useRouter();
   const shipType = proof.ship_type ?? inferShipTypeFromArtifact(proof.artifact_type);
   const label = shipTypeLabel(shipType);
@@ -52,15 +55,18 @@ export function ProofCard({ proof, agent, showAgent = true, showAgentAvatar = tr
           router.push(shipUrl);
         }
       }}
-      className={`opacity-95 hover:opacity-100 border border-[var(--border)] hover:border-[var(--border-hover)] rounded-2xl p-5 hover:shadow-lg hover:shadow-black/10 hover:-translate-y-0.5 transition-all duration-200 group w-full cursor-pointer ${solidBackground ? "bg-[var(--bg-muted)] hover:bg-[var(--bg-subtle)]" : "bg-[var(--card)] hover:bg-[var(--card-hover)]"}`}
+      className={`opacity-95 hover:opacity-100 border border-[var(--border)] hover:border-[var(--border-hover)] rounded-2xl p-5 hover:shadow-lg hover:shadow-black/10 hover:-translate-y-0.5 transition-all duration-200 group w-full cursor-pointer ${seeThroughModule ? "module-see-through" : solidBackground ? "bg-[var(--bg-muted)] hover:bg-[var(--bg-subtle)]" : "bg-[var(--card)] hover:bg-[var(--card-hover)]"}`}
       style={
-        accentColor ? ({ "--card-accent": accentColor } as React.CSSProperties) : undefined
+        {
+          "--proof-card-title-hover": getCategoryColor(shipTypeIcon(shipType)),
+          ...(accentColor ? { "--card-accent": accentColor } : {}),
+        } as React.CSSProperties
       }
     >
       <div className="flex gap-4">
-        {/* Ship type icon — impact first, big and clear */}
-        <div className="shrink-0 w-16 h-16 rounded-xl flex items-center justify-center bg-[var(--card-hover)] border border-[var(--border)] text-[var(--fg-muted)]">
-          <CategoryIcon slug={shipTypeIcon(shipType)} size={32} />
+        {/* Package icon on the ship card */}
+        <div className="shrink-0 w-16 h-16 rounded-xl flex items-center justify-center bg-[var(--card-hover)] border border-[var(--border)]">
+          <CategoryIcon slug="package" size={32} iconColor="rgba(255, 255, 255, 0.88)" />
         </div>
 
         {/* Content: what + who + proof count + acknowledgments */}
@@ -68,10 +74,10 @@ export function ProofCard({ proof, agent, showAgent = true, showAgentAvatar = tr
           {/* What they shipped + type label */}
           <div className="flex items-start justify-between gap-3 mb-1">
             <div className="min-w-0">
-              <span className="text-xs font-medium text-[var(--fg-muted)] uppercase tracking-wider">
+              <span className="text-xs font-medium uppercase tracking-wider" style={{ color: getCategoryColor(shipTypeIcon(shipType)) }}>
                 {label}
               </span>
-              <h3 className="proof-card-title font-semibold text-[var(--card-accent,var(--fg))] line-clamp-1 mt-0.5">
+              <h3 className="proof-card-title font-bold text-[var(--fg)] line-clamp-1 mt-0.5">
                 {proof.title}
               </h3>
               {description && (
@@ -105,11 +111,6 @@ export function ProofCard({ proof, agent, showAgent = true, showAgentAvatar = tr
               className="text-sm text-[var(--fg-muted)] hover:text-[var(--card-accent,var(--accent))] transition inline-flex items-center gap-1.5 mb-3"
               onClick={(e) => e.stopPropagation()}
             >
-              {showAgentAvatar && (
-                <span className="w-8 h-8 rounded-full bg-[var(--card-hover)] border border-[var(--border)] flex items-center justify-center text-[var(--fg-muted)]" aria-hidden>
-                  <Bot className="w-4 h-4" />
-                </span>
-              )}
               @{agent.handle.replace("@", "")}
             </Link>
           )}

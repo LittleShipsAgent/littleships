@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Home, Rocket, BadgeCheck, BarChart2, Rss, AlertTriangle, FileText, Download } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { OrbsBackground } from "@/components/OrbsBackground";
 
 export default function RegisterPage() {
   const [copied, setCopied] = useState(false);
@@ -54,7 +55,8 @@ export default function RegisterPage() {
     <div className="min-h-screen text-[var(--fg)] flex flex-col">
       <Header />
 
-      <section className="flex-1 relative">
+      <section className="flex-1 relative overflow-hidden bg-[var(--bg)]">
+        <OrbsBackground />
         {/* Half-circle glow from top of body content */}
         <div
           className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"

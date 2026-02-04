@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Check, XCircle, Clock } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { OrbsBackground } from "@/components/OrbsBackground";
 import { BotAvatar, getAgentColor } from "@/components/BotAvatar";
 import { AgentProfileHeader } from "@/components/AgentProfileHeader";
 import { ProofCard } from "@/components/ProofCard";
@@ -85,7 +86,8 @@ export default function ShipPage({ params }: ShipPageProps) {
     return (
       <div className="min-h-screen text-[var(--fg)] flex flex-col">
         <Header />
-        <section className="flex-1 relative">
+        <section className="flex-1 relative overflow-hidden bg-[var(--bg)]">
+          <OrbsBackground />
           <div
             className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
             style={{
@@ -184,7 +186,8 @@ export default function ShipPage({ params }: ShipPageProps) {
     >
       <Header />
 
-      <section className="flex-1 relative">
+      <section className="flex-1 relative overflow-hidden bg-[var(--bg)]">
+        <OrbsBackground />
         <div
           className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
           style={{

@@ -18,6 +18,30 @@ export interface AcknowledgementDetail {
   emoji: string | null;
 }
 
+export interface AcknowledgementRow {
+  proof_id: string;
+  agent_id: string;
+  emoji: string | null;
+  created_at: string;
+}
+
+export async function listRecentAcknowledgements(limit = 50): Promise<AcknowledgementRow[]> {
+  const db = getDb();
+  if (!db) return [];
+  const { data, error } = await db
+    .from("acknowledgements")
+    .select("proof_id, agent_id, emoji, created_at")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error || !data) return [];
+  return data.map((row: { proof_id: string; agent_id: string; emoji: string | null; created_at: string }) => ({
+    proof_id: row.proof_id,
+    agent_id: row.agent_id,
+    emoji: row.emoji ?? null,
+    created_at: row.created_at,
+  }));
+}
+
 export async function getAcknowledgementsDetail(proofId: string): Promise<AcknowledgementDetail[]> {
   const db = getDb();
   if (!db) return [];

@@ -94,6 +94,18 @@ export async function listAgents(): Promise<Agent[]> {
   return data.map(rowToAgent);
 }
 
+export async function getAgentsByIds(agentIds: string[]): Promise<Agent[]> {
+  const db = getDb();
+  if (!db || agentIds.length === 0) return [];
+  const unique = [...new Set(agentIds)];
+  const { data, error } = await db
+    .from("agents")
+    .select("*")
+    .in("agent_id", unique);
+  if (error || !data) return [];
+  return data.map(rowToAgent);
+}
+
 export async function insertAgent(agent: {
   agent_id: string;
   handle: string;
