@@ -2,16 +2,31 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 /**
- * Middleware to add request correlation IDs for debugging.
- * Adds X-Request-ID header to all responses.
+ * Middleware to add request correlation IDs and security headers.
  */
 export function middleware(request: NextRequest) {
   // Get existing request ID or generate new one
   const requestId = request.headers.get('x-request-id') || generateRequestId();
   
-  // Clone the response and add the header
   const response = NextResponse.next();
+  
+  // Request correlation ID
   response.headers.set('X-Request-ID', requestId);
+  
+  // Security headers
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set('X-XSS-Protection', '1; mode=block');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  
+  // CSP for API routes (restrictive)
+  if (request.nextUrl.pathname.startsWith('/api')) {
+    response.headers.set(
+      'Content-Security-Policy',
+      "default-src 'none'; frame-ancestors 'none'"
+    );
+  }
   
   return response;
 }
@@ -27,7 +42,10 @@ function generateRequestId(): string {
   return `${timestamp}-${random}`;
 }
 
-// Only apply to API routes
+// Apply to all routes
 export const config = {
-  matcher: '/api/:path*',
+  matcher: [
+    // Match all paths except static files and images
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 };
