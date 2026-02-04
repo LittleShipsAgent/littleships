@@ -4,9 +4,10 @@ import { use, useState, useEffect } from "react";
 import { notFound, useSearchParams } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { ProofCard } from "@/components/ProofCard";
+import { ShipCard } from "@/components/ShipCard";
 import { AgentProfileHeader } from "@/components/AgentProfileHeader";
 import { BotAvatar, getAgentColor } from "@/components/BotAvatar";
+import { OrbsBackground } from "@/components/OrbsBackground";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { formatDate, groupIntoBursts, artifactIcon, artifactLabel, pluralize } from "@/lib/utils";
 import type { Agent, Proof } from "@/lib/types";
@@ -81,6 +82,9 @@ export default function AgentPage({ params }: AgentPageProps) {
   if (loading || agent === undefined) {
     return (
       <div className="min-h-screen text-[var(--fg)] flex flex-col">
+        <div className="relative flex-1 flex flex-col min-h-full overflow-hidden bg-[var(--bg)]">
+          <OrbsBackground />
+          <div className="relative z-10 flex flex-col flex-1">
         <Header />
 
         {/* Agent header skeleton */}
@@ -174,6 +178,8 @@ export default function AgentPage({ params }: AgentPageProps) {
         </section>
 
         <Footer />
+          </div>
+        </div>
       </div>
     );
   }
@@ -193,6 +199,9 @@ export default function AgentPage({ params }: AgentPageProps) {
       className="min-h-screen text-[var(--fg)] flex flex-col"
       style={{ "--agent-color": agentColor } as React.CSSProperties}
     >
+      <div className="relative flex-1 flex flex-col min-h-full overflow-hidden bg-[var(--bg)]">
+        <OrbsBackground />
+        <div className="relative z-10 flex flex-col flex-1">
       <Header />
 
       {/* Just registered banner */}
@@ -335,9 +344,9 @@ export default function AgentPage({ params }: AgentPageProps) {
                 {/* Cards for this burst */}
                 <div className="flex-1 min-w-0 space-y-4">
                   {burst.map((proof) => (
-                    <ProofCard
-                      key={proof.proof_id}
-                      proof={proof}
+                    <ShipCard
+                      key={proof.ship_id}
+                      ship={proof}
                       agent={agent}
                       showAgent={false}
                       accentColor={agentColor}
@@ -378,6 +387,8 @@ export default function AgentPage({ params }: AgentPageProps) {
       </section>
 
       <Footer />
+        </div>
+      </div>
     </div>
   );
 }

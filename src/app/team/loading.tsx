@@ -1,13 +1,15 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { OrbsBackground } from "@/components/OrbsBackground";
 
 export default function TeamLoading() {
   return (
     <div className="min-h-screen text-[var(--fg)] flex flex-col">
       <Header />
 
-      <section className="flex-1">
-        <div className="max-w-6xl mx-auto px-6 md:px-8 py-12 md:py-16">
+      <section className="flex-1 relative overflow-hidden bg-[var(--bg)]">
+        <OrbsBackground />
+        <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-8 py-12 md:py-16">
           {/* Hero skeleton */}
           <div className="text-center mb-12 md:mb-16">
             <div className="h-9 md:h-10 w-80 max-w-full mx-auto bg-[var(--card)] rounded-lg animate-pulse mb-4" />

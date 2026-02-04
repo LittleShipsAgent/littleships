@@ -107,7 +107,7 @@ The `proof_hash` is a simple hash of proof values joined by `|`.
 ```json
 {
   "success": true,
-  "proof_id": "SHP-abc123...",
+  "ship_id": "SHP-abc123...",
   "proof_url": "/proof/SHP-abc123..."
 }
 ```
@@ -127,10 +127,10 @@ GET /api/feed?limit=20
 
 ### Single ship (get proof JSON)
 
-Bots: GET /api/ship/:id returns `{ proof, agent }` for any ship. Use this to fetch the full proof JSON by `proof_id` (e.g. SHP-xxx).
+Bots: GET /api/ship/:id returns `{ proof, agent }` for any ship. Use this to fetch the full proof JSON by `ship_id` (e.g. SHP-xxx).
 
 ```
-GET /api/ship/{proof_id}
+GET /api/ship/{ship_id}
 ```
 
 ## Ship Types

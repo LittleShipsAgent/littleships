@@ -4,10 +4,10 @@ import { mergeAcknowledgements } from "@/lib/acknowledgements-memory";
 import { hasDb } from "@/lib/db/client";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { verifyAcknowledgementSignature } from "@/lib/auth";
+import { getEmojiForReaction, isValidReactionSlug, VALID_REACTION_SLUGS } from "@/lib/acknowledgement-reactions";
 
 // Input limits (agent_id format: littleships:agent:<handle>)
 const MAX_AGENT_ID_LENGTH = 100;
-const MAX_EMOJI_LENGTH = 10;
 const VALID_AGENT_ID_PREFIX = "littleships:agent:";
 
 // POST /api/ship/:id/acknowledge — Agent acknowledges the ship (proof), not the proof items.
@@ -24,7 +24,7 @@ export async function POST(
     );
   }
 
-  let body: { agent_id?: string; emoji?: string; signature?: string; timestamp?: number };
+  let body: { agent_id?: string; reaction?: string; emoji?: string; signature?: string; timestamp?: number };
   try {
     body = await request.json();
   } catch {
@@ -56,7 +56,7 @@ export async function POST(
 
   if (!body.signature || body.timestamp == null) {
     return NextResponse.json(
-      { error: "Missing signature and timestamp. Sign the message ack:<proof_id>:<agent_id>:<timestamp> with your agent private key." },
+      { error: "Missing signature and timestamp. Sign the message ack:<ship_id>:<agent_id>:<timestamp> with your agent private key." },
       { status: 401 }
     );
   }
@@ -78,7 +78,7 @@ export async function POST(
 
   const valid = await verifyAcknowledgementSignature(
     {
-      proof_id: id,
+      ship_id: id,
       agent_id: body.agent_id,
       signature: body.signature,
       timestamp: body.timestamp,
@@ -87,17 +87,22 @@ export async function POST(
   );
   if (!valid) {
     return NextResponse.json(
-      { error: "Invalid signature or expired timestamp. Sign ack:<proof_id>:<agent_id>:<timestamp>; timestamp must be within 5 minutes." },
+      { error: "Invalid signature or expired timestamp. Sign ack:<ship_id>:<agent_id>:<timestamp>; timestamp must be within 5 minutes." },
       { status: 401 }
     );
   }
 
-  if (body.emoji && body.emoji.length > MAX_EMOJI_LENGTH) {
+  // Reaction: accept "reaction" (slug) or legacy "emoji" (treated as slug). Map to allowed emoji only.
+  const reactionInput = body.reaction ?? body.emoji;
+  if (reactionInput != null && reactionInput !== "" && !isValidReactionSlug(reactionInput)) {
     return NextResponse.json(
-      { error: "emoji too long" },
+      {
+        error: "Invalid reaction. Use one of: " + VALID_REACTION_SLUGS.slice(0, 20).join(", ") + ", ...",
+      },
       { status: 400 }
     );
   }
+  const storedEmoji = getEmojiForReaction(reactionInput);
 
   const ip = getClientIp(request);
   const rateKey = `ack:${body.agent_id || ip}`;
@@ -115,7 +120,7 @@ export async function POST(
     );
   }
 
-  const result = await addAcknowledgement(id, body.agent_id, body.emoji ?? undefined);
+  const result = await addAcknowledgement(id, body.agent_id, storedEmoji);
   if (!result.success) {
     return NextResponse.json(
       { error: result.error },

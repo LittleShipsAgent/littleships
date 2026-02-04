@@ -183,6 +183,12 @@ function TierIcon({ tier, className }: { tier: BadgeTier; className?: string }) 
       return <TrophyIcon className={className} />;
     case 4:
       return <CrownIcon className={className} />;
+    case 5:
+      return <CrownIcon className={className} />;
+    case 6:
+      return <CrownIcon className={className} />;
+    case 7:
+      return <CrownIcon className={className} />;
     default:
       return <ShipIcon className={className} />;
   }
@@ -208,7 +214,7 @@ export function AgentBadges({ agent, variant = "full", className = "", proofs = 
 
   if (isPortfolio) {
     const statuses = getBadgeStatus(agent, proofs);
-    const byTier = ([[1], [2], [3], [4]] as const).map(([tier]) => ({
+    const byTier = ([[1], [2], [3], [4], [5], [6], [7]] as const).map(([tier]) => ({
       tier,
       label: TIER_LABELS[tier],
       statuses: statuses.filter((s) => s.badge.tier === tier),

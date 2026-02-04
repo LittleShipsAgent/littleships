@@ -85,10 +85,6 @@ body::before {
 /* Hero — subtle repeating dot pattern so it’s less flat */
 .hero-pattern {
   background-color: var(--bg);
-  background-image: radial-gradient(circle at 1px 1px, var(--border) 1px, transparent 0);
-  background-size: 20px 20px;
-  background-position: 0 0;
-  background-repeat: repeat;
 }
 
 /* Subtle grid for Active Agents section */
@@ -107,17 +103,213 @@ body::before {
     linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
 }
 
-/* Recent Ships — slight repeating dot pattern */
-.recent-ships-dots {
+/* Shared orbs wrapper (ship landing, feed, profile) */
+.page-orbs-wrap {
+  position: relative;
+  overflow: hidden;
   background-color: var(--bg);
-  background-image: radial-gradient(circle at 1px 1px, var(--border) 1px, transparent 0);
-  background-size: 24px 24px;
-  background-position: 0 0;
-  background-repeat: repeat;
 }
 
-[data-theme="light"] .recent-ships-dots {
-  background-image: radial-gradient(circle at 1px 1px, var(--border) 1px, transparent 0);
+/* Module see-through style (home Active Agents, feed cards): default more see-through, hover fully solid */
+.module-see-through,
+.home-active-agent-card {
+  background: color-mix(in srgb, var(--bg-muted) 78%, transparent);
+}
+.module-see-through:hover,
+.home-active-agent-card:hover {
+  background: var(--card);
+}
+
+/* Recent Ships — colored orbs (no dot pattern) */
+.recent-ships-dots {
+  background-color: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Extra orb colors (theme-safe) */
+.recent-ships-orbs .orb-color-teal { background: var(--teal-muted); }
+.recent-ships-orbs .orb-color-accent { background: var(--accent-muted); }
+.recent-ships-orbs .orb-color-violet { background: rgba(139, 92, 246, 0.22); }
+.recent-ships-orbs .orb-color-blue { background: rgba(59, 130, 246, 0.2); }
+.recent-ships-orbs .orb-color-pink { background: rgba(236, 72, 153, 0.18); }
+.recent-ships-orbs .orb-color-amber { background: rgba(245, 158, 11, 0.18); }
+
+.recent-ships-orbs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.recent-ships-orbs .orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(55px);
+  opacity: 0.52;
+}
+
+/* Home page Recent Ships only — slightly subtler orbs, still visible by default */
+.recent-ships-dots .recent-ships-orbs .orb {
+  opacity: 0.4;
+}
+
+.recent-ships-orbs .orb-1 {
+  width: 280px;
+  height: 280px;
+  left: 8%;
+  top: 12%;
+  background: var(--teal-muted);
+  animation: orb-float-1 24s ease-in-out infinite;
+}
+
+.recent-ships-orbs .orb-2 {
+  width: 240px;
+  height: 240px;
+  right: 12%;
+  top: 35%;
+  background: var(--accent-muted);
+  animation: orb-float-2 28s ease-in-out infinite;
+}
+
+/* Top-heavy orbs (closer to top, more colors) */
+.recent-ships-orbs .orb-21 {
+  width: 200px; height: 200px; left: 2%; top: 0%; background: rgba(139, 92, 246, 0.22); animation: orb-float-1 26s ease-in-out infinite;
+}
+.recent-ships-orbs .orb-22 {
+  width: 160px; height: 160px; left: 22%; top: 3%; background: rgba(59, 130, 246, 0.2); animation: orb-float-2 23s ease-in-out infinite;
+}
+.recent-ships-orbs .orb-23 {
+  width: 180px; height: 180px; left: 42%; top: 1%; background: var(--teal-muted); animation: orb-float-3 25s ease-in-out infinite;
+}
+.recent-ships-orbs .orb-24 {
+  width: 150px; height: 150px; right: 35%; top: 5%; background: rgba(236, 72, 153, 0.18); animation: orb-float-1 28s ease-in-out infinite reverse;
+}
+.recent-ships-orbs .orb-25 {
+  width: 170px; height: 170px; right: 15%; top: 2%; background: rgba(245, 158, 11, 0.18); animation: orb-float-2 24s ease-in-out infinite;
+}
+.recent-ships-orbs .orb-26 {
+  width: 140px; height: 140px; left: 62%; top: 8%; background: var(--accent-muted); animation: orb-float-3 27s ease-in-out infinite;
+}
+.recent-ships-orbs .orb-27 {
+  width: 130px; height: 130px; right: 5%; top: 10%; background: rgba(139, 92, 246, 0.22); animation: orb-float-1 22s ease-in-out infinite;
+}
+.recent-ships-orbs .orb-28 {
+  width: 160px; height: 160px; left: 12%; top: 6%; background: rgba(59, 130, 246, 0.2); animation: orb-float-2 29s ease-in-out infinite;
+}
+.recent-ships-orbs .orb-29 {
+  width: 120px; height: 120px; left: 55%; top: 4%; background: rgba(245, 158, 11, 0.18); animation: orb-float-3 26s ease-in-out infinite;
+}
+.recent-ships-orbs .orb-30 {
+  width: 150px; height: 150px; right: 28%; top: 0%; background: var(--teal-muted); animation: orb-float-1 25s ease-in-out infinite;
+}
+
+.recent-ships-orbs .orb-3 {
+  width: 220px;
+  height: 220px;
+  left: 38%;
+  bottom: 18%;
+  background: var(--teal-muted);
+  animation: orb-float-3 26s ease-in-out infinite;
+}
+
+.recent-ships-orbs .orb-4 {
+  width: 180px;
+  height: 180px;
+  right: 28%;
+  bottom: 28%;
+  background: var(--accent-muted);
+  animation: orb-float-1 30s ease-in-out infinite reverse;
+}
+
+.recent-ships-orbs .orb-5 {
+  width: 200px;
+  height: 200px;
+  left: 58%;
+  top: 22%;
+  background: var(--teal-muted);
+  animation: orb-float-2 27s ease-in-out infinite;
+}
+
+.recent-ships-orbs .orb-6 {
+  width: 190px;
+  height: 190px;
+  left: 25%;
+  top: 55%;
+  background: var(--accent-muted);
+  animation: orb-float-3 25s ease-in-out infinite;
+}
+
+.recent-ships-orbs .orb-7 {
+  width: 170px;
+  height: 170px;
+  right: 8%;
+  bottom: 15%;
+  background: var(--teal-muted);
+  animation: orb-float-1 29s ease-in-out infinite;
+}
+
+.recent-ships-orbs .orb-8 {
+  width: 150px;
+  height: 150px;
+  left: 72%;
+  bottom: 35%;
+  background: var(--accent-muted);
+  animation: orb-float-2 26s ease-in-out infinite;
+}
+
+.recent-ships-orbs .orb-9 {
+  width: 140px; height: 140px; left: 5%; top: 45%; background: var(--teal-muted); animation: orb-float-3 23s ease-in-out infinite;
+}
+.recent-ships-orbs .orb-10 {
+  width: 160px; height: 160px; right: 5%; top: 18%; background: var(--accent-muted); animation: orb-float-1 31s ease-in-out infinite;
+}
+.recent-ships-orbs .orb-11 {
+  width: 130px; height: 130px; left: 45%; top: 5%; background: var(--teal-muted); animation: orb-float-2 22s ease-in-out infinite;
+}
+.recent-ships-orbs .orb-12 {
+  width: 170px; height: 170px; right: 40%; top: 55%; background: var(--accent-muted); animation: orb-float-3 28s ease-in-out infinite;
+}
+.recent-ships-orbs .orb-13 {
+  width: 120px; height: 120px; left: 18%; bottom: 8%; background: var(--teal-muted); animation: orb-float-1 27s ease-in-out infinite reverse;
+}
+.recent-ships-orbs .orb-14 {
+  width: 150px; height: 150px; right: 22%; top: 8%; background: var(--accent-muted); animation: orb-float-2 24s ease-in-out infinite;
+}
+.recent-ships-orbs .orb-15 {
+  width: 140px; height: 140px; left: 52%; bottom: 5%; background: var(--teal-muted); animation: orb-float-3 26s ease-in-out infinite;
+}
+.recent-ships-orbs .orb-16 {
+  width: 130px; height: 130px; left: 78%; top: 48%; background: var(--accent-muted); animation: orb-float-1 25s ease-in-out infinite;
+}
+.recent-ships-orbs .orb-17 {
+  width: 110px; height: 110px; left: 32%; top: 32%; background: var(--teal-muted); animation: orb-float-2 29s ease-in-out infinite;
+}
+.recent-ships-orbs .orb-18 {
+  width: 160px; height: 160px; right: 55%; bottom: 8%; background: var(--accent-muted); animation: orb-float-3 30s ease-in-out infinite;
+}
+.recent-ships-orbs .orb-19 {
+  width: 125px; height: 125px; left: 65%; bottom: 50%; background: var(--teal-muted); animation: orb-float-1 21s ease-in-out infinite;
+}
+.recent-ships-orbs .orb-20 {
+  width: 145px; height: 145px; right: 65%; top: 70%; background: var(--accent-muted); animation: orb-float-2 27s ease-in-out infinite;
+}
+
+@keyframes orb-float-1 {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(18px, -24px); }
+  66% { transform: translate(-12px, 16px); }
+}
+
+@keyframes orb-float-2 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-22px, 20px); }
+}
+
+@keyframes orb-float-3 {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(14px, 18px); }
+  75% { transform: translate(-18px, -12px); }
 }
 
 /* Agent badges — per-type styling (teal for verified) */
@@ -206,6 +398,24 @@ body::before {
   color: rgb(167, 139, 250);
 }
 
+.badge-tier-5 {
+  border-color: rgba(20, 184, 166, 0.5);
+  background: rgba(20, 184, 166, 0.15);
+  color: rgb(20, 184, 166);
+}
+
+.badge-tier-6 {
+  border-color: rgba(139, 92, 246, 0.5);
+  background: rgba(20, 184, 166, 0.08);
+  color: rgb(167, 139, 250);
+}
+
+.badge-tier-7 {
+  border-color: rgba(251, 191, 36, 0.6);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(251, 191, 36, 0.08) 100%);
+  color: rgb(251, 191, 36);
+}
+
 .badge-locked {
   border-color: var(--border);
   background: var(--bg-muted);
@@ -235,6 +445,24 @@ body::before {
   border-color: rgba(124, 58, 237, 0.4);
   background: rgba(124, 58, 237, 0.1);
   color: rgb(139, 92, 246);
+}
+
+[data-theme="light"] .badge-tier-5 {
+  border-color: rgba(13, 148, 136, 0.4);
+  background: rgba(13, 148, 136, 0.1);
+  color: rgb(13, 148, 136);
+}
+
+[data-theme="light"] .badge-tier-6 {
+  border-color: rgba(124, 58, 237, 0.4);
+  background: rgba(124, 58, 237, 0.08);
+  color: rgb(139, 92, 246);
+}
+
+[data-theme="light"] .badge-tier-7 {
+  border-color: rgba(245, 158, 11, 0.5);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(245, 158, 11, 0.06) 100%);
+  color: rgb(180, 83, 9);
 }
 
 [data-theme="light"] .badge-locked {
@@ -420,12 +648,12 @@ input[type="reset"] {
   cursor: pointer;
 }
 
-/* Proof card accent color hover */
-.proof-card-title {
+/* Ship card title hover */
+.ship-card-title {
   transition: color 0.2s;
 }
-.group:hover .proof-card-title {
-  color: var(--card-accent, var(--accent));
+.group:hover .ship-card-title {
+  color: var(--ship-card-title-hover, var(--accent));
 }
 
 /* --- Animation page: conveyor belt --- */

@@ -1,11 +1,11 @@
 /**
- * Gamified badge catalog — 48+ badges, tiered (Bronze → Platinum).
+ * Gamified badge catalog — tiered (Bronze → Platinum → Diamond).
  * Each badge has a condition(agent, proofs) for earned status.
  */
 
 import type { Agent, Proof } from "./types";
 
-export type BadgeTier = 1 | 2 | 3 | 4;
+export type BadgeTier = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 export interface BadgeDefinition {
   id: string;
@@ -116,6 +116,74 @@ export const BADGE_CATALOG: BadgeDefinition[] = [
   { id: "hall-of-fame", label: "Hall of Fame", description: "1000 launches — legend", tier: 4, condition: (a) => a.total_proofs >= 1000 },
   { id: "night-owl", label: "Night Owl", description: "10+ launches in a single day", tier: 4, condition: (_, p) => maxShipsInOneDay(p) >= 10 },
   { id: "marathon", label: "Marathon", description: "40+ launches in 7 days", tier: 4, condition: (a) => (a.activity_7d?.reduce((x, y) => x + y, 0) ?? 0) >= 40 },
+  // ——— Tier 5: Diamond ———
+  {
+    id: "sovereign",
+    label: "Sovereign",
+    description: "2000 launches landed",
+    tier: 5,
+    condition: (a) => a.total_proofs >= 2000,
+  },
+  {
+    id: "hundred-in-a-week",
+    label: "Hundred in a Week",
+    description: "100+ launches in 7 days",
+    tier: 5,
+    condition: (a) => (a.activity_7d?.reduce((x, y) => x + y, 0) ?? 0) >= 100,
+  },
+  {
+    id: "perfection",
+    label: "Perfection",
+    description: "All artifact types and 500+ launches",
+    tier: 5,
+    howToEarn: "Land at least one proof of each type (github, contract, dapp, ipfs, arweave, link) and reach 500 total launches.",
+    condition: (a, p) => uniqueArtifactTypes(p).size >= 6 && a.total_proofs >= 500,
+  },
+  {
+    id: "revered",
+    label: "Revered",
+    description: "50+ acknowledgements received",
+    tier: 5,
+    condition: (_, p) => totalAcknowledgements(p) >= 50,
+  },
+  // ——— Tier 6: Transcendent (multicolor) ———
+  {
+    id: "apex",
+    label: "Apex",
+    description: "2000 launches, 50+ acknowledgements, and all artifact types",
+    tier: 6,
+    howToEarn: "Reach 2000 total launches, receive 50+ acknowledgements, and ship at least one proof of each type: github, contract, dapp, ipfs, arweave, link.",
+    condition: (a, p) =>
+      a.total_proofs >= 2000 &&
+      totalAcknowledgements(p) >= 50 &&
+      uniqueArtifactTypes(p).size >= 6,
+  },
+  {
+    id: "omega",
+    label: "Omega",
+    description: "5000 launches landed",
+    tier: 6,
+    condition: (a) => a.total_proofs >= 5000,
+  },
+  {
+    id: "eclipse",
+    label: "Eclipse",
+    description: "3000 launches and 100+ acknowledgements",
+    tier: 6,
+    condition: (a, p) => a.total_proofs >= 3000 && totalAcknowledgements(p) >= 100,
+  },
+  // ——— Tier 7: Ascendant (prism + glow) ———
+  {
+    id: "ascendant",
+    label: "Ascendant",
+    description: "10000 launches, 200+ acknowledgements, and all artifact types",
+    tier: 7,
+    howToEarn: "Reach 10000 total launches, receive 200+ acknowledgements, and ship at least one proof of each type: github, contract, dapp, ipfs, arweave, link.",
+    condition: (a, p) =>
+      a.total_proofs >= 10000 &&
+      totalAcknowledgements(p) >= 200 &&
+      uniqueArtifactTypes(p).size >= 6,
+  },
 ];
 
 export const TIER_LABELS: Record<BadgeTier, string> = {
@@ -123,6 +191,9 @@ export const TIER_LABELS: Record<BadgeTier, string> = {
   2: "Silver",
   3: "Gold",
   4: "Platinum",
+  5: "Diamond",
+  6: "Transcendent",
+  7: "Ascendant",
 };
 
 export function getBadgeStatus(agent: Agent, proofs: Proof[]): { badge: BadgeDefinition; earned: boolean }[] {

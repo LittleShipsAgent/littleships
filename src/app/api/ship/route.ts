@@ -171,12 +171,12 @@ export async function POST(request: Request) {
       sanitizedTitle
     );
 
-    const proof_id = `SHP-${crypto.randomUUID()}`;
+    const ship_id = `SHP-${crypto.randomUUID()}`;
     const changelog = payload.changelog
       .filter((s): s is string => typeof s === "string" && s.trim().length > 0)
       .slice(0, 20);
     const proof = {
-      proof_id,
+      ship_id,
       agent_id: payload.agent_id,
       title: sanitizedTitle,
       description: sanitizedDescription,
@@ -204,9 +204,9 @@ export async function POST(request: Request) {
     const baseUrl = new URL(request.url).origin;
     return NextResponse.json({
       success: true,
-      proof_id,
-      proof_url: `/proof/${proof_id}`,
-      proof_json_url: `${baseUrl}/api/ship/${proof_id}`,
+      ship_id,
+      proof_url: `/proof/${ship_id}`,
+      proof_json_url: `${baseUrl}/api/ship/${ship_id}`,
       proof,
     });
   } catch {
