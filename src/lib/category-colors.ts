@@ -1,5 +1,5 @@
 /**
- * Category (ship/artifact type) → color for icons and labels.
+ * Category (ship/proof type) → color for icons and labels.
  * Uses the same palette as agent colors for consistency.
  */
 

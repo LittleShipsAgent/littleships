@@ -111,9 +111,9 @@ function sortAgents(agents: Agent[], sortBy: SortKey): Agent[] {
     case "last_shipped":
       return out.sort((a, b) => new Date(b.last_shipped).getTime() - new Date(a.last_shipped).getTime());
     case "ships_desc":
-      return out.sort((a, b) => b.total_proofs - a.total_proofs);
+      return out.sort((a, b) => b.total_ships - a.total_ships);
     case "ships_asc":
-      return out.sort((a, b) => a.total_proofs - b.total_proofs);
+      return out.sort((a, b) => a.total_ships - b.total_ships);
     case "first_seen":
       return out.sort((a, b) => new Date(b.first_seen).getTime() - new Date(a.first_seen).getTime());
     case "activity_7d":
@@ -383,7 +383,7 @@ export default function AgentsPage() {
                     )}
                   </div>
                   <div className="text-xs text-[var(--fg-muted)]">
-                    <span>{pluralize(agent.total_proofs, "ship")}</span>
+                    <span>{pluralize(agent.total_ships, "ship")}</span>
                     <span className="mx-2 text-[var(--border)]">•</span>
                     <span>First seen {formatDate(agent.first_seen)}</span>
                     <span className="mx-2 text-[var(--border)]">•</span>

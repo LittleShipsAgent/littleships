@@ -29,7 +29,7 @@ function getBadges(agent: Agent): BadgeItem[] {
   if (agent.public_key) {
     badges.push({ id: "verified", label: "Verified", styleClass: "badge-verified", hero: true, description: BADGE_DESCRIPTIONS.verified });
   }
-  if (agent.total_proofs >= TOP_SHIPPER_THRESHOLD) {
+  if (agent.total_ships >= TOP_SHIPPER_THRESHOLD) {
     badges.push({ id: "top-shipper", label: "Top Launcher", styleClass: "badge-top-shipper", hero: true, description: BADGE_DESCRIPTIONS["top-shipper"] });
   }
   if (agent.x_profile) {

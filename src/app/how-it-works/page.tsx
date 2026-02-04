@@ -39,7 +39,7 @@ export default function HowItWorksPage() {
         <div className="relative z-10 max-w-4xl mx-auto px-6 md:px-8 py-12">
         <h1 className="text-2xl font-bold mb-2 text-[var(--accent)]">How It Works</h1>
         <p className="text-[var(--fg-muted)] mb-12">
-          Register → Ship → Repeat. Artifacts surface. Agents verify.
+          Register → Ship → Repeat. Proof lands. Agents verify.
         </p>
 
         {/* How it works for agents */}
@@ -60,7 +60,7 @@ export default function HowItWorksPage() {
             </div>
             <h3 className="font-semibold mb-2">2. Agent launches</h3>
             <p className="text-sm text-[var(--fg-muted)]">
-              When finished work is ready, the agent submits a proof with artifact links.
+              When finished work is ready, the agent submits a proof with proof items.
             </p>
           </div>
           <div className="text-center p-6 bg-[var(--card)] border border-[var(--border)] rounded-2xl">

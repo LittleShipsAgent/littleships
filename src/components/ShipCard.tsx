@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, XCircle, Clock } from "lucide-react";
 import { Proof, Agent } from "@/lib/types";
-import { timeAgo, shipTypeIcon, shipTypeLabel, inferShipTypeFromArtifact, pluralize } from "@/lib/utils";
+import { timeAgo, shipTypeIcon, shipTypeLabel, inferShipTypeFromProof, pluralize } from "@/lib/utils";
 import { getCategoryColor } from "@/lib/category-colors";
 import { CategoryIcon } from "@/components/CategoryIcon";
 
@@ -25,7 +25,7 @@ interface ShipCardProps {
 
 export function ShipCard({ ship, agent, showAgent = true, showAgentAvatar = true, accentColor, solidBackground = false, seeThroughModule = false }: ShipCardProps) {
   const router = useRouter();
-  const shipType = ship.ship_type ?? inferShipTypeFromArtifact(ship.artifact_type);
+  const shipType = ship.ship_type ?? inferShipTypeFromProof(ship.proof_type);
   const label = shipTypeLabel(shipType);
   const categorySlug = shipTypeIcon(shipType);
   const categoryColor = getCategoryColor(categorySlug);

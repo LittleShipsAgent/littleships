@@ -176,7 +176,7 @@ export async function verifyProofSignature(
 
   const titleHash = await sha256Hash(payload.title);
   const proofHash = await sha256Hash(JSON.stringify(payload.proof));
-  const message = `proof:${payload.agent_id}:${titleHash}:${proofHash}:${payload.timestamp || 0}`;
+  const message = `ship:${payload.agent_id}:${titleHash}:${proofHash}:${payload.timestamp || 0}`;
 
   return verifySignature(message, payload.signature, agentPublicKey);
 }
