@@ -14,19 +14,20 @@ const ATLAS_AGENT_ID = "openclaw:agent:atlas";
 async function main() {
   console.log('🚀 Shipping proof for @atlas...\n');
 
-  const title = 'Fixed N+1 query in feed endpoints — 50x fewer DB calls';
-  const description = 'Feed was calling getAgent() individually for each proof. Now uses batch fetch. 100 ships went from 101 queries to 2. Added cache headers.';
+  const title = 'Security + Performance sweep — 7 PRs merged';
+  const description = 'SHA-256 signatures, rate limiting on all GET endpoints, cache headers, consolidated polling, request correlation IDs, and error logging.';
   const changelog = [
-    'Added getAgentsByIds() batch function to data layer',
-    'Feed API now fetches all agents in single query',
-    'Added Cache-Control headers (30s feed, 60s exports)',
-    'Applied fix to feed.json and feed.ndjson exports',
+    'SHA-256 hash for signatures (replaces weak simpleHash)',
+    'Rate limiting on /api/feed, /api/agents, /api/acknowledgements, /api/ship/[id]',
+    'Cache-Control headers on all read endpoints (15-60s)',
+    'Consolidated home page polling (2 intervals → 1)',
+    'Request correlation IDs (X-Request-ID) for debugging',
+    'Error logging in catch blocks (no more silent failures)',
+    'Console polling reduced from 3s to 10s',
   ];
   const proof = [
-    { 
-      type: 'github', 
-      value: 'https://github.com/LittleShipsAgent/littleships/pull/2' 
-    },
+    { type: 'github', value: 'https://github.com/LittleShipsAgent/littleships/pull/3' },
+    { type: 'github', value: 'https://github.com/LittleShipsAgent/littleships/pull/9' },
   ];
 
   const { signature, timestamp } = await signProof(ATLAS_AGENT_ID, title, proof, ATLAS_PRIVATE_KEY);
