@@ -67,7 +67,10 @@ export async function getAgentById(agentId: string): Promise<Agent | null> {
     .eq("agent_id", agentId)
     .single();
   if (error || !data) return null;
-  return rowToAgent(data);
+  const agent = rowToAgent(data);
+  // Compute fresh activity_7d
+  agent.activity_7d = await computeActivity7d(agentId);
+  return agent;
 }
 
 export async function getAgentByHandle(handle: string): Promise<Agent | null> {
@@ -80,18 +83,71 @@ export async function getAgentByHandle(handle: string): Promise<Agent | null> {
     .eq("handle", normalized)
     .maybeSingle();
   if (error || !data) return null;
-  return rowToAgent(data);
+  const agent = rowToAgent(data);
+  // Compute fresh activity_7d
+  agent.activity_7d = await computeActivity7d(agent.agent_id);
+  return agent;
+}
+
+/** Batch compute activity_7d for all agents in one query (avoids N+1). */
+async function batchComputeActivity7d(): Promise<Map<string, number[]>> {
+  const db = getDb();
+  const result = new Map<string, number[]>();
+  if (!db) return result;
+  
+  const now = new Date();
+  const sevenDaysAgo = new Date(now);
+  sevenDaysAgo.setUTCDate(sevenDaysAgo.getUTCDate() - 6);
+  sevenDaysAgo.setUTCHours(0, 0, 0, 0);
+  
+  const { data: ships } = await db
+    .from("ships")
+    .select("agent_id, timestamp")
+    .gte("timestamp", sevenDaysAgo.toISOString());
+  
+  if (!ships?.length) return result;
+  
+  const today = new Date(now);
+  today.setUTCHours(0, 0, 0, 0);
+  
+  for (const ship of ships) {
+    const d = new Date(ship.timestamp);
+    d.setUTCHours(0, 0, 0, 0);
+    const diffDays = Math.floor((today.getTime() - d.getTime()) / (24 * 60 * 60 * 1000));
+    if (diffDays >= 0 && diffDays <= 6) {
+      if (!result.has(ship.agent_id)) {
+        result.set(ship.agent_id, [0, 0, 0, 0, 0, 0, 0]);
+      }
+      result.get(ship.agent_id)![6 - diffDays] += 1;
+    }
+  }
+  
+  return result;
 }
 
 export async function listAgents(): Promise<Agent[]> {
   const db = getDb();
   if (!db) return [];
-  const { data, error } = await db
-    .from("agents")
-    .select("*")
-    .order("last_shipped", { ascending: false });
-  if (error || !data) return [];
-  return data.map(rowToAgent);
+  
+  // Fetch agents and compute fresh activity_7d in parallel
+  const [agentsResult, activityMap] = await Promise.all([
+    db.from("agents").select("*").order("last_shipped", { ascending: false }),
+    batchComputeActivity7d(),
+  ]);
+  
+  if (agentsResult.error || !agentsResult.data) return [];
+  
+  // Merge fresh activity_7d into agents
+  return agentsResult.data.map((row) => {
+    const agent = rowToAgent(row);
+    const freshActivity = activityMap.get(agent.agent_id);
+    if (freshActivity) {
+      agent.activity_7d = freshActivity;
+    } else {
+      agent.activity_7d = [0, 0, 0, 0, 0, 0, 0];
+    }
+    return agent;
+  });
 }
 
 export async function getAgentsByIds(agentIds: string[]): Promise<Agent[]> {
