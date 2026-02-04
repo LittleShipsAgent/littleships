@@ -143,55 +143,119 @@ export default function Home() {
     wasLoading.current = loading;
   }, [loading]);
 
-  // Poll for new proofs every 15 seconds (real data, no fakes)
+  // Track state for polling
   const seenProofIds = useRef<Set<string>>(new Set());
-  const initializedProofs = useRef(false);
+  const knownAgentStates = useRef<Map<string, string>>(new Map()); // agent_id -> last_shipped
+  const initializedPolling = useRef(false);
+  const [newSlideEffect, setNewSlideEffect] = useState(false);
+  const [highlightedAgentId, setHighlightedAgentId] = useState<string | null>(null);
+  const carouselHoverRef = useRef(false);
 
+  // Keep refs to avoid stale closures in polling
+  const agentsRef = useRef<Agent[]>([]);
   useEffect(() => {
-    if (loading || initializedProofs.current) return;
-    // Initialize with current proof IDs after initial load
+    agentsRef.current = agents;
+  }, [agents]);
+
+  // Initialize polling state after first load
+  useEffect(() => {
+    if (loading || initializedPolling.current) return;
     proofs.forEach(p => seenProofIds.current.add(p.ship_id));
-    initializedProofs.current = true;
-  }, [loading, proofs]);
+    agents.forEach(a => knownAgentStates.current.set(a.agent_id, a.last_shipped));
+    initializedPolling.current = true;
+  }, [loading, proofs, agents]);
 
+  // Consolidated polling: fetch both feed and agents in one interval
   useEffect(() => {
-    if (loading || !initializedProofs.current) return;
+    if (loading || !initializedPolling.current) return;
     
-    const pollForNew = async () => {
-      try {
-        const res = await fetchWithTimeout("/api/feed?limit=20", FETCH_TIMEOUT_MS);
-        const data = await res.json();
-        const newProofs = (data.proofs ?? []).filter(
-          (p: Proof) => !seenProofIds.current.has(p.ship_id)
-        );
-        
-        if (newProofs.length > 0) {
-          newProofs.forEach((p: Proof) => seenProofIds.current.add(p.ship_id));
-          // Add new proofs to the top with animation flag
-          setProofs(prev => [
-            ...newProofs.map((p: Proof) => ({ ...p, _injectedId: Date.now() })),
-            ...prev
-          ]);
+    const POLL_INTERVAL_MS = 10000;
+    
+    const pollForUpdates = async () => {
+      // Fetch both in parallel
+      const [feedRes, agentsRes] = await Promise.all([
+        fetchWithTimeout("/api/feed?limit=20", FETCH_TIMEOUT_MS).catch(() => null),
+        fetchWithTimeout("/api/agents", FETCH_TIMEOUT_MS).catch(() => null),
+      ]);
+
+      // Process feed updates
+      if (feedRes) {
+        try {
+          const feedData = await feedRes.json();
+          const newProofs = (feedData.proofs ?? []).filter(
+            (p: Proof) => !seenProofIds.current.has(p.ship_id)
+          );
+          
+          if (newProofs.length > 0) {
+            newProofs.forEach((p: Proof) => seenProofIds.current.add(p.ship_id));
+            setProofs(prev => [
+              ...newProofs.map((p: Proof) => ({ ...p, _injectedId: Date.now() })),
+              ...prev
+            ]);
+          }
+        } catch {
+          // Ignore feed parse errors
         }
-      } catch {
-        // Ignore polling errors
+      }
+
+      // Process agent updates
+      if (agentsRes) {
+        try {
+          const agentsData = await agentsRes.json();
+          const freshAgents: Agent[] = agentsData.agents ?? [];
+          
+          // Find truly new agents or agents with new ships
+          let agentToHighlight: Agent | null = null;
+          
+          for (const fresh of freshAgents) {
+            const knownLastShipped = knownAgentStates.current.get(fresh.agent_id);
+            
+            if (!knownLastShipped) {
+              agentToHighlight = fresh;
+              break;
+            } else if (new Date(fresh.last_shipped).getTime() > new Date(knownLastShipped).getTime()) {
+              agentToHighlight = fresh;
+              break;
+            }
+          }
+          
+          // Update known states
+          freshAgents.forEach((a) => knownAgentStates.current.set(a.agent_id, a.last_shipped));
+          
+          // Check for actual changes
+          const hasChanges = freshAgents.length !== agentsRef.current.length || agentToHighlight;
+          
+          if (hasChanges) {
+            setHighlightedAgentId(null);
+            setNewSlideEffect(false);
+            setAgents(freshAgents);
+            
+            if (agentToHighlight && !carouselHoverRef.current) {
+              requestAnimationFrame(() => {
+                setHighlightedAgentId(agentToHighlight!.agent_id);
+                setNewSlideEffect(true);
+                setTimeout(() => {
+                  setNewSlideEffect(false);
+                  setHighlightedAgentId(null);
+                }, 3000);
+              });
+            }
+          }
+        } catch {
+          // Ignore agent parse errors
+        }
       }
     };
-
-    const interval = setInterval(pollForNew, 10000);
-    return () => clearInterval(interval);
+    
+    const intervalId = setInterval(pollForUpdates, POLL_INTERVAL_MS);
+    return () => clearInterval(intervalId);
   }, [loading]);
 
+  // Derived state
   const filteredProofs =
     filter === "all"
       ? proofs
       : proofs.filter((r) => r.artifact_type === filter);
-
-  const proofsToday = proofs.filter(
-    (r) => Date.now() - new Date(r.timestamp).getTime() < 24 * 60 * 60 * 1000
-  ).length;
-
-  const totalProofs = proofs.length;
 
   // Only show agents who have actually shipped something
   const activeAgents = [...agents]
@@ -199,89 +263,6 @@ export default function Home() {
     .sort((a, b) => new Date(b.last_shipped).getTime() - new Date(a.last_shipped).getTime());
 
   const CAROUSEL_SIZE = 3;
-  
-  // Track known agent states to detect real new activity
-  const knownAgentStates = useRef<Map<string, string>>(new Map()); // agent_id -> last_shipped
-  const [newSlideEffect, setNewSlideEffect] = useState(false);
-  const [highlightedAgentId, setHighlightedAgentId] = useState<string | null>(null);
-  const carouselHoverRef = useRef(false);
-
-  // Initialize known agent states on first load
-  useEffect(() => {
-    if (agents.length > 0 && knownAgentStates.current.size === 0) {
-      agents.forEach((a) => knownAgentStates.current.set(a.agent_id, a.last_shipped));
-    }
-  }, [agents]);
-
-  // Keep a ref to latest agents to avoid stale closures in polling
-  const agentsRef = useRef<Agent[]>([]);
-  useEffect(() => {
-    agentsRef.current = agents;
-  }, [agents]);
-
-  // Poll for real new activity every 10 seconds
-  useEffect(() => {
-    if (loading) return;
-    
-    const POLL_INTERVAL_MS = 10000;
-    
-    const pollForNewAgentActivity = async () => {
-      try {
-        const res = await fetchWithTimeout("/api/agents", FETCH_TIMEOUT_MS);
-        const data = await res.json();
-        const freshAgents: Agent[] = data.agents ?? [];
-        
-        // Find truly new agents or agents with new ships
-        let agentToHighlight: Agent | null = null;
-        
-        for (const fresh of freshAgents) {
-          const knownLastShipped = knownAgentStates.current.get(fresh.agent_id);
-          
-          if (!knownLastShipped) {
-            // Brand new agent
-            agentToHighlight = fresh;
-            break;
-          } else if (new Date(fresh.last_shipped).getTime() > new Date(knownLastShipped).getTime()) {
-            // Existing agent shipped something new
-            agentToHighlight = fresh;
-            break;
-          }
-        }
-        
-        // Update known states
-        freshAgents.forEach((a) => knownAgentStates.current.set(a.agent_id, a.last_shipped));
-        
-        // Check for actual changes using ref (avoids stale closure)
-        const hasChanges = freshAgents.length !== agentsRef.current.length || agentToHighlight;
-        
-        if (hasChanges) {
-          // Clear any existing highlight first to avoid color bleed
-          setHighlightedAgentId(null);
-          setNewSlideEffect(false);
-          
-          // Update agents state
-          setAgents(freshAgents);
-          
-          // Highlight after a tick to ensure clean render
-          if (agentToHighlight && !carouselHoverRef.current) {
-            requestAnimationFrame(() => {
-              setHighlightedAgentId(agentToHighlight!.agent_id);
-              setNewSlideEffect(true);
-              setTimeout(() => {
-                setNewSlideEffect(false);
-                setHighlightedAgentId(null);
-              }, 3000);
-            });
-          }
-        }
-      } catch {
-        // Silently fail on poll errors
-      }
-    };
-    
-    const intervalId = setInterval(pollForNewAgentActivity, POLL_INTERVAL_MS);
-    return () => clearInterval(intervalId);
-  }, [loading]); // Remove agents.length dependency - use ref instead
 
   // Display agents: if one is highlighted (new activity), put them first
   const displayAgents = useMemo(() => {
