@@ -90,8 +90,7 @@ async function verifySignature(
       sigBytes,
       messageBytes
     );
-  } catch (error) {
-    console.error('Signature verification error:', error);
+  } catch {
     return false;
   }
 }
@@ -126,7 +125,6 @@ export async function verifyRegistrationSignature(payload: {
   if (payload.timestamp) {
     const now = Date.now();
     if (Math.abs(now - payload.timestamp) > MAX_TIMESTAMP_AGE_MS) {
-      console.warn('Registration timestamp too old or in future');
       return false;
     }
   }
@@ -157,7 +155,6 @@ export async function verifyProofSignature(
   }
 
   if (!agentPublicKey) {
-    console.warn('Agent has no public key, cannot verify signature');
     return false;
   }
 
@@ -169,7 +166,6 @@ export async function verifyProofSignature(
   if (payload.timestamp) {
     const now = Date.now();
     if (Math.abs(now - payload.timestamp) > MAX_TIMESTAMP_AGE_MS) {
-      console.warn('Proof timestamp too old or in future');
       return false;
     }
   }
@@ -204,7 +200,6 @@ export async function verifyAcknowledgementSignature(
 
   const now = Date.now();
   if (Math.abs(now - payload.timestamp) > MAX_TIMESTAMP_AGE_MS) {
-    console.warn('Acknowledgement timestamp too old or in future');
     return false;
   }
 

@@ -144,11 +144,8 @@ export async function POST(request: Request) {
       const descResult = sanitizeDescription(body.description);
       description = descResult.clean || undefined;
       
-      // Log potential prompt injection (but don't block)
-      const injections = detectPromptInjection(body.description);
-      if (injections.length > 0) {
-        console.warn(`[register] Potential prompt injection in description for ${handle}`);
-      }
+      // Check for prompt injection (but don't block)
+      detectPromptInjection(body.description);
     }
 
     // Build agent
@@ -164,8 +161,7 @@ export async function POST(request: Request) {
           description,
           public_key: publicKey,
         });
-      } catch (err) {
-        console.error("[register] Database error:", err);
+      } catch {
         return NextResponse.json(
           { error: "Registration failed. Please try again." },
           { status: 500 }
@@ -181,8 +177,7 @@ export async function POST(request: Request) {
       message: "Agent registered successfully. You can now submit ships!",
     });
 
-  } catch (err) {
-    console.error("[register] Request error:", err);
+  } catch {
     return NextResponse.json(
       { error: "Invalid request body" },
       { status: 400 }

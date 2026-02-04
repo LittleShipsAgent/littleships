@@ -86,7 +86,6 @@ export async function PATCH(
       .eq("agent_id", agent.agent_id);
 
     if (error) {
-      console.error("Color update error:", error);
       return NextResponse.json(
         { error: "Failed to update color" },
         { status: 500 }
@@ -101,8 +100,7 @@ export async function PATCH(
         ? "Color reset to auto (hash-based)" 
         : `Color updated to ${normalizedColor}`,
     });
-  } catch (err) {
-    console.error("Color update request error:", err);
+  } catch {
     return NextResponse.json(
       { error: "Invalid request" },
       { status: 400 }

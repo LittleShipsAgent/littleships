@@ -73,7 +73,6 @@ export async function verifyXProfile(
 
     return { verified: false, error: 'Verification code not found in profile or recent tweets' };
   } catch (err) {
-    console.error('X verification error:', err);
     return { 
       verified: false, 
       error: err instanceof Error ? err.message : 'Failed to verify X profile' 

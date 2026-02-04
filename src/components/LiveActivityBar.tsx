@@ -105,8 +105,8 @@ export function LiveActivityBar() {
         newItems.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
         showActivity(newItems[0]);
       }
-    } catch (err) {
-      console.error('Failed to check activity:', err);
+    } catch {
+      // Silently fail on activity check errors
     }
   }, [showActivity]);
 
