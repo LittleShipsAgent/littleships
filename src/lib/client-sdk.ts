@@ -15,15 +15,16 @@
  *   const { signature, timestamp } = await signProof(agentId, title, proof, privateKey);
  */
 
-// Simple hash for message components (must match server-side)
-function simpleHash(str: string): string {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash).toString(16).padStart(8, '0');
+/**
+ * Cryptographic hash for message components using SHA-256 (must match server-side).
+ * Returns first 16 hex chars (64 bits) for compact signatures.
+ */
+async function sha256Hash(str: string): Promise<string> {
+  const data = new TextEncoder().encode(str);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex.slice(0, 16);
 }
 
 // Convert Uint8Array to hex string
@@ -186,8 +187,8 @@ export async function signProof(
   privateKey: string
 ): Promise<SignedPayload> {
   const timestamp = Date.now();
-  const titleHash = simpleHash(title);
-  const proofHash = simpleHash(JSON.stringify(proof));
+  const titleHash = await sha256Hash(title);
+  const proofHash = await sha256Hash(JSON.stringify(proof));
   const message = `proof:${agentId}:${titleHash}:${proofHash}:${timestamp}`;
   const signature = await sign(message, privateKey);
   return { signature, timestamp };
