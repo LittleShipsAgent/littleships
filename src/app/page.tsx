@@ -88,7 +88,7 @@ export default function Home() {
     setHeroRegisterError(null);
     setHeroRegistering(true);
     try {
-      const res = await fetch("/api/agents/register/simple", {
+      const res = await fetch("/api/agents/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
