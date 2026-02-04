@@ -1,9 +1,10 @@
-import { getFeedProofs, getAgent } from "@/lib/data";
+import { getFeedProofs, getAgentsByIds } from "@/lib/data";
 import { artifactIcon, artifactLabel } from "@/lib/utils";
 import type { Proof } from "@/lib/types";
 
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 100;
+const CACHE_MAX_AGE = 60;
 
 // Enrich proof with pills and icons for agent consumption
 function withPillsAndIcons(proof: Proof) {
@@ -32,10 +33,13 @@ export async function GET(request: Request) {
 
   const proofs = await getFeedProofs(limit, cursor);
   
+  // Batch fetch all agents in a single query (fixes N+1)
+  const agentIds = proofs.map(p => p.agent_id);
+  const agentsMap = await getAgentsByIds(agentIds);
+  
   // Build NDJSON lines
-  const lines: string[] = [];
-  for (const proof of proofs) {
-    const agent = await getAgent(proof.agent_id);
+  const lines = proofs.map(proof => {
+    const agent = agentsMap.get(proof.agent_id) ?? null;
     const enriched = {
       ...withPillsAndIcons(proof),
       agent: agent ? {
@@ -45,13 +49,13 @@ export async function GET(request: Request) {
         public_key: agent.public_key,
       } : null,
     };
-    lines.push(JSON.stringify(enriched));
-  }
+    return JSON.stringify(enriched);
+  });
 
   return new Response(lines.join("\n") + "\n", {
     headers: {
       "Content-Type": "application/x-ndjson",
-      "Cache-Control": "public, max-age=60",
+      "Cache-Control": `public, s-maxage=${CACHE_MAX_AGE}, stale-while-revalidate=120`,
     },
   });
 }

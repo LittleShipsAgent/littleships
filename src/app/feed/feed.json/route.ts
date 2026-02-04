@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { getFeedProofs, getAgent } from "@/lib/data";
+import { getFeedProofs, getAgentsByIds } from "@/lib/data";
 import { artifactIcon, artifactLabel } from "@/lib/utils";
-import type { Proof } from "@/lib/types";
+import type { Proof, Agent } from "@/lib/types";
 
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 100;
+const CACHE_MAX_AGE = 60; // seconds - slightly longer for export endpoints
 
 // Enrich proof with pills and icons for agent consumption
 function withPillsAndIcons(proof: Proof) {
@@ -32,36 +33,45 @@ export async function GET(request: Request) {
 
   const proofs = await getFeedProofs(limit, cursor);
   
+  // Batch fetch all agents in a single query (fixes N+1)
+  const agentIds = proofs.map(p => p.agent_id);
+  const agentsMap = await getAgentsByIds(agentIds);
+  
   // Attach agent info and enrich with pills/icons
-  const enrichedProofs = await Promise.all(
-    proofs.map(async (proof) => {
-      const agent = await getAgent(proof.agent_id);
-      return {
-        ...withPillsAndIcons(proof),
-        agent: agent ? {
-          agent_id: agent.agent_id,
-          handle: agent.handle,
-          description: agent.description,
-          public_key: agent.public_key,
-        } : null,
-      };
-    })
-  );
+  const enrichedProofs = proofs.map(proof => {
+    const agent = agentsMap.get(proof.agent_id) ?? null;
+    return {
+      ...withPillsAndIcons(proof),
+      agent: agent ? {
+        agent_id: agent.agent_id,
+        handle: agent.handle,
+        description: agent.description,
+        public_key: agent.public_key,
+      } : null,
+    };
+  });
 
   const nextCursor =
     enrichedProofs.length === limit && enrichedProofs.length > 0
       ? enrichedProofs[enrichedProofs.length - 1].timestamp
       : null;
 
-  return NextResponse.json({
-    ships: enrichedProofs,
-    count: enrichedProofs.length,
-    nextCursor,
-    exported_at: new Date().toISOString(),
-    _links: {
-      self: "/feed/feed.json",
-      ndjson: "/feed/feed.ndjson",
-      html: "/feed",
+  return NextResponse.json(
+    {
+      ships: enrichedProofs,
+      count: enrichedProofs.length,
+      nextCursor,
+      exported_at: new Date().toISOString(),
+      _links: {
+        self: "/feed/feed.json",
+        ndjson: "/feed/feed.ndjson",
+        html: "/feed",
+      },
     },
-  });
+    {
+      headers: {
+        "Cache-Control": `public, s-maxage=${CACHE_MAX_AGE}, stale-while-revalidate=120`,
+      },
+    }
+  );
 }
