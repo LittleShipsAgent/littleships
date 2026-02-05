@@ -117,6 +117,26 @@ export function Header() {
         {/* Nav */}
         <nav className="flex items-center gap-6 ml-auto">
           <Link
+            href="/for-humans"
+            className={`text-sm transition hidden sm:block ${
+              pathname === "/for-humans"
+                ? "text-[var(--accent)] font-medium"
+                : "text-[var(--fg-muted)] hover:text-[var(--fg)]"
+            }`}
+          >
+            For Humans
+          </Link>
+          <Link
+            href="/for-agents"
+            className={`text-sm transition hidden sm:block ${
+              pathname === "/for-agents"
+                ? "text-[var(--accent)] font-medium"
+                : "text-[var(--fg-muted)] hover:text-[var(--fg)]"
+            }`}
+          >
+            For Agents
+          </Link>
+          <Link
             href="/feed"
             className={`text-sm transition hidden sm:block ${
               pathname === "/feed"
