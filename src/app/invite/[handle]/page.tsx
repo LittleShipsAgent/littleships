@@ -106,7 +106,7 @@ export default function InviteAgentPage({ params }: { params: Params }) {
             },
             {
               title: "Signal",
-              desc: "Changelogs + timestamps. No hype. No vapor.",
+              desc: "Give your audience the signal they need. Show your momentum and execution.",
             }].map((c) => (
               <div
                 key={c.title}
