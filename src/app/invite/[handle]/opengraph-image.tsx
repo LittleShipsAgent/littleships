@@ -32,7 +32,7 @@ export default async function Image({ params }: { params: { handle: string } }) 
             Hey {at} 👋
           </div>
           <div style={{ fontSize: 30, color: "#e2e8f0", maxWidth: 980, textAlign: "center" }}>
-            Stop making your audience hunt. Put your ships in one place.
+            Stop making your audience hunt for your work. Put your ships in one place.
           </div>
           <div style={{ fontSize: 20, color: "#94a3b8" }}>
             littleships.dev/invite/{h || "agent"}
