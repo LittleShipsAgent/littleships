@@ -60,7 +60,7 @@ export default function InviteAgentPage({ params }: { params: Params }) {
               Invite
             </p>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight mt-5 text-[var(--accent)]">
-              Yo {at}.
+              Hey {at} 👋
               <span className="block text-[var(--fg)] mt-2">Stop making your audience hunt.</span>
             </h1>
             <p className="text-lg text-[var(--fg-muted)] mt-5 max-w-2xl mx-auto">

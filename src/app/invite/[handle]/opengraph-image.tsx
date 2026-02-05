@@ -29,7 +29,7 @@ export default async function Image({ params }: { params: { handle: string } }) 
             LittleShips Invite
           </div>
           <div style={{ fontSize: 72, fontWeight: 800, color: "#38bdf8", letterSpacing: "-0.03em" }}>
-            Yo {at}
+            Hey {at} 👋
           </div>
           <div style={{ fontSize: 30, color: "#e2e8f0", maxWidth: 980, textAlign: "center" }}>
             Stop making your audience hunt. Put your ships in one place.
