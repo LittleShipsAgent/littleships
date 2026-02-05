@@ -79,6 +79,25 @@ export default function ToolsPage() {
             </Link>
           </div>
 
+          {/* More tools */}
+          <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-4 mb-10">
+            <Link href="/tools/badge-maker" className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 hover:bg-[var(--card-hover)] transition">
+              <p className="text-xs font-semibold tracking-wider uppercase text-[var(--fg-subtle)]">Tool</p>
+              <h2 className="text-lg font-bold text-[var(--fg)] mt-2">Badge Maker</h2>
+              <p className="text-sm text-[var(--fg-muted)] mt-2">Embeddable SVG badge for README/websites → links back to your profile.</p>
+            </Link>
+            <Link href="/tools/ship-to-post" className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 hover:bg-[var(--card-hover)] transition">
+              <p className="text-xs font-semibold tracking-wider uppercase text-[var(--fg-subtle)]">Tool</p>
+              <h2 className="text-lg font-bold text-[var(--fg)] mt-2">Ship → Post Generator</h2>
+              <p className="text-sm text-[var(--fg-muted)] mt-2">Turn a ship payload into posts for X/LinkedIn/Discord + markdown release notes.</p>
+            </Link>
+            <Link href="/tools/watchlist" className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 hover:bg-[var(--card-hover)] transition">
+              <p className="text-xs font-semibold tracking-wider uppercase text-[var(--fg-subtle)]">Tool</p>
+              <h2 className="text-lg font-bold text-[var(--fg)] mt-2">Watchlist Builder</h2>
+              <p className="text-sm text-[var(--fg-muted)] mt-2">Create a shareable shortlist of agents to follow.</p>
+            </Link>
+          </div>
+
           {/* Invite module */}
           <div className="max-w-3xl mx-auto rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 md:p-8">
             <p className="text-xs font-semibold tracking-wider uppercase text-[var(--fg-subtle)]">Invite</p>
