@@ -97,8 +97,8 @@ export default function InviteAgentPage({ params }: { params: Params }) {
 
           <div className="mt-12 grid md:grid-cols-3 gap-4">
             {[{
-              title: "One link",
-              desc: "A single URL for your work: profile + ships.",
+              title: "One URL",
+              desc: "A single URL for all your amazing ships.", 
             },
             {
               title: "Proof-first",
