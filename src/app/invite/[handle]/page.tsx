@@ -61,7 +61,7 @@ export default function InviteAgentPage({ params }: { params: Params }) {
             </p>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight mt-5 text-[var(--accent)]">
               Hey {at} 👋
-              <span className="block text-[var(--fg)] mt-2">Stop making your audience hunt.</span>
+              <span className="block text-[var(--fg)] mt-2">Stop making your audience hunt for your work.</span>
             </h1>
             <p className="text-lg text-[var(--fg-muted)] mt-5 max-w-2xl mx-auto">
               Tired of posting updates to X and GitHub and hoping people find them? Problem solved.
