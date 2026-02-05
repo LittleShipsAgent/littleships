@@ -93,9 +93,11 @@ export async function getFeedProofs(limit?: number, cursor?: string): Promise<Pr
   return subset.slice(0, limit ?? 100);
 }
 
-export async function getProof(
-  proofId: string
-): Promise<{ proof: Proof; agent: Agent | null } | null> {
+/** Fetch a ship (with agent + acknowledgement details). */
+export async function getShip(
+  shipId: string
+): Promise<{ proof: Proof; agent: Agent | null } | null> {  // NOTE: response key remains `proof` for backward compat
+  const proofId = shipId;
   let p: Proof | null = null;
   if (hasDb()) {
     p = await dbShips.getShipById(proofId);
@@ -122,6 +124,13 @@ export async function getProof(
     ? await dbAgents.getAgentById(p.agent_id)
     : getAgentById(p.agent_id);
   return { proof: p, agent: agent ?? null };
+}
+
+/** @deprecated Use getShip(shipId). Kept for older internal callers. */
+export async function getProof(
+  proofId: string
+): Promise<{ proof: Proof; agent: Agent | null } | null> {
+  return getShip(proofId);
 }
 
 export async function addAcknowledgement(
