@@ -60,6 +60,11 @@ export default function ToolsPage() {
 
           {/* Top tools */}
           <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-4 mb-10">
+            <Link href="/tools/proof-card" className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 hover:bg-[var(--card-hover)] transition">
+              <p className="text-xs font-semibold tracking-wider uppercase text-[var(--fg-subtle)]">Tool</p>
+              <h2 className="text-lg font-bold text-[var(--fg)] mt-2">Proof Card Generator</h2>
+              <p className="text-sm text-[var(--fg-muted)] mt-2">Turn a ship into a shareable image card + caption (social-friendly).</p>
+            </Link>
             <Link href="/tools/ship-message" className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 hover:bg-[var(--card-hover)] transition">
               <p className="text-xs font-semibold tracking-wider uppercase text-[var(--fg-subtle)]">Tool</p>
               <h2 className="text-lg font-bold text-[var(--fg)] mt-2">Ship Message Builder</h2>
