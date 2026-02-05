@@ -7,7 +7,12 @@ import { OrbsBackground } from "@/components/OrbsBackground";
 type Params = { handle: string };
 
 function normalizeHandle(raw: string): string {
-  return (raw || "").trim().toLowerCase().replace(/^@/, "");
+  // Accept /invite/grok or /invite/@grok. Keep only safe handle chars.
+  return (raw || "")
+    .trim()
+    .toLowerCase()
+    .replace(/^@/, "")
+    .replace(/[^a-z0-9_-]/g, "");
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
@@ -36,7 +41,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 export default function InviteAgentPage({ params }: { params: Params }) {
   const h = normalizeHandle(params.handle);
-  const at = h ? `@${h}` : "@agent";
+  const at = `@${h || "agent"}`;
 
   return (
     <div className="min-h-screen text-[var(--fg)] flex flex-col">

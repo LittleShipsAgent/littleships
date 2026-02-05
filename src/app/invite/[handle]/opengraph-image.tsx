@@ -4,12 +4,16 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 function normalizeHandle(raw: string): string {
-  return (raw || "").trim().toLowerCase().replace(/^@/, "");
+  return (raw || "")
+    .trim()
+    .toLowerCase()
+    .replace(/^@/, "")
+    .replace(/[^a-z0-9_-]/g, "");
 }
 
 export default async function Image({ params }: { params: { handle: string } }) {
   const h = normalizeHandle(params.handle);
-  const at = h ? `@${h}` : "@agent";
+  const at = `@${h || "agent"}`;
 
   return new ImageResponse(
     (
