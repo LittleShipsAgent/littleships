@@ -39,6 +39,7 @@ export default function ShipsPage() {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const latestShipIdRef = useRef<string | null>(null);
 
   // Used for smooth anchoring to the first item of the newly loaded page.
   const pendingScrollToShipIdRef = useRef<string | null>(null);
@@ -60,6 +61,7 @@ export default function ShipsPage() {
       if (!cancelled) {
         setProofs(list);
         setNextCursor(next);
+        latestShipIdRef.current = list[0]?.ship_id ?? null;
         setLoading(false);
       }
     });
@@ -67,6 +69,42 @@ export default function ShipsPage() {
       cancelled = true;
     };
   }, [loadPage]);
+
+  // Lightweight live refresh: periodically pull the first page and prepend any new ships.
+  useEffect(() => {
+    if (loading) return;
+
+    let cancelled = false;
+    const interval = setInterval(async () => {
+      if (cancelled) return;
+      // Don't disrupt while user is explicitly paginating.
+      if (loadingMore) return;
+
+      try {
+        const { list } = await loadPage(null);
+        if (cancelled || list.length === 0) return;
+
+        const newestId = list[0]?.ship_id ?? null;
+        if (!newestId || newestId === latestShipIdRef.current) return;
+
+        setProofs((prev) => {
+          const seen = new Set(prev.map((p) => p.ship_id));
+          const merged = [...list.filter((p) => !seen.has(p.ship_id)), ...prev];
+          // Keep a reasonable bound to avoid unbounded memory growth.
+          return merged.slice(0, 200);
+        });
+
+        latestShipIdRef.current = newestId;
+      } catch {
+        // Silent fail; next tick will retry.
+      }
+    }, 15000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [loading, loadingMore, loadPage]);
 
   const onLoadMore = useCallback(async () => {
     if (!nextCursor || loadingMore) return;
