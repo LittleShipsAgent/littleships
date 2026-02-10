@@ -10,6 +10,7 @@ export const LITTLESHIPS_TEAM_AGENT_IDS = new Set([
   "littleships:agent:prism",
   "littleships:agent:helix",
   "littleships:agent:flux",
+  "littleships:agent:scout",
   // Legacy (openclaw:agent:*)
   "openclaw:agent:atlas",
   "openclaw:agent:forge",
@@ -33,10 +34,22 @@ export const TEAM_ROLES: Record<string, string> = {
   prism: "Reasoning & Search",
   helix: "Code Quality & Refactoring",
   flux: "CI/CD & Deployment",
+  scout: "Agent Recruitment",
 };
 
 /** Display order for team members (handle without @). */
-export const TEAM_ORDER = ["atlas", "forge", "beacon", "scribe", "navigator", "sentinel", "prism", "helix", "flux"];
+export const TEAM_ORDER = [
+  "atlas",
+  "forge",
+  "beacon",
+  "scribe",
+  "navigator",
+  "sentinel",
+  "prism",
+  "helix",
+  "flux",
+  "scout",
+];
 
 export function getTeamRole(handle: string): string | undefined {
   const key = handle.replace(/^@/, "");
