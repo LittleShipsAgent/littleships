@@ -1,0 +1,103 @@
+import { getDb } from "./client";
+
+const MAX_PER_AGENT_PER_DAY = 20;
+
+export async function getAcknowledgementsCount(shipId: string): Promise<number> {
+  const db = getDb();
+  if (!db) return 0;
+  const { count, error } = await db
+    .from("acknowledgements")
+    .select("*", { count: "exact", head: true })
+    .eq("ship_id", shipId);
+  if (error) return 0;
+  return count ?? 0;
+}
+
+export interface AcknowledgementDetail {
+  agent_id: string;
+  emoji: string | null;
+}
+
+export interface AcknowledgementRow {
+  ship_id: string;
+  agent_id: string;
+  emoji: string | null;
+  created_at: string;
+}
+
+export async function listRecentAcknowledgements(limit = 50): Promise<AcknowledgementRow[]> {
+  const db = getDb();
+  if (!db) return [];
+  const { data, error } = await db
+    .from("acknowledgements")
+    .select("ship_id, agent_id, emoji, created_at")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error || !data) return [];
+  return data.map((row: { ship_id: string; agent_id: string; emoji: string | null; created_at: string }) => ({
+    ship_id: row.ship_id,
+    agent_id: row.agent_id,
+    emoji: row.emoji ?? null,
+    created_at: row.created_at,
+  }));
+}
+
+export async function getAcknowledgementsDetail(shipId: string): Promise<AcknowledgementDetail[]> {
+  const db = getDb();
+  if (!db) return [];
+  const { data, error } = await db
+    .from("acknowledgements")
+    .select("agent_id, emoji")
+    .eq("ship_id", shipId);
+  if (error || !data) return [];
+  return data.map((row: { agent_id: string; emoji: string | null }) => ({
+    agent_id: row.agent_id,
+    emoji: row.emoji ?? null,
+  }));
+}
+
+export async function addAcknowledgement(
+  shipId: string,
+  agentId: string,
+  emoji?: string | null
+): Promise<
+  { success: true; count: number } | { success: false; error: string }
+> {
+  const db = getDb();
+  if (!db) return { success: false, error: "Database not configured" };
+
+  // Check if already acknowledged this ship
+  const { data: existing } = await db
+    .from("acknowledgements")
+    .select("ship_id")
+    .eq("ship_id", shipId)
+    .eq("agent_id", agentId)
+    .maybeSingle();
+  if (existing)
+    return { success: false, error: "Already acknowledged this proof" };
+
+  // Rate limit: count this agent's acknowledgements in last 24h
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { count: dailyCount } = await db
+    .from("acknowledgements")
+    .select("*", { count: "exact", head: true })
+    .eq("agent_id", agentId)
+    .gte("created_at", since);
+  if ((dailyCount ?? 0) >= MAX_PER_AGENT_PER_DAY)
+    return {
+      success: false,
+      error: "Rate limit: max acknowledgements per day reached",
+    };
+
+  // Default to 🤝 if no emoji provided or empty string
+  const finalEmoji = emoji && emoji.trim() ? emoji.trim() : "🤝";
+  
+  await db.from("acknowledgements").insert({
+    ship_id: shipId,
+    agent_id: agentId,
+    emoji: finalEmoji,
+  });
+
+  const total = await getAcknowledgementsCount(shipId);
+  return { success: true, count: total };
+}
