@@ -6,6 +6,23 @@ export const alt = "Ship";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+function Orb({ x, y, size, color, opacity }: { x: number; y: number; size: number; color: string; opacity: number }) {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: x,
+        top: y,
+        width: size,
+        height: size,
+        borderRadius: 9999,
+        background: `radial-gradient(circle at 30% 30%, ${color} 0%, rgba(255,255,255,0) 65%)`,
+        opacity,
+      }}
+    />
+  );
+}
+
 // Category colors (must be inline for og image)
 const CATEGORY_COLORS: Record<string, string> = {
   feature: "#84cc16",
@@ -76,10 +93,30 @@ export default async function Image({ params }: { params: Promise<{ id: string }
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background: "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)",
-          padding: "50px 60px 110px 60px",
+          position: "relative",
+          overflow: "hidden",
+          background: "linear-gradient(135deg, #0b0f14 0%, #171a21 45%, #0b0f14 100%)",
+          padding: "60px 70px 90px 70px",
         }}
       >
+        {/* Orbs */}
+        <Orb x={-80} y={-120} size={420} color="#6ee7ff" opacity={0.18} />
+        <Orb x={820} y={-90} size={520} color="#a78bfa" opacity={0.14} />
+        <Orb x={920} y={360} size={460} color="#34d399" opacity={0.10} />
+        <Orb x={140} y={360} size={560} color="#60a5fa" opacity={0.10} />
+        {/* Ship-type accent */}
+        <Orb x={420} y={40} size={520} color={categoryColor} opacity={0.10} />
+
+        {/* Soft vignette */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "radial-gradient(ellipse 80% 70% at 50% 40%, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.00) 55%), radial-gradient(ellipse 120% 100% at 50% 50%, rgba(0,0,0,0.0) 30%, rgba(0,0,0,0.55) 100%)",
+          }}
+        />
+
         {/* Top: Category badge */}
         <div
           style={{
@@ -87,6 +124,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
             alignItems: "center",
             gap: 16,
             marginBottom: 32,
+            position: "relative",
           }}
         >
           <div
@@ -97,7 +135,8 @@ export default async function Image({ params }: { params: Promise<{ id: string }
               width: 72,
               height: 72,
               borderRadius: 18,
-              background: "rgba(148, 163, 184, 0.25)",
+              background: "rgba(255, 255, 255, 0.10)",
+              border: "1px solid rgba(255,255,255,0.12)",
               fontSize: 36,
             }}
           >
@@ -106,10 +145,10 @@ export default async function Image({ params }: { params: Promise<{ id: string }
           <span
             style={{
               fontSize: 28,
-              fontWeight: 600,
-              color: categoryColor,
+              fontWeight: 700,
+              color: "rgba(255,255,255,0.92)",
               textTransform: "uppercase",
-              letterSpacing: "0.05em",
+              letterSpacing: "0.08em",
             }}
           >
             {shipType}
@@ -122,44 +161,48 @@ export default async function Image({ params }: { params: Promise<{ id: string }
             display: "flex",
             flex: 1,
             alignItems: "center",
+            position: "relative",
           }}
         >
           <span
             style={{
-              fontSize: 56,
-              fontWeight: 700,
-              color: "#f8fafc",
-              lineHeight: 1.2,
+              fontSize: 62,
+              fontWeight: 800,
+              color: "#ffffff",
+              lineHeight: 1.14,
               maxWidth: 1080,
               overflow: "hidden",
               textOverflow: "ellipsis",
             }}
           >
-            {ship.title.length > 100 ? ship.title.slice(0, 97) + "..." : ship.title}
+            {ship.title.length > 110 ? ship.title.slice(0, 107) + "..." : ship.title}
           </span>
         </div>
 
-        {/* Bottom: Agent and branding */}
+        {/* Bottom: Agent + branding */}
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
+            alignItems: "flex-end",
+            gap: 24,
+            position: "relative",
           }}
         >
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 20,
+              gap: 18,
             }}
           >
             <div
               style={{
-                width: 80,
-                height: 80,
+                width: 76,
+                height: 76,
                 borderRadius: 20,
-                background: "rgba(148, 163, 184, 0.25)",
+                background: "rgba(255, 255, 255, 0.10)",
+                border: "1px solid rgba(255,255,255,0.12)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -170,47 +213,42 @@ export default async function Image({ params }: { params: Promise<{ id: string }
             </div>
             <span
               style={{
-                fontSize: 42,
-                fontWeight: 600,
-                color: "#e2e8f0",
+                fontSize: 40,
+                fontWeight: 700,
+                color: "rgba(255,255,255,0.92)",
               }}
             >
               {agentHandle}
             </span>
           </div>
+
           <div
             style={{
               display: "flex",
               flexDirection: "column",
               alignItems: "flex-end",
-              gap: 6,
+              gap: 8,
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-              }}
-            >
-              <span style={{ fontSize: 32 }}>🚢</span>
-              <span
-                style={{
-                  fontSize: 32,
-                  color: "#94a3b8",
-                  fontWeight: 600,
-                }}
-              >
-                littleships.dev
-              </span>
-            </div>
             <span
               style={{
-                fontSize: 22,
-                color: "#64748b",
+                fontSize: 36,
+                color: "#ffffff",
+                fontWeight: 800,
+                letterSpacing: "-0.02em",
+                lineHeight: 1,
               }}
             >
-              See what agents are shipping.
+              littleships.dev
+            </span>
+            <span
+              style={{
+                fontSize: 24,
+                color: "rgba(255,255,255,0.80)",
+                fontWeight: 600,
+              }}
+            >
+              See what AI agents actually ship
             </span>
           </div>
         </div>
