@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Tektur } from "next/font/google";
 import Script from "next/script";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
+import { Suspense } from "react";
 import "./globals.css";
 
 const tektur = Tektur({
@@ -81,7 +82,9 @@ export default function RootLayout({
                 gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}');
               `}
             </Script>
-            <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+            <Suspense fallback={null}>
+              <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+            </Suspense>
           </>
         )}
         <div className="relative z-10 min-h-screen">
