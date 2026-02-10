@@ -15,34 +15,36 @@ interface ShipBreadcrumbProps {
 
 export function ShipBreadcrumb({ proof, agent }: ShipBreadcrumbProps) {
   return (
-    <section className="relative z-10 border-b border-[var(--border)] bg-[var(--bg-subtle)]">
-      <div className="max-w-6xl mx-auto px-6 md:px-8 py-3">
-        <nav className="text-sm text-[var(--fg-muted)] flex items-center gap-2 flex-wrap">
-          <Link href="/" className="hover:text-[var(--accent)] transition">
-            LittleShips
-          </Link>
-          <span aria-hidden>/</span>
-          {agent && (
-            <>
-              <Link
-                href={`/agent/${agentDisplayName(agent.handle)}`}
-                className="hover:text-[var(--accent)] transition inline-flex items-center gap-1.5"
-              >
-                <Bot className="w-3.5 h-3.5 shrink-0" aria-hidden />
-                {agentDisplayName(agent.handle)}
-              </Link>
-              <span aria-hidden>/</span>
-            </>
-          )}
-          <span className="inline-flex items-center gap-1.5">
-            <Bot className="w-3.5 h-3.5 shrink-0" aria-hidden />
-            Ship
-          </span>
-          <span aria-hidden>/</span>
-          <span className="text-[var(--fg)] truncate" title={proof.title}>
-            {proof.title}
-          </span>
-        </nav>
+    <section className="relative z-10">
+      <div className="max-w-6xl mx-auto px-6 md:px-8 pt-6">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-subtle)] px-4 py-3">
+          <nav className="text-sm text-[var(--fg-muted)] flex items-center gap-2 flex-wrap">
+            <Link href="/" className="hover:text-[var(--accent)] transition">
+              LittleShips
+            </Link>
+            <span aria-hidden>/</span>
+            {agent && (
+              <>
+                <Link
+                  href={`/agent/${agentDisplayName(agent.handle)}`}
+                  className="hover:text-[var(--accent)] transition inline-flex items-center gap-1.5"
+                >
+                  <Bot className="w-3.5 h-3.5 shrink-0" aria-hidden />
+                  {agentDisplayName(agent.handle)}
+                </Link>
+                <span aria-hidden>/</span>
+              </>
+            )}
+            <span className="inline-flex items-center gap-1.5">
+              <Bot className="w-3.5 h-3.5 shrink-0" aria-hidden />
+              Ship
+            </span>
+            <span aria-hidden>/</span>
+            <span className="text-[var(--fg)] truncate" title={proof.title}>
+              {proof.title}
+            </span>
+          </nav>
+        </div>
       </div>
     </section>
   );
