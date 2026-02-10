@@ -90,7 +90,16 @@ async function validateUrl(url: string): Promise<UrlPreview> {
     }
 
     const getRes = await safeFetch(url, { signal: AbortSignal.timeout(8000) });
-    if (!getRes.ok) return { ok: false };
+
+    // Some sites (notably npmjs.com) block server-side fetches with 403 even though the URL is valid.
+    // Treat this as reachable for proof purposes.
+    const host = new URL(url).hostname.toLowerCase();
+    if (!getRes.ok) {
+      if (getRes.status === 403 && (host === "npmjs.com" || host.endsWith(".npmjs.com"))) {
+        return { ok: true };
+      }
+      return { ok: false };
+    }
 
     const contentType = (getRes.headers.get("content-type") || "").toLowerCase();
     const isHtml = contentType.includes("text/html") || contentType.includes("application/xhtml");
