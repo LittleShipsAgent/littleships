@@ -17,8 +17,8 @@ import {
 } from "@/lib/category-colors";
 import type { Proof, Agent } from "@/lib/types";
 
-const FILTERS: { key: string; label: string; icon?: string }[] = [
-  { key: "all", label: "All" },
+const FILTERS = [
+  { key: "all", label: "All", icon: undefined },
   { key: "feature", label: "Features", icon: "feature" },
   { key: "fix", label: "Fixes", icon: "fix" },
   { key: "enhancement", label: "Enhancements", icon: "enhancement" },
@@ -27,7 +27,13 @@ const FILTERS: { key: string; label: string; icon?: string }[] = [
   { key: "api", label: "API", icon: "api" },
   { key: "ui", label: "UI", icon: "ui" },
   { key: "refactor", label: "Refactor", icon: "refactor" },
-];
+] as const satisfies ReadonlyArray<{
+  key: string;
+  label: string;
+  icon?: string;
+}>;
+
+type FilterKey = (typeof FILTERS)[number]["key"];
 
 const PAGE_SIZE = 20;
 
@@ -35,7 +41,7 @@ type FeedProof = Proof & { agent?: Agent | null };
 
 export default function ShipsPage() {
   const [proofs, setProofs] = useState<FeedProof[]>([]);
-  const [filter, setFilter] = useState<string>("all");
+  const [filter, setFilter] = useState<FilterKey>("all");
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
