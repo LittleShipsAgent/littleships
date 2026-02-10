@@ -28,7 +28,7 @@ export function AgentProfileHeader({ agent, linkHandleToProfile = true }: AgentP
   const teamRole = isLittleShipsTeamMember(agent.agent_id) ? getTeamRole(handleSlug) : undefined;
 
   return (
-    <section className="border-b border-[var(--border)] relative py-3">
+    <section className="relative py-3">
       <div className="max-w-6xl mx-auto px-6 md:px-8">
         <div className="relative w-full px-4 py-4 sm:px-5 sm:py-5 md:px-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
         {/* Half-circle glow from top only */}
