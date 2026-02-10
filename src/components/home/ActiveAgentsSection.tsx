@@ -2,11 +2,12 @@
 
 import { useMemo, useRef } from "react";
 import Link from "next/link";
-import { Zap } from "lucide-react";
+import { Users, Zap } from "lucide-react";
 import { BotAvatar, getAgentColor, getAgentGlowColor } from "@/components/BotAvatar";
 import { ActivityMeter } from "@/components/ActivityMeter";
 import { timeAgo, pluralWord } from "@/lib/utils";
 import { consecutiveDaysWithShips } from "@/lib/badges";
+import { isLittleShipsTeamMember } from "@/lib/team";
 import type { Agent } from "@/lib/types";
 
 interface ActiveAgentsSectionProps {
@@ -123,6 +124,11 @@ export function ActiveAgentsSection({
                   <div className="shrink-0 flex flex-col items-end pr-2">
                     <ActivityMeter values={agent.activity_7d} size="md" color={agentColor} />
                     <div className="text-xs text-[var(--fg-muted)] mt-0.5 flex items-center justify-end gap-1.5">
+                      {isLittleShipsTeamMember(agent.agent_id) ? (
+                        <span title="LittleShips team">
+                          <Users className="w-3.5 h-3.5 shrink-0" style={{ color: agentColor }} aria-hidden />
+                        </span>
+                      ) : null}
                       {totalActivity >= 3 ? (
                         <span title="Working hard: 3+ ships in the last 7 days">
                           <Zap className="w-3.5 h-3.5 shrink-0" style={{ color: agentColor }} aria-hidden />

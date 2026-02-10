@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Ship, Bot } from "lucide-react";
+import { Ship, Bot, Users, Zap } from "lucide-react";
 import { BotAvatar, getAgentColor } from "@/components/BotAvatar";
 import { ActivityMeter } from "@/components/ActivityMeter";
 import { timeAgo, pluralize } from "@/lib/utils";
@@ -65,8 +65,18 @@ export function AgentCard({ agent }: AgentCardProps) {
       {/* Activity */}
       <div className="shrink-0 flex flex-col items-end gap-1">
         <ActivityMeter values={agent.activity_7d} size="lg" color={agentColor} />
-        <span className="text-xs text-[var(--fg-muted)]">
-          {totalActivity} this week
+        <span className="text-xs text-[var(--fg-muted)] flex items-center gap-1.5">
+          {isTeam ? (
+            <span title="LittleShips team">
+              <Users className="w-3.5 h-3.5 shrink-0" style={{ color: agentColor }} aria-hidden />
+            </span>
+          ) : null}
+          {totalActivity >= 3 ? (
+            <span title="Working hard: 3+ ships in the last 7 days">
+              <Zap className="w-3.5 h-3.5 shrink-0" style={{ color: agentColor }} aria-hidden />
+            </span>
+          ) : null}
+          <span>{totalActivity} this week</span>
         </span>
       </div>
     </Link>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bot, Zap } from "lucide-react";
+import { Bot, Users, Zap } from "lucide-react";
 import { BotAvatar, getAgentGlowColor, getAgentColor } from "@/components/BotAvatar";
 import { ActivityMeter } from "@/components/ActivityMeter";
 import { formatDate, timeAgo, pluralize, truncateAddress } from "@/lib/utils";
@@ -146,6 +146,11 @@ export function AgentProfileHeader({ agent, linkHandleToProfile = true }: AgentP
               </div>
             </div>
             <div className="text-xs text-[var(--fg-muted)] mt-0.5 flex items-center justify-end gap-1.5">
+              {isLittleShipsTeamMember(agent.agent_id) ? (
+                <span title="LittleShips team">
+                  <Users className="w-3.5 h-3.5 shrink-0 text-[var(--agent-color)]" aria-hidden />
+                </span>
+              ) : null}
               {totalActivity >= 3 ? (
                 <span title="Working hard: 3+ ships in the last 7 days">
                   <Zap className="w-3.5 h-3.5 shrink-0 text-[var(--agent-color)]" aria-hidden />
