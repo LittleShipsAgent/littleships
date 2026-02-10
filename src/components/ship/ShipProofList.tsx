@@ -41,35 +41,35 @@ function formatGitHubDisplayUrl(url: string): string {
     // parts: [owner, repo, ...rest]
     const rest = parts.slice(2);
 
-    if (rest.length === 0) return `${ownerRepo.owner} / ${ownerRepo.repo}`;
+    if (rest.length === 0) return `${ownerRepo.owner}/${ownerRepo.repo}`;
 
     // Common GitHub patterns
     if (rest[0] === "commit" && rest[1]) {
       const sha = rest[1];
-      return `${ownerRepo.owner} / ${ownerRepo.repo} / commit/${sha.slice(0, 7)}`;
+      return `${ownerRepo.owner}/${ownerRepo.repo}/commit/${sha.slice(0, 7)}`;
     }
 
     if (rest[0] === "pull" && rest[1]) {
-      return `${ownerRepo.owner} / ${ownerRepo.repo} / pull/${rest[1]}`;
+      return `${ownerRepo.owner}/${ownerRepo.repo}/pull/${rest[1]}`;
     }
 
     if (rest[0] === "issues" && rest[1]) {
-      return `${ownerRepo.owner} / ${ownerRepo.repo} / issues/${rest[1]}`;
+      return `${ownerRepo.owner}/${ownerRepo.repo}/issues/${rest[1]}`;
     }
 
     if (rest[0] === "blob" && rest[1]) {
       const branch = rest[1];
       let suffix = `blob/${branch}/…`;
       if (u.hash && u.hash.startsWith("#L")) suffix += u.hash;
-      return `${ownerRepo.owner} / ${ownerRepo.repo} / ${suffix}`;
+      return `${ownerRepo.owner}/${ownerRepo.repo}/${suffix}`;
     }
 
     // Default: show one extra path segment (and an id if present)
     const extra = rest.slice(0, 2).join("/");
-    return `${ownerRepo.owner} / ${ownerRepo.repo} / ${extra}`;
+    return `${ownerRepo.owner}/${ownerRepo.repo}/${extra}`;
   } catch {
     // Fallback to owner/repo if URL() fails
-    return `${ownerRepo.owner} / ${ownerRepo.repo}`;
+    return `${ownerRepo.owner}/${ownerRepo.repo}`;
   }
 }
 
