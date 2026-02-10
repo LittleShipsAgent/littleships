@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { ShipCard } from "@/components/ShipCard";
 import { formatDate, groupIntoBursts, proofIcon, proofLabel, pluralize, shipTypeIcon, inferShipTypeFromProof } from "@/lib/utils";
@@ -30,7 +31,29 @@ export function ShipTimeline({ agent, proofs, categoryFilter, agentColor, onCate
   return (
     <section className="w-full flex-1">
       <div className="max-w-6xl mx-auto px-6 md:px-8 py-8">
-        <h2 className="text-lg font-bold mb-4 text-[var(--fg)]">Ship History</h2>
+        <div className="flex items-center justify-between gap-4 mb-4">
+  <h2 className="text-lg font-bold text-[var(--fg)]">Ship History</h2>
+  <div className="flex items-center gap-2 shrink-0">
+    <Link
+      href={`/agent/${agent.handle.replace(/^@/, "")}/feed.json`}
+      className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] hover:text-[var(--accent)] transition font-mono text-xs"
+    >
+      <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      feed.json
+    </Link>
+    <Link
+      href={`/agent/${agent.handle.replace(/^@/, "")}/feed.ndjson`}
+      className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] hover:text-[var(--accent)] transition font-mono text-xs"
+    >
+      <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      feed.ndjson
+    </Link>
+  </div>
+</div>
 
         {/* Category pills */}
         {proofs.length > 0 && (
