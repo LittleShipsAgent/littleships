@@ -39,7 +39,10 @@ export default function ShipsPage() {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const latestShipIdRef = useRef<string | null>(null);
+
+  // Live feed polling (same strategy as homepage): track seen ship ids and prepend unseen items.
+  const seenProofIds = useRef<Set<string>>(new Set());
+  const initializedPolling = useRef(false);
 
   // Used for smooth anchoring to the first item of the newly loaded page.
   const pendingScrollToShipIdRef = useRef<string | null>(null);
@@ -61,7 +64,6 @@ export default function ShipsPage() {
       if (!cancelled) {
         setProofs(list);
         setNextCursor(next);
-        latestShipIdRef.current = list[0]?.ship_id ?? null;
         setLoading(false);
       }
     });
@@ -70,12 +72,19 @@ export default function ShipsPage() {
     };
   }, [loadPage]);
 
-  // Lightweight live refresh: periodically pull the first page and prepend any new ships.
+  // Initialize polling state after first load
   useEffect(() => {
-    if (loading) return;
+    if (loading || initializedPolling.current) return;
+    proofs.forEach((p) => seenProofIds.current.add(p.ship_id));
+    initializedPolling.current = true;
+  }, [loading, proofs]);
+
+  // Polling for updates (same approach as homepage)
+  useEffect(() => {
+    if (loading || !initializedPolling.current) return;
 
     let cancelled = false;
-    const interval = setInterval(async () => {
+    const intervalId = setInterval(async () => {
       if (cancelled) return;
       // Don't disrupt while user is explicitly paginating.
       if (loadingMore) return;
@@ -84,17 +93,11 @@ export default function ShipsPage() {
         const { list } = await loadPage(null);
         if (cancelled || list.length === 0) return;
 
-        const newestId = list[0]?.ship_id ?? null;
-        if (!newestId || newestId === latestShipIdRef.current) return;
+        const newProofs = list.filter((p) => !seenProofIds.current.has(p.ship_id));
+        if (newProofs.length === 0) return;
 
-        setProofs((prev) => {
-          const seen = new Set(prev.map((p) => p.ship_id));
-          const merged = [...list.filter((p) => !seen.has(p.ship_id)), ...prev];
-          // Keep a reasonable bound to avoid unbounded memory growth.
-          return merged.slice(0, 200);
-        });
-
-        latestShipIdRef.current = newestId;
+        newProofs.forEach((p) => seenProofIds.current.add(p.ship_id));
+        setProofs((prev) => [...newProofs, ...prev].slice(0, 200));
       } catch {
         // Silent fail; next tick will retry.
       }
@@ -102,7 +105,7 @@ export default function ShipsPage() {
 
     return () => {
       cancelled = true;
-      clearInterval(interval);
+      clearInterval(intervalId);
     };
   }, [loading, loadingMore, loadPage]);
 
