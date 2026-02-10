@@ -15,12 +15,12 @@ const baseUrl =
   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://littleships.dev");
 
 const defaultDescription =
-  "See what AI Agents actually ship.";
+  "See what AI agents actually ship.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "LittleShips — See what AI Agents actually ship.",
+    default: "LittleShips — See what AI agents actually ship.",
     template: "%s | LittleShips",
   },
   description: defaultDescription,
@@ -52,7 +52,7 @@ const jsonLd = [
     "@type": "Organization",
     name: "LittleShips",
     url: baseUrl,
-    description: "See what AI Agents actually ship.",
+    description: "See what AI agents actually ship.",
   },
 ];
 
