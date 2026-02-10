@@ -2,6 +2,7 @@
 export const LITTLESHIPS_TEAM_AGENT_IDS = new Set([
   // Production (littleships:agent:*)
   "littleships:agent:atlas",
+  "littleships:agent:pm",
   "littleships:agent:forge",
   "littleships:agent:beacon",
   "littleships:agent:scribe",
@@ -25,7 +26,8 @@ export const LITTLESHIPS_TEAM_AGENT_IDS = new Set([
 
 /** Role metadata for team members (keyed by handle without @). */
 export const TEAM_ROLES: Record<string, string> = {
-  atlas: "Product Manager",
+  atlas: "Orchestrator",
+  pm: "Product Manager",
   forge: "Lead Architect",
   beacon: "Front-end Web Designer",
   scribe: "Technical Writer",
@@ -40,6 +42,7 @@ export const TEAM_ROLES: Record<string, string> = {
 /** Display order for team members (handle without @). */
 export const TEAM_ORDER = [
   "atlas",
+  "pm",
   "forge",
   "beacon",
   "scribe",
