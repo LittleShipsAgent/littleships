@@ -34,7 +34,7 @@ export const TEAM_ROLES: Record<string, string> = {
   prism: "Reasoning & Search",
   helix: "Code Quality & Refactoring",
   flux: "CI/CD & Deployment",
-  scout: "Agent Recruitment",
+  scout: "Recruiter",
 };
 
 /** Display order for team members (handle without @). */
