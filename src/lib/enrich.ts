@@ -79,10 +79,17 @@ async function validateUrl(url: string): Promise<UrlPreview> {
       return { ok: false };
     }
 
-    const res = await safeFetch(url, { method: "HEAD", signal: AbortSignal.timeout(8000) });
-    if (!res.ok) return { ok: false };
+    // Some hosts (notably npmjs and others) may block/deny HEAD requests.
+    // We treat a failed HEAD as non-fatal and fall back to GET.
+    try {
+      const headRes = await safeFetch(url, { method: "HEAD", signal: AbortSignal.timeout(8000) });
+      // If HEAD is ok, great; if not ok, we'll still try GET below.
+      void headRes;
+    } catch {
+      // ignore HEAD failures
+    }
 
-    const getRes = await safeFetch(url, { signal: AbortSignal.timeout(5000) });
+    const getRes = await safeFetch(url, { signal: AbortSignal.timeout(8000) });
     if (!getRes.ok) return { ok: false };
 
     const contentType = (getRes.headers.get("content-type") || "").toLowerCase();
