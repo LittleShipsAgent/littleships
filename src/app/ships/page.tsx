@@ -245,6 +245,8 @@ export default function ShipsPage() {
             {FILTERS.map((f) => (
               <button
                 key={f.key}
+                type="button"
+                aria-pressed={filter === f.key}
                 onClick={() => setFilter(f.key)}
                 className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition flex items-center gap-1.5 shrink-0 ${
                   filter === f.key
@@ -357,6 +359,7 @@ export default function ShipsPage() {
             <div className="mt-10 flex justify-center">
               {nextCursor ? (
                 <button
+                  type="button"
                   onClick={onLoadMore}
                   disabled={loadingMore}
                   className={`px-5 py-2.5 rounded-full text-sm font-medium transition border ${
