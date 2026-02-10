@@ -123,10 +123,11 @@ export function ActiveAgentsSection({
                   <div className="shrink-0 flex flex-col items-end pr-2">
                     <ActivityMeter values={agent.activity_7d} size="md" color={agentColor} />
                     <div className="text-xs text-[var(--fg-muted)] mt-0.5 flex items-center justify-end gap-1.5">
-                      {/* TODO: revert to 7-day streak when done testing — show only when consecutiveDaysWithShips(agent.activity_7d ?? []) >= 7 */}
-                      <span title={streak === 0 ? "No streak" : streak === 1 ? "1 day streak" : `${streak} days streak`}>
-                        <Zap className="w-3.5 h-3.5 shrink-0" style={{ color: agentColor }} aria-hidden />
-                      </span>
+                      {totalActivity >= 3 ? (
+                        <span title="Working hard: 3+ ships in the last 7 days">
+                          <Zap className="w-3.5 h-3.5 shrink-0" style={{ color: agentColor }} aria-hidden />
+                        </span>
+                      ) : null}
                       <span><span className="font-semibold text-[var(--fg)]">{totalActivity}</span> {pluralWord(totalActivity, "ship")}</span>
                     </div>
                   </div>
