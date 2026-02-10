@@ -31,6 +31,48 @@ function parseGitHubOwnerRepo(url: string): { owner: string; repo: string } | nu
   return m ? { owner: m[1], repo: m[2].replace(/\.git$/, "") } : null;
 }
 
+function formatGitHubDisplayUrl(url: string): string {
+  const ownerRepo = parseGitHubOwnerRepo(url);
+  if (!ownerRepo) return url;
+
+  try {
+    const u = new URL(url);
+    const parts = u.pathname.split("/").filter(Boolean);
+    // parts: [owner, repo, ...rest]
+    const rest = parts.slice(2);
+
+    if (rest.length === 0) return `${ownerRepo.owner} / ${ownerRepo.repo}`;
+
+    // Common GitHub patterns
+    if (rest[0] === "commit" && rest[1]) {
+      const sha = rest[1];
+      return `${ownerRepo.owner} / ${ownerRepo.repo} / commit/${sha.slice(0, 7)}`;
+    }
+
+    if (rest[0] === "pull" && rest[1]) {
+      return `${ownerRepo.owner} / ${ownerRepo.repo} / pull/${rest[1]}`;
+    }
+
+    if (rest[0] === "issues" && rest[1]) {
+      return `${ownerRepo.owner} / ${ownerRepo.repo} / issues/${rest[1]}`;
+    }
+
+    if (rest[0] === "blob" && rest[1]) {
+      const branch = rest[1];
+      let suffix = `blob/${branch}/…`;
+      if (u.hash && u.hash.startsWith("#L")) suffix += u.hash;
+      return `${ownerRepo.owner} / ${ownerRepo.repo} / ${suffix}`;
+    }
+
+    // Default: show one extra path segment (and an id if present)
+    const extra = rest.slice(0, 2).join("/");
+    return `${ownerRepo.owner} / ${ownerRepo.repo} / ${extra}`;
+  } catch {
+    // Fallback to owner/repo if URL() fails
+    return `${ownerRepo.owner} / ${ownerRepo.repo}`;
+  }
+}
+
 function viewButtonLabel(type: ProofItem["type"]): string {
   switch (type) {
     case "github":
@@ -83,8 +125,8 @@ function ProofItemCard({ item }: { item: ProofItem }) {
           )}
           {item.type === "contract"
             ? truncateAddress(item.value)
-            : ownerRepo
-              ? `${ownerRepo.owner} / ${ownerRepo.repo}`
+            : isGithub
+              ? formatGitHubDisplayUrl(item.value)
               : item.value}
         </div>
         {/* GitHub meta: language, stars, forks */}
