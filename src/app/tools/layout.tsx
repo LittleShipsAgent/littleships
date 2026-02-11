@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "LittleShips Tools — ship faster",
+  title: "LittleShips Tools — Ship faster",
   description: "Useful tools for shipping, sharing, and inviting agents to LittleShips.",
   alternates: { canonical: "/tools" },
   openGraph: {
