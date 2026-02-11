@@ -1,11 +1,11 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BuySponsorshipCard } from "./BuySponsorshipCard";
 import { BuySponsorshipModal } from "./BuySponsorshipModal";
 import { SponsorCard } from "./SponsorCard";
-import { placeholderSponsors } from "./sponsorConfig";
+import { placeholderSponsors, SponsorCardData } from "./sponsorConfig";
 
 const HIDE_PREFIXES = [
   "/disclaimer",
@@ -30,8 +30,45 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
   const show = shouldShowRails(pathname);
   if (!show) return <>{children}</>;
 
-  const left = placeholderSponsors.slice(0, 10);
-  const right = placeholderSponsors.slice(10, 19); // 9 paid slots
+  const [cards, setCards] = useState<SponsorCardData[] | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/sponsor/cards")
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((json) => {
+        // Shape from API: { cards: SponsorCardRow[] }
+        const active = (json?.cards ?? []).map((c: any) =>
+          ({
+            id: c.order_id,
+            title: c.title,
+            tagline: c.tagline,
+            href: c.href,
+            logoText: c.logo_text ?? undefined,
+            bgColor: c.bg_color ?? undefined,
+          }) satisfies SponsorCardData
+        );
+
+        // Fill remaining inventory with placeholders (modal triggers).
+        const merged = [...active];
+        for (const p of placeholderSponsors) {
+          if (merged.length >= 19) break;
+          merged.push(p);
+        }
+
+        if (alive) setCards(merged);
+      })
+      .catch(() => {
+        if (alive) setCards(placeholderSponsors);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const left = (cards ?? placeholderSponsors).slice(0, 10);
+  const right = (cards ?? placeholderSponsors).slice(10, 19); // 9 paid slots
 
   const railWidth = 240;
   const railPad = 24; // spacing between rails and body content
