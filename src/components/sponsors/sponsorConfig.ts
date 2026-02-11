@@ -2,7 +2,8 @@ export type SponsorCardData = {
   id: string;
   title: string;
   tagline: string;
-  href: string;
+  href?: string;
+  onClickAction?: "open-buy-modal";
   logoText?: string; // v0 placeholder: initials or short text
   bgColor?: string; // future: curated palette token
 };
@@ -12,6 +13,6 @@ export const placeholderSponsors: SponsorCardData[] = Array.from({ length: 19 })
   id: `placeholder-${i + 1}`,
   title: "Available",
   tagline: "Click to advertise",
-  href: "/sponsor",
+  onClickAction: "open-buy-modal",
   // logo rendered by SponsorCard fallback (icon)
 }));

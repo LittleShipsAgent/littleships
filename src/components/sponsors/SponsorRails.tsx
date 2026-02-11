@@ -1,7 +1,9 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { BuySponsorshipCard } from "./BuySponsorshipCard";
+import { BuySponsorshipModal } from "./BuySponsorshipModal";
 import { SponsorCard } from "./SponsorCard";
 import { placeholderSponsors } from "./sponsorConfig";
 
@@ -35,6 +37,8 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
   const railPad = 24; // spacing between rails and body content
   // Note: body padding is applied only at lg+ via Tailwind arbitrary values.
 
+  const [open, setOpen] = useState(false);
+
   return (
     <>
       {/* Fixed rails (desktop/tablet). Content should never be squashed. */}
@@ -45,7 +49,7 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
         >
           <div className="flex h-full w-[240px] flex-col gap-3">
             {left.map((s) => (
-              <SponsorCard key={s.id} data={s} />
+              <SponsorCard key={s.id} data={s} onOpenBuyModal={() => setOpen(true)} />
             ))}
           </div>
         </div>
@@ -58,10 +62,10 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
         >
           <div className="flex h-full w-[240px] flex-col gap-3">
             {right.map((s) => (
-              <SponsorCard key={s.id} data={s} />
+              <SponsorCard key={s.id} data={s} onOpenBuyModal={() => setOpen(true)} />
             ))}
             <div className="mt-auto">
-              <BuySponsorshipCard />
+              <BuySponsorshipCard onOpen={() => setOpen(true)} />
             </div>
           </div>
         </div>
@@ -71,6 +75,9 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
       <div className="w-full px-4 lg:px-8 lg:pl-[264px] lg:pr-[264px]">
         <div className="min-w-0">{children}</div>
       </div>
+
+      {/* Single modal instance, shared across all rail modules */}
+      <BuySponsorshipModal open={open} onClose={() => setOpen(false)} />
     </>
   );
 }
