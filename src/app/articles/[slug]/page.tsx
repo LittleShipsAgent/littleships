@@ -72,7 +72,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   if (!article) notFound();
 
   const AUTHOR_HANDLE_ALIASES: Record<string, string> = {
-    Signal: "@pm",
+    Signal: "@signal",
   };
 
   const authorHandleCandidate = article.author_display
