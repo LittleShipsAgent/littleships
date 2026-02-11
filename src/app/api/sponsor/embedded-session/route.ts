@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getStripe, getStripePublishableKey } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 
 // Create an Embedded Checkout session (no redirect to stripe.com).
 // Client uses the returned client_secret with <EmbeddedCheckoutProvider />.
@@ -19,11 +19,6 @@ function computePriceCents(slotsSold: number): number {
 export async function POST(req: Request) {
   const stripe = getStripe();
   const body = (await req.json().catch(() => ({}))) as { returnUrl?: string };
-
-  const pk = getStripePublishableKey();
-  if (!pk) {
-    return new NextResponse("Missing NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY", { status: 500 });
-  }
 
   const slotsSold = getSlotsSold();
   const priceCents = computePriceCents(slotsSold);
@@ -60,6 +55,5 @@ export async function POST(req: Request) {
   return NextResponse.json({
     sessionId: session.id,
     clientSecret: session.client_secret,
-    publishableKey: pk,
   });
 }

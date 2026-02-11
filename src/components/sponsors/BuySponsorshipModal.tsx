@@ -3,8 +3,10 @@
 import { loadStripe } from "@stripe/stripe-js";
 import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
 import { Megaphone } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { SponsorSetupForm } from "./SponsorSetupForm";
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 function Modal({ open, onClose, children }: { open: boolean; onClose: () => void; children: React.ReactNode }) {
   if (!open) return null;
@@ -35,12 +37,6 @@ type Step = "pitch" | "checkout" | "success";
 export function BuySponsorshipModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [step, setStep] = useState<Step>("pitch");
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [publishableKey, setPublishableKey] = useState<string | null>(null);
-
-  const stripePromise = useMemo(() => {
-    if (!publishableKey) return null;
-    return loadStripe(publishableKey);
-  }, [publishableKey]);
 
   const fetchClientSecret = useCallback(async () => {
     const returnUrl = window.location.origin + window.location.pathname;
@@ -58,11 +54,9 @@ export function BuySponsorshipModal({ open, onClose }: { open: boolean; onClose:
     const data = (await res.json()) as {
       sessionId?: string;
       clientSecret?: string;
-      publishableKey?: string;
     };
 
     if (data.sessionId) setSessionId(data.sessionId);
-    if (data.publishableKey) setPublishableKey(data.publishableKey);
 
     return data.clientSecret || "";
   }, []);
@@ -96,21 +90,15 @@ export function BuySponsorshipModal({ open, onClose }: { open: boolean; onClose:
             <p className="mt-2 text-sm text-[var(--fg-muted)]">Complete payment below to reserve a sponsor spot.</p>
 
             <div className="mt-6 w-full">
-              {stripePromise ? (
-                <EmbeddedCheckoutProvider
-                  stripe={stripePromise}
-                  options={{
-                    fetchClientSecret,
-                    onComplete: () => setStep("success"),
-                  }}
-                >
-                  <EmbeddedCheckout />
-                </EmbeddedCheckoutProvider>
-              ) : (
-                <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 text-sm text-[var(--fg-muted)]">
-                  Loading…
-                </div>
-              )}
+              <EmbeddedCheckoutProvider
+                stripe={stripePromise}
+                options={{
+                  fetchClientSecret,
+                  onComplete: () => setStep("success"),
+                }}
+              >
+                <EmbeddedCheckout />
+              </EmbeddedCheckoutProvider>
             </div>
           </>
         ) : (
