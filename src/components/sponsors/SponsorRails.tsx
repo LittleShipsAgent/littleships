@@ -31,21 +31,31 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
   const left = placeholderSponsors.slice(0, 10);
   const right = placeholderSponsors.slice(10, 19); // 9 paid slots
 
+  const railWidth = 240;
+  const railPad = 24; // spacing between rails and body content
+
   return (
-    <div className="mx-auto w-full max-w-7xl px-4">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[240px_minmax(0,1fr)_240px]">
-        <aside className="hidden lg:block">
-          <div className="sticky top-6 flex h-[calc(100vh-3rem)] flex-col gap-3">
+    <>
+      {/* Fixed rails (desktop/tablet). Content should never be squashed. */}
+      <aside className="hidden lg:block">
+        <div
+          className="fixed left-0 top-0 z-40 h-screen px-3 py-6"
+          style={{ width: railWidth + railPad }}
+        >
+          <div className="flex h-full w-[240px] flex-col gap-3">
             {left.map((s) => (
               <SponsorCard key={s.id} data={s} />
             ))}
           </div>
-        </aside>
+        </div>
+      </aside>
 
-        <main className="min-w-0">{children}</main>
-
-        <aside className="hidden lg:block">
-          <div className="sticky top-6 flex h-[calc(100vh-3rem)] flex-col gap-3">
+      <aside className="hidden lg:block">
+        <div
+          className="fixed right-0 top-0 z-40 h-screen px-3 py-6"
+          style={{ width: railWidth + railPad }}
+        >
+          <div className="flex h-full w-[240px] flex-col gap-3">
             {right.map((s) => (
               <SponsorCard key={s.id} data={s} />
             ))}
@@ -53,8 +63,19 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
               <BuySponsorshipCard />
             </div>
           </div>
-        </aside>
+        </div>
+      </aside>
+
+      {/* Body content */}
+      <div
+        className="mx-auto w-full max-w-7xl px-4"
+        style={{
+          paddingLeft: railWidth + railPad,
+          paddingRight: railWidth + railPad,
+        }}
+      >
+        <div className="min-w-0">{children}</div>
       </div>
-    </div>
+    </>
   );
 }
