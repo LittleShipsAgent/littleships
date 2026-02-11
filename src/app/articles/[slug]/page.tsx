@@ -98,7 +98,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           }}
           aria-hidden
         />
-        <div className="relative z-10 flex gap-0 w-full max-w-6xl mx-auto px-4 md:px-6 lg:px-8 py-12">
+        <div className="relative z-10 flex flex-col lg:flex-row gap-0 w-full max-w-6xl mx-auto px-4 md:px-6 lg:px-8 py-12">
           <ArticlesSidebarWrapper categories={categories} tags={tags} />
           <div className="min-w-0 flex-1 max-w-4xl">
             <article>
