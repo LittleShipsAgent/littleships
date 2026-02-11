@@ -81,12 +81,21 @@ export function BuySponsorshipCard() {
           </ul>
 
           <div className="mt-6 w-full">
-            <a
-              href="/sponsor"
+            <button
+              type="button"
+              onClick={async () => {
+                const res = await fetch("/api/sponsor/checkout", {
+                  method: "POST",
+                  headers: { "content-type": "application/json" },
+                  body: JSON.stringify({}),
+                });
+                const data = (await res.json().catch(() => ({}))) as { url?: string };
+                if (data.url) window.location.href = data.url;
+              }}
               className="block w-full rounded-xl bg-[var(--fg)] px-4 py-3 text-center text-sm font-semibold text-black hover:opacity-90"
             >
               Continue to checkout
-            </a>
+            </button>
             <p className="mt-3 text-xs text-[var(--fg-subtle)]">
               You’ll be charged today. Your sponsorship goes live after approval (typically within 1 business day). If we can’t approve it, we’ll refund.
             </p>
