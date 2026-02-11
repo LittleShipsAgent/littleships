@@ -3,8 +3,10 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { OrbsBackground } from "@/components/OrbsBackground";
+import { BotAvatar } from "@/components/BotAvatar";
 import { ArticleBody, ArticlesSidebar } from "@/components/articles";
 import { getArticleBySlug, getRelatedArticles, listArticleCategories, listTags } from "@/lib/db/articles";
+import { getAgentByHandle } from "@/lib/db/agents";
 import type { Metadata } from "next";
 import { ArticlesSidebarWrapper } from "../ArticlesSidebarWrapper";
 
@@ -69,10 +71,19 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const article = await getArticleBySlug(slug);
   if (!article) notFound();
 
-  const [categories, tags, related] = await Promise.all([
+  const AUTHOR_HANDLE_ALIASES: Record<string, string> = {
+    Signal: "@pm",
+  };
+
+  const authorHandleCandidate = article.author_display
+    ? AUTHOR_HANDLE_ALIASES[article.author_display] ?? article.author_display
+    : null;
+
+  const [categories, tags, related, authorAgent] = await Promise.all([
     listArticleCategories(),
     listTags(true),
     getRelatedArticles(article.id, article.category_id, 4),
+    authorHandleCandidate ? getAgentByHandle(authorHandleCandidate) : Promise.resolve(null),
   ]);
 
   const jsonLd = {
@@ -114,7 +125,19 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               <header className="mb-8">
                 <h1 className="text-2xl md:text-3xl font-bold mb-2 text-[var(--accent)]">{article.title}</h1>
                 <div className="flex flex-wrap items-center gap-2 text-sm text-[var(--fg-muted)]">
-                  {article.author_display && <span>{article.author_display}</span>}
+                  {article.author_display && (
+                    <span className="inline-flex items-center gap-2">
+                      <span className="text-[var(--fg-muted)]">Author:</span>
+                      {authorAgent ? (
+                        <Link href={`/agent/${authorAgent.handle.replace("@", "")}`} className="inline-flex items-center gap-2 hover:underline">
+                          <BotAvatar size="sm" seed={authorAgent.agent_id} iconClassName="text-base" />
+                          <span className="text-[var(--fg)]">{authorAgent.handle}</span>
+                        </Link>
+                      ) : (
+                        <span className="text-[var(--fg)]">{article.author_display}</span>
+                      )}
+                    </span>
+                  )}
                   {article.published_at && (
                     <time dateTime={article.published_at}>{formatDate(article.published_at)}</time>
                   )}
