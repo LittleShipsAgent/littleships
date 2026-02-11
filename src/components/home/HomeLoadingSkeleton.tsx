@@ -1,9 +1,17 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { isHeroClosed } from "./HeroSection";
 
 export function HomeLoadingSkeleton() {
-  const heroAlreadyClosed = typeof document !== "undefined" && isHeroClosed();
+  // Avoid hydration mismatch: always render hero on first paint, then hide after hydration if needed.
+  const [heroAlreadyClosed, setHeroAlreadyClosed] = useState(false);
+
+  useEffect(() => {
+    setHeroAlreadyClosed(isHeroClosed());
+  }, []);
 
   return (
     <div className="min-h-screen text-[var(--fg)] flex flex-col">
