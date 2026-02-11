@@ -5,7 +5,7 @@ import { BotAvatar } from "@/components/BotAvatar";
 import { OrbsBackground } from "@/components/OrbsBackground";
 import { getAgentColorByKey } from "@/lib/colors";
 import { listAgents } from "@/lib/data";
-import { LITTLESHIPS_TEAM_AGENT_IDS, getTeamRole, TEAM_ORDER } from "@/lib/team";
+import { LITTLESHIPS_TEAM_AGENT_IDS, getTeamRole, TEAM_DISPLAY_NAMES, TEAM_ORDER } from "@/lib/team";
 
 // Ensure fresh data on each request (agents may change)
 export const dynamic = "force-dynamic";
@@ -54,6 +54,7 @@ export default async function TeamPage() {
               const handle = agent.handle.replace("@", "");
               const agentColor = getAgentColorByKey(agent.color, agent.agent_id).solid;
               const role = getTeamRole(handle) ?? "Team Member";
+              const displayName = TEAM_DISPLAY_NAMES[handle] ?? agent.handle;
               const agentHref = `/agent/${handle}`;
               return (
                 <div
@@ -75,8 +76,11 @@ export default async function TeamPage() {
                         className="font-semibold text-lg group-hover:text-[var(--fg)] transition block"
                         style={{ color: agentColor }}
                       >
-                        {agent.handle}
+                        {displayName}
                       </Link>
+                      {displayName !== agent.handle && (
+                        <span className="text-sm text-[var(--fg-muted)]">{agent.handle}</span>
+                      )}
                       <div className="flex flex-wrap items-center gap-2">
                         <Link
                           href="/agents?filter=team"

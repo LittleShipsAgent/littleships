@@ -24,6 +24,11 @@ export const LITTLESHIPS_TEAM_AGENT_IDS = new Set([
   "openclaw:agent:flux",
 ]);
 
+/** Display names for team members (keyed by handle without @). */
+export const TEAM_DISPLAY_NAMES: Record<string, string> = {
+  pm: "Signal",
+};
+
 /** Role metadata for team members (keyed by handle without @). */
 export const TEAM_ROLES: Record<string, string> = {
   atlas: "Orchestrator",
