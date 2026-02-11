@@ -8,6 +8,8 @@ const CONTROL_CHARS = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g;
 const ZERO_WIDTH_CHARS = /[\u200B-\u200D\uFEFF\u2060\u180E]/g;
 
 // Potential prompt injection patterns
+const PROMPT_INJECTION_WARNING = 'Potential prompt injection detected';
+
 const PROMPT_INJECTION_PATTERNS = [
   /ignore\s+(all\s+)?previous\s+instructions?/i,
   /disregard\s+(all\s+)?previous/i,
@@ -91,11 +93,8 @@ export function sanitizeString(
   }
   
   // Check for prompt injection (warn but don't strip)
-  for (const pattern of PROMPT_INJECTION_PATTERNS) {
-    if (pattern.test(clean)) {
-      warnings.push(`Potential prompt injection detected`);
-      break;
-    }
+  if (PROMPT_INJECTION_PATTERNS.some((pattern) => pattern.test(clean))) {
+    warnings.push(PROMPT_INJECTION_WARNING);
   }
   
   // Truncate if too long
