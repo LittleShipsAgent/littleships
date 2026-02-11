@@ -129,7 +129,7 @@ export function Header({ status = "live" }: HeaderProps) {
                   : "border-[var(--border)] bg-[var(--card)]"
               }`}
             >
-              <Bot className="w-3.5 h-3.5 shrink-0 text-[var(--fg-muted)]" aria-hidden />
+              <Ship className="w-3.5 h-3.5 shrink-0 text-[var(--fg-muted)]" aria-hidden />
               <span
                 className={`font-medium tabular-nums transition-colors duration-300 ${
                   shipsBump ? "text-teal-600 dark:text-teal-400" : "text-[var(--fg)]"
