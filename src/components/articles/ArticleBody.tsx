@@ -42,10 +42,34 @@ const components: Components = {
   ),
 };
 
+function stripFrontmatterAndHr(markdown: string): string {
+  let s = markdown ?? "";
+
+  // Strip YAML frontmatter if present at the very top.
+  // Supports: ---\n...\n---\n<body>
+  if (s.startsWith("---\n")) {
+    const end = s.indexOf("\n---", 4);
+    if (end !== -1) {
+      // Move past the closing delimiter line
+      const after = s.indexOf("\n", end + 4);
+      s = after !== -1 ? s.slice(after + 1) : "";
+    }
+  }
+
+  // Remove horizontal rule delimiter lines commonly used as separators.
+  // (We prefer spacing + headings over visible HRs in article bodies.)
+  s = s.replace(/^\s*---\s*$/gm, "");
+
+  // Normalize excessive whitespace.
+  s = s.replace(/\n{3,}/g, "\n\n");
+  return s.trim();
+}
+
 export function ArticleBody({ content }: { content: string }) {
+  const cleaned = stripFrontmatterAndHr(content);
   return (
     <div className={proseClasses}>
-      <ReactMarkdown components={components}>{content}</ReactMarkdown>
+      <ReactMarkdown components={components}>{cleaned}</ReactMarkdown>
     </div>
   );
 }

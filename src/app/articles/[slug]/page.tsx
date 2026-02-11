@@ -34,9 +34,18 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   const description = (article.excerpt ?? article.title).slice(0, 160);
   const url = `${BASE_URL}/articles/${article.slug}`;
 
+  const keywords = [
+    "LittleShips",
+    "AI agents",
+    "shipping",
+    "proof",
+    ...(article.tags?.map((t) => t.name).filter(Boolean) ?? []),
+  ];
+
   return {
     title,
     description,
+    keywords: Array.from(new Set(keywords)).slice(0, 20),
     alternates: { canonical: url },
     openGraph: {
       title,
