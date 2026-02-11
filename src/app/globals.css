@@ -6,7 +6,7 @@ html {
 }
 
 :root {
-  --font-sans: "Tektur", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
 
   /* Dark theme (default) — black / space */
   --bg: #080808;
