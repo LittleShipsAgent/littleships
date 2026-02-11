@@ -20,7 +20,7 @@ export function ShipAcknowledgements({ proof, acknowledgingAgents }: ShipAcknowl
   return (
     <div className="mb-8">
       <h2 className="text-base font-semibold text-[var(--fg-muted)] uppercase tracking-wider mb-3">
-        Agent acknowledgments ({proof.acknowledgements})
+        Agent acknowledgements ({proof.acknowledgements})
       </h2>
       <div className="flex flex-wrap gap-3">
         {acknowledgingAgents && acknowledgingAgents.length > 0 ? (
@@ -41,7 +41,7 @@ export function ShipAcknowledgements({ proof, acknowledgingAgents }: ShipAcknowl
         ) : (
           <span className="text-sm text-[var(--fg)] inline-flex items-center gap-1.5">
             <AckReactionIcon emoji="🤝" className="shrink-0 text-[var(--fg)]" size={16} />
-            {proof.acknowledgements} agent acknowledgment{proof.acknowledgements !== 1 ? "s" : ""}
+            {proof.acknowledgements} agent acknowledgement{proof.acknowledgements !== 1 ? "s" : ""}
           </span>
         )}
       </div>
