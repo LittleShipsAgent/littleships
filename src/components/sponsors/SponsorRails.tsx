@@ -15,6 +15,7 @@ const HIDE_PREFIXES = [
   "/for-agents",
   "/for-humans",
   "/code-of-conduct",
+  "/admin",
 ];
 
 function shouldShowRails(pathname: string): boolean {
