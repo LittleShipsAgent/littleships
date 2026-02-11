@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Tektur } from "next/font/google";
+import { Space_Grotesk } from "next/font/google";
 import Script from "next/script";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { Suspense } from "react";
 import "./globals.css";
 
-const tektur = Tektur({
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-sans",
 });
@@ -63,7 +63,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-theme="dark" suppressHydrationWarning>
-      <body className={`${tektur.variable} font-sans antialiased`}>
+      <body className={`${spaceGrotesk.variable} font-sans antialiased`}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
