@@ -24,6 +24,8 @@ export async function POST(req: Request) {
 
   // Create a monthly subscription Checkout Session with an ad-hoc price.
   // This keeps the pricing ladder server-authoritative.
+  const returnBase = body.returnUrl ?? process.env.NEXT_PUBLIC_APP_URL ?? "https://littleships.dev";
+
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     line_items: [
@@ -40,8 +42,9 @@ export async function POST(req: Request) {
         },
       },
     ],
-    success_url: `${body.returnUrl ?? process.env.NEXT_PUBLIC_APP_URL ?? "https://littleships.dev"}/sponsor?success=1&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${body.returnUrl ?? process.env.NEXT_PUBLIC_APP_URL ?? "https://littleships.dev"}/sponsor?canceled=1`,
+    // Keep the user on the same page: return to the page that initiated checkout.
+    success_url: `${returnBase}?sponsorSuccess=1&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${returnBase}?sponsorCanceled=1`,
     allow_promotion_codes: false,
     metadata: {
       kind: "sponsor",

@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { BuySponsorshipCard } from "./BuySponsorshipCard";
 import { SponsorCard } from "./SponsorCard";
 import { placeholderSponsors } from "./sponsorConfig";
@@ -35,6 +36,8 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
   const railPad = 24; // spacing between rails and body content
   // Note: body padding is applied only at lg+ via Tailwind arbitrary values.
 
+  const [modalKey, setModalKey] = useState(0);
+
   return (
     <>
       {/* Fixed rails (desktop/tablet). Content should never be squashed. */}
@@ -45,7 +48,11 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
         >
           <div className="flex h-full w-[240px] flex-col gap-3">
             {left.map((s) => (
-              <SponsorCard key={s.id} data={s} />
+              <SponsorCard
+                key={s.id}
+                data={s}
+                onOpenBuyModal={() => setModalKey((k) => k + 1)}
+              />
             ))}
           </div>
         </div>
@@ -58,10 +65,15 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
         >
           <div className="flex h-full w-[240px] flex-col gap-3">
             {right.map((s) => (
-              <SponsorCard key={s.id} data={s} />
+              <SponsorCard
+                key={s.id}
+                data={s}
+                onOpenBuyModal={() => setModalKey((k) => k + 1)}
+              />
             ))}
             <div className="mt-auto">
-              <BuySponsorshipCard />
+              {/* key hack: allows opening from placeholder cards by re-mounting with defaultOpen */}
+              <BuySponsorshipCard key={modalKey} defaultOpen={modalKey > 0} />
             </div>
           </div>
         </div>

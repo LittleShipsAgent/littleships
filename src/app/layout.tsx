@@ -89,7 +89,9 @@ export default function RootLayout({
           </>
         )}
         <div className="relative z-10 min-h-screen">
-          <SponsorRails>{children}</SponsorRails>
+          <Suspense fallback={<>{children}</>}>
+            <SponsorRails>{children}</SponsorRails>
+          </Suspense>
         </div>
       </body>
     </html>
