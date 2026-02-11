@@ -9,7 +9,7 @@ function Modal({ open, onClose, children }: { open: boolean; onClose: () => void
       <div className="w-full max-w-lg overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-subtle)] shadow-2xl">
         <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
           <div className="flex items-center gap-2 text-[var(--fg)]">
-            <span aria-hidden className="text-lg">🎁</span>
+            <span aria-hidden className="text-lg">📣</span>
             <span className="font-semibold">Advertise on LittleShips</span>
           </div>
           <button
@@ -56,7 +56,7 @@ export function BuySponsorshipCard() {
         <div className="flex flex-col items-center text-center">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--bg-muted)_55%,transparent)] text-[var(--fg-muted)]">
             <span className="text-2xl" aria-hidden>
-              🎁
+              📣
             </span>
           </div>
           <h2 className="text-2xl font-semibold text-[var(--fg)]">Get your product in front of builders</h2>
