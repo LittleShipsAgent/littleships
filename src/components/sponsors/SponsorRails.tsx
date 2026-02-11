@@ -73,7 +73,7 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
 
       {/* Body content */}
       <div className="w-full px-4 lg:px-8 lg:pl-[264px] lg:pr-[264px]">
-        <div className="min-w-0">{children}</div>
+        <div className="mx-auto w-full max-w-6xl min-w-0">{children}</div>
       </div>
 
       {/* Single modal instance, shared across all rail modules */}
