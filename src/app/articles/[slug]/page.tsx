@@ -119,8 +119,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                     <time dateTime={article.published_at}>{formatDate(article.published_at)}</time>
                   )}
                 </div>
-                {(article.tags?.length ?? 0) > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-3">
+                {/* Tags moved to bottom of article */}
+              </header>
+              <ArticleBody content={article.body} stripTitleH1={article.title} />
+
+              {(article.tags?.length ?? 0) > 0 && (
+                <footer className="mt-10 pt-6 border-t border-[var(--border)]" aria-label="Article tags">
+                  <h2 className="text-sm font-semibold text-[var(--fg)] mb-3">Tags</h2>
+                  <div className="flex flex-wrap gap-2">
                     {article.tags?.map((tag) => (
                       <Link
                         key={tag.id}
@@ -131,9 +137,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                       </Link>
                     ))}
                   </div>
-                )}
-              </header>
-              <ArticleBody content={article.body} />
+                </footer>
+              )}
             </article>
             {related.length > 0 && (
               <aside className="mt-12 pt-8 border-t border-[var(--border)]" aria-label="Related articles">

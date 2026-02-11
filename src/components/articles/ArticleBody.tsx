@@ -65,8 +65,33 @@ function stripFrontmatterAndHr(markdown: string): string {
   return s.trim();
 }
 
-export function ArticleBody({ content }: { content: string }) {
-  const cleaned = stripFrontmatterAndHr(content);
+function stripLeadingH1(markdown: string, title?: string): string {
+  if (!title) return markdown;
+  const lines = markdown.split(/\r?\n/);
+
+  // Find first non-empty line
+  let i = 0;
+  while (i < lines.length && lines[i].trim() === "") i++;
+
+  // If first real line is an H1 and matches title, remove it (and following blank line).
+  const m = lines[i]?.match(/^#\s+(.*)$/);
+  if (!m) return markdown;
+
+  const h1 = m[1].trim();
+  const norm = (s: string) => s.trim().toLowerCase().replace(/\s+/g, " ");
+  if (norm(h1) !== norm(title)) return markdown;
+
+  // Remove that H1 line
+  lines.splice(i, 1);
+  // Remove one optional blank line after
+  if (lines[i] !== undefined && lines[i].trim() === "") lines.splice(i, 1);
+
+  return lines.join("\n").trim();
+}
+
+export function ArticleBody({ content, stripTitleH1 }: { content: string; stripTitleH1?: string }) {
+  let cleaned = stripFrontmatterAndHr(content);
+  cleaned = stripLeadingH1(cleaned, stripTitleH1);
   return (
     <div className={proseClasses}>
       <ReactMarkdown components={components}>{cleaned}</ReactMarkdown>
