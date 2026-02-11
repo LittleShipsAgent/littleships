@@ -1,0 +1,141 @@
+"use client";
+
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+
+type Article = {
+  id: string;
+  slug: string;
+  category_id: string;
+  title: string;
+  excerpt: string | null;
+  body: string;
+  author_display: string | null;
+  published_at: string | null;
+  updated_at: string;
+};
+
+export default function EditArticlePage() {
+  const params = useParams<{ slug: string }>();
+  const slug = params.slug;
+
+  const [a, setA] = useState<Article | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function load() {
+    setErr(null);
+    const r = await fetch(`/api/admin/articles/${slug}`);
+    if (!r.ok) {
+      setErr(await r.text());
+      setA(null);
+      return;
+    }
+    const j = await r.json();
+    setA(j.article);
+  }
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug]);
+
+  async function save() {
+    if (!a) return;
+    setBusy(true);
+    setErr(null);
+
+    const r = await fetch(`/api/admin/articles/${slug}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        slug: a.slug,
+        title: a.title,
+        excerpt: a.excerpt,
+        body: a.body,
+        author_display: a.author_display,
+        category_id: a.category_id,
+        published_at: a.published_at,
+      }),
+    });
+
+    if (!r.ok) {
+      setErr(await r.text());
+      setBusy(false);
+      return;
+    }
+
+    const j = await r.json();
+    setA(j.article);
+    setBusy(false);
+  }
+
+  async function publishNow() {
+    setBusy(true);
+    setErr(null);
+    const r = await fetch(`/api/admin/articles/${slug}/publish`, { method: "POST" });
+    if (!r.ok) setErr(await r.text());
+    await load();
+    setBusy(false);
+  }
+
+  async function unpublish() {
+    setBusy(true);
+    setErr(null);
+    const r = await fetch(`/api/admin/articles/${slug}/unpublish`, { method: "POST" });
+    if (!r.ok) setErr(await r.text());
+    await load();
+    setBusy(false);
+  }
+
+  if (!a && !err) {
+    return <main className="mx-auto w-full max-w-3xl px-4 py-10 text-sm text-neutral-400">Loading…</main>;
+  }
+
+  return (
+    <main className="mx-auto w-full max-w-3xl px-4 py-10">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold">Edit article</h1>
+          <div className="mt-1 font-mono text-xs text-neutral-500">/{slug}</div>
+        </div>
+        <div className="flex gap-2">
+          <Link className="rounded bg-neutral-900 px-3 py-2 text-sm" href="/admin/articles">
+            Back
+          </Link>
+          <Link className="rounded bg-neutral-900 px-3 py-2 text-sm" href={`/articles/${slug}`}>
+            View
+          </Link>
+        </div>
+      </div>
+
+      {err && <div className="mt-6 rounded border border-red-900 bg-red-950 p-3 text-sm">{err}</div>}
+
+      {!a ? (
+        <div className="mt-6 text-sm text-neutral-400">Not found.</div>
+      ) : (
+        <div className="mt-6 space-y-3">
+          <input className="w-full rounded bg-neutral-900 px-3 py-2 text-sm" value={a.slug} onChange={(e) => setA({ ...a, slug: e.target.value })} />
+          <input className="w-full rounded bg-neutral-900 px-3 py-2 text-sm" value={a.title} onChange={(e) => setA({ ...a, title: e.target.value })} />
+          <input className="w-full rounded bg-neutral-900 px-3 py-2 text-sm" value={a.category_id} onChange={(e) => setA({ ...a, category_id: e.target.value })} />
+          <input className="w-full rounded bg-neutral-900 px-3 py-2 text-sm" value={a.excerpt ?? ""} onChange={(e) => setA({ ...a, excerpt: e.target.value || null })} placeholder="Excerpt (optional)" />
+          <input className="w-full rounded bg-neutral-900 px-3 py-2 text-sm" value={a.author_display ?? ""} onChange={(e) => setA({ ...a, author_display: e.target.value || null })} placeholder="Author display (optional)" />
+          <textarea className="h-[520px] w-full rounded bg-neutral-900 px-3 py-2 text-sm" value={a.body} onChange={(e) => setA({ ...a, body: e.target.value })} />
+
+          <div className="flex flex-wrap gap-2 pt-2">
+            <button className="rounded bg-neutral-100 px-3 py-2 text-sm font-medium text-neutral-950" disabled={busy} onClick={save}>
+              Save
+            </button>
+            <button className="rounded bg-emerald-700 px-3 py-2 text-sm font-medium hover:bg-emerald-600" disabled={busy} onClick={publishNow}>
+              Publish now
+            </button>
+            <button className="rounded bg-neutral-800 px-3 py-2 text-sm font-medium hover:bg-neutral-700" disabled={busy} onClick={unpublish}>
+              Unpublish
+            </button>
+          </div>
+        </div>
+      )}
+    </main>
+  );
+}

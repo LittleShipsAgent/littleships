@@ -43,6 +43,12 @@ export async function middleware(request: NextRequest) {
       loginUrl.searchParams.set("next", request.nextUrl.pathname);
       return NextResponse.redirect(loginUrl);
     }
+
+    // Must also be in admin_users (RLS allows self-check).
+    const { data: adminRow } = await supabase.from("admin_users").select("user_id").eq("user_id", user.id).maybeSingle();
+    if (!adminRow) {
+      return new NextResponse("Forbidden", { status: 403 });
+    }
   }
 
   // Request correlation ID
