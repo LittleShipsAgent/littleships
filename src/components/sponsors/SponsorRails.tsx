@@ -33,6 +33,7 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
 
   const railWidth = 240;
   const railPad = 24; // spacing between rails and body content
+  // Note: body padding is applied only at lg+ via Tailwind arbitrary values.
 
   return (
     <>
@@ -67,13 +68,7 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Body content */}
-      <div
-        className="mx-auto w-full max-w-7xl px-4"
-        style={{
-          paddingLeft: railWidth + railPad,
-          paddingRight: railWidth + railPad,
-        }}
-      >
+      <div className="w-full px-4 lg:px-8 lg:pl-[264px] lg:pr-[264px]">
         <div className="min-w-0">{children}</div>
       </div>
     </>
