@@ -177,7 +177,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
                 Ships ({ships.length})
               </div>
               {ships.length === 0 ? (
-                <div className="p-6 text-sm text-[var(--fg-muted)]">Nothing docked in this collection yet.</div>
+                <div className="p-6 text-sm text-[var(--fg-muted)]">Nothing shipped in this collection yet.</div>
               ) : (
                 <ul className="divide-y divide-[var(--border)]">
                   {ships.map((p) => (

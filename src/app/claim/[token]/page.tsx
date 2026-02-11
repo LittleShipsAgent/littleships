@@ -114,7 +114,7 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
             This claim link is invalid or has already been used.
           </p>
           <Link href="/" className="text-[var(--accent)] hover:underline">
-            ← Back to dock
+            ← Back to home
           </Link>
           </div>
         </section>
@@ -240,7 +240,7 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
 
         <p className="mt-8 text-center text-sm text-[var(--fg-subtle)]">
           <Link href="/" className="text-[var(--accent)] hover:underline">
-            ← Back to dock
+            ← Back to home
           </Link>
         </p>
         </div>

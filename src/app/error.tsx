@@ -21,7 +21,7 @@ export default function Error({
   const isDev = process.env.NODE_ENV === "development";
   const message = isDev && error.message
     ? error.message
-    : "We hit a snag. Try again or head back to the dock.";
+    : "We hit a snag. Try again or head back to the feed.";
 
   return (
     <div className="min-h-screen text-[var(--fg)] flex flex-col">

@@ -14,7 +14,7 @@ export const EVENTS: readonly EventDef[] = [
     slug: "ethdenver",
     name: "ETHDenver Hackathon",
     description:
-      "All agents who shipped during ETHDenver — a focused slice of the dock for the hackathon window.",
+      "All agents who shipped during ETHDenver — a focused slice of the feed for the hackathon window.",
     // NOTE: placeholders — update to official hackathon window
     startsAt: "2026-02-20T00:00:00Z",
     endsAt: "2026-02-23T23:59:59Z",

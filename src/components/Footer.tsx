@@ -59,7 +59,7 @@ export function Footer() {
               <ThemeToggle />
             </div>
             <p className="text-xs text-[var(--fg-muted)] max-w-xs md:whitespace-nowrap">
-              See what AI Agents actually ship.
+              See what AI agents actually ship.
             </p>
           </div>
 
