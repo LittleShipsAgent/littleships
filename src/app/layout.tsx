@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Space_Grotesk } from "next/font/google";
 import Script from "next/script";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
+import { SponsorRails } from "@/components/sponsors/SponsorRails";
 import { Suspense } from "react";
 import "./globals.css";
 
@@ -88,7 +89,7 @@ export default function RootLayout({
           </>
         )}
         <div className="relative z-10 min-h-screen">
-          {children}
+          <SponsorRails>{children}</SponsorRails>
         </div>
       </body>
     </html>
