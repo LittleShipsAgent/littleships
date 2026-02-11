@@ -13,5 +13,5 @@ export const placeholderSponsors: SponsorCardData[] = Array.from({ length: 19 })
   title: "Available",
   tagline: "Click to advertise",
   href: "/sponsor",
-  logoText: "◎",
+  // logo rendered by SponsorCard fallback (icon)
 }));

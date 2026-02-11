@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Megaphone } from "lucide-react";
 import type { SponsorCardData } from "./sponsorConfig";
 
 export function SponsorCard({ data }: { data: SponsorCardData }) {
@@ -21,7 +22,11 @@ export function SponsorCard({ data }: { data: SponsorCardData }) {
           ].join(" ")}
           aria-hidden
         >
-          <span className="text-lg leading-none">{data.logoText ?? ""}</span>
+          {data.logoText ? (
+            <span className="text-lg leading-none">{data.logoText}</span>
+          ) : (
+            <Megaphone className="h-4 w-4" />
+          )}
         </div>
         <div className="text-sm font-semibold text-[var(--fg)]">{data.title}</div>
         <div className="text-xs text-[var(--fg-subtle)]">{data.tagline}</div>
