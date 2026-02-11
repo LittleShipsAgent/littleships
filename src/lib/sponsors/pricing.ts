@@ -9,7 +9,7 @@ export type SponsorPricingConfig = {
 
 export const defaultSponsorPricing: SponsorPricingConfig = {
   startCents: 59900,
-  stepCents: 30000,
+  stepCents: 15000,
   capCents: 299900,
   paidSlotsTotal: 19,
 };

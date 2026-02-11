@@ -10,7 +10,7 @@ function getSlotsSold(): number {
 
 function computePriceCents(slotsSold: number): number {
   const start = 59900;
-  const step = 30000;
+  const step = 15000;
   const cap = 299900;
   return Math.min(start + slotsSold * step, cap);
 }
