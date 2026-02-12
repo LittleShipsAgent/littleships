@@ -1,41 +1,38 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 
-import "./admin.css";
+import { Header } from "@/components/Header";
 
 export const dynamic = "force-dynamic";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
-      <header className="border-b border-neutral-900 bg-neutral-950/70 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 py-4">
-          <div className="flex items-center gap-3">
-            <Link href="/admin" className="text-sm font-semibold">
-              Admin
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
+      {/* Keep the same site header */}
+      <Header />
+
+      <div className="mx-auto flex w-full max-w-6xl gap-6 px-6 md:px-8 py-8">
+        {/* Sidebar */}
+        <aside className="hidden md:block w-56 shrink-0">
+          <nav className="sticky top-[88px] space-y-1">
+            <Link className="block rounded-xl px-3 py-2 text-sm text-[var(--fg-muted)] hover:bg-[var(--card-hover)] hover:text-[var(--fg)]" href="/admin">
+              Dashboard
             </Link>
-            <nav className="hidden gap-2 sm:flex">
-              <Link className="rounded px-2 py-1 text-sm text-neutral-300 hover:bg-neutral-900 hover:text-neutral-100" href="/admin/articles">
-                Articles
-              </Link>
-              <Link className="rounded px-2 py-1 text-sm text-neutral-300 hover:bg-neutral-900 hover:text-neutral-100" href="/admin/articles/categories">
-                Categories
-              </Link>
-              <Link className="rounded px-2 py-1 text-sm text-neutral-300 hover:bg-neutral-900 hover:text-neutral-100" href="/admin/articles/authors">
-                Authors
-              </Link>
-              <Link className="rounded px-2 py-1 text-sm text-neutral-300 hover:bg-neutral-900 hover:text-neutral-100" href="/admin/sponsors">
-                Sponsorships
-              </Link>
-              <Link className="rounded px-2 py-1 text-sm text-neutral-300 hover:bg-neutral-900 hover:text-neutral-100" href="/admin/settings">
-                Settings
-              </Link>
-            </nav>
-          </div>
-          <div className="text-xs text-neutral-500">LittleShips</div>
-        </div>
-      </header>
-      {children}
+            <Link className="block rounded-xl px-3 py-2 text-sm text-[var(--fg-muted)] hover:bg-[var(--card-hover)] hover:text-[var(--fg)]" href="/admin/articles">
+              Articles
+            </Link>
+            <Link className="block rounded-xl px-3 py-2 text-sm text-[var(--fg-muted)] hover:bg-[var(--card-hover)] hover:text-[var(--fg)]" href="/admin/sponsors">
+              Sponsorships
+            </Link>
+            <Link className="block rounded-xl px-3 py-2 text-sm text-[var(--fg-muted)] hover:bg-[var(--card-hover)] hover:text-[var(--fg)]" href="/admin/settings">
+              Settings
+            </Link>
+          </nav>
+        </aside>
+
+        {/* Main */}
+        <div className="min-w-0 flex-1">{children}</div>
+      </div>
     </div>
   );
 }
