@@ -1,10 +1,11 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BuySponsorshipCard } from "./BuySponsorshipCard";
+import { BuySponsorshipModal } from "./BuySponsorshipModal";
 import { SponsorCard } from "./SponsorCard";
-import { placeholderSponsors } from "./sponsorConfig";
+import { placeholderSponsors, SponsorCardData } from "./sponsorConfig";
 
 const HIDE_PREFIXES = [
   "/disclaimer",
@@ -14,6 +15,7 @@ const HIDE_PREFIXES = [
   "/for-agents",
   "/for-humans",
   "/code-of-conduct",
+  "/admin",
 ];
 
 function shouldShowRails(pathname: string): boolean {
@@ -29,60 +31,79 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
   const show = shouldShowRails(pathname);
   if (!show) return <>{children}</>;
 
-  const left = placeholderSponsors.slice(0, 10);
-  const right = placeholderSponsors.slice(10, 19); // 9 paid slots
+  const [cards, setCards] = useState<SponsorCardData[] | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/sponsor/cards")
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((json) => {
+        const active = (json?.cards ?? []).map((c: any) =>
+          ({
+            id: c.order_id,
+            title: c.title,
+            tagline: c.tagline,
+            href: c.href,
+            logoText: c.logo_text ?? undefined,
+            bgColor: c.bg_color ?? undefined,
+          }) satisfies SponsorCardData
+        );
+
+        const merged = [...active];
+        for (const p of placeholderSponsors) {
+          if (merged.length >= 19) break;
+          merged.push(p);
+        }
+
+        if (alive) setCards(merged);
+      })
+      .catch(() => {
+        if (alive) setCards(placeholderSponsors);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const left = (cards ?? placeholderSponsors).slice(0, 10);
+  const right = (cards ?? placeholderSponsors).slice(10, 19);
 
   const railWidth = 240;
-  const railPad = 24; // spacing between rails and body content
-  // Note: body padding is applied only at lg+ via Tailwind arbitrary values.
+  const railPad = 24;
 
-  const [modalKey, setModalKey] = useState(0);
+  const [open, setOpen] = useState(false);
 
   return (
     <>
-      {/* Fixed rails (desktop/tablet). Content should never be squashed. */}
       <aside className="hidden lg:block">
-        <div
-          className="fixed left-0 top-0 z-40 h-screen px-3 py-6"
-          style={{ width: railWidth + railPad }}
-        >
+        <div className="fixed left-0 top-0 z-40 h-screen px-3 py-6" style={{ width: railWidth + railPad }}>
           <div className="flex h-full w-[240px] flex-col gap-3">
             {left.map((s) => (
-              <SponsorCard
-                key={s.id}
-                data={s}
-                onOpenBuyModal={() => setModalKey((k) => k + 1)}
-              />
+              <SponsorCard key={s.id} data={s} onOpenBuyModal={() => setOpen(true)} />
             ))}
           </div>
         </div>
       </aside>
 
       <aside className="hidden lg:block">
-        <div
-          className="fixed right-0 top-0 z-40 h-screen px-3 py-6"
-          style={{ width: railWidth + railPad }}
-        >
+        <div className="fixed right-0 top-0 z-40 h-screen px-3 py-6" style={{ width: railWidth + railPad }}>
           <div className="flex h-full w-[240px] flex-col gap-3">
             {right.map((s) => (
-              <SponsorCard
-                key={s.id}
-                data={s}
-                onOpenBuyModal={() => setModalKey((k) => k + 1)}
-              />
+              <SponsorCard key={s.id} data={s} onOpenBuyModal={() => setOpen(true)} />
             ))}
             <div className="mt-auto">
-              {/* key hack: allows opening from placeholder cards by re-mounting with defaultOpen */}
-              <BuySponsorshipCard key={modalKey} defaultOpen={modalKey > 0} />
+              <BuySponsorshipCard onOpen={() => setOpen(true)} />
             </div>
           </div>
         </div>
       </aside>
 
-      {/* Body content */}
       <div className="w-full px-4 lg:px-8 lg:pl-[264px] lg:pr-[264px]">
-        <div className="min-w-0">{children}</div>
+        <div className="mx-auto w-full max-w-6xl min-w-0">{children}</div>
       </div>
+
+      <BuySponsorshipModal open={open} onClose={() => setOpen(false)} />
     </>
   );
 }

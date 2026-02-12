@@ -120,7 +120,7 @@ export function SponsorSetupForm({ sessionId }: { sessionId: string }) {
             {status === "saving" ? "Saving…" : status === "saved" ? "Saved" : "Submit for approval"}
           </button>
           <p className="mt-3 text-xs text-[var(--fg-subtle)]">
-            You’ve paid successfully. Your sponsorship is now <span className="font-semibold">pending approval</span> (typically within 1 business day).
+            Your sponsorship is now <span className="font-semibold">pending approval</span> (typically within 1 business day).
           </p>
           {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
         </div>
