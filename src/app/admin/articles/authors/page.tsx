@@ -71,9 +71,15 @@ export default function AdminAuthorsPage() {
 
       <div className="mt-6 rounded-lg border border-neutral-800 bg-neutral-950 p-4">
         <div className="text-sm font-medium">Add author</div>
-        <div className="mt-3 grid gap-2 sm:grid-cols-2">
-          <input className="w-full rounded bg-neutral-900 px-3 py-2 text-sm" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="slug (e.g. signal)" />
-          <input className="w-full rounded bg-neutral-900 px-3 py-2 text-sm" value={name} onChange={(e) => setName(e.target.value)} placeholder="Display name (e.g. Signal)" />
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <div>
+            <label className="text-xs text-neutral-400">Slug</label>
+            <input className="mt-1 w-full rounded bg-neutral-900 px-3 py-2 text-sm" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="slug (e.g. signal)" />
+          </div>
+          <div>
+            <label className="text-xs text-neutral-400">Display name</label>
+            <input className="mt-1 w-full rounded bg-neutral-900 px-3 py-2 text-sm" value={name} onChange={(e) => setName(e.target.value)} placeholder="Display name (e.g. Signal)" />
+          </div>
         </div>
         <button
           className="mt-3 rounded bg-neutral-100 px-3 py-2 text-sm font-medium text-neutral-950 disabled:opacity-60"

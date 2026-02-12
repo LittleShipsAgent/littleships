@@ -12,21 +12,14 @@ create table if not exists public.article_authors (
   updated_at timestamptz not null default now()
 );
 
--- updated_at trigger (re-use set_updated_at if present)
-do $$
+-- updated_at trigger helper
+-- We always CREATE OR REPLACE to keep this idempotent and avoid DO-block parsing issues.
+create or replace function public.set_updated_at() returns trigger as $fn$
 begin
-  if not exists (
-    select 1 from pg_proc where proname = 'set_updated_at' and pronamespace = 'public'::regnamespace
-  ) then
-    create or replace function public.set_updated_at() returns trigger as $$
-    begin
-      new.updated_at = now();
-      return new;
-    end;
-    $$ language plpgsql;
-  end if;
+  new.updated_at = now();
+  return new;
 end;
-$$;
+$fn$ language plpgsql;
 
 drop trigger if exists article_authors_set_updated_at on public.article_authors;
 create trigger article_authors_set_updated_at
@@ -38,7 +31,7 @@ alter table public.articles
   add column if not exists author_id uuid;
 
 -- Add FK (best-effort; skip if already exists)
-do $$
+do $outer2$
 begin
   if not exists (
     select 1
@@ -50,7 +43,7 @@ begin
       foreign key (author_id) references public.article_authors(id) on delete set null;
   end if;
 end;
-$$;
+$outer2$;
 
 -- RLS (admin-only writes)
 alter table public.article_authors enable row level security;
