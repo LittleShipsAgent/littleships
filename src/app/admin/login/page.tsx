@@ -4,8 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   const nextPath = useMemo(() => {
     if (typeof window === "undefined") return "/admin";
@@ -17,52 +18,60 @@ export default function AdminLoginPage() {
     document.title = "Admin login | LittleShips";
   }, []);
 
-  async function sendMagicLink(e: React.FormEvent) {
+  async function login(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setBusy(true);
 
-    const r = await fetch("/api/admin/auth/magic-link", {
+    const r = await fetch("/api/admin/auth/login", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email, next: nextPath }),
+      body: JSON.stringify({ email, password }),
     });
 
     if (!r.ok) {
       setError(await r.text());
+      setBusy(false);
       return;
     }
 
-    setSent(true);
+    // middleware will allow /admin only once you're also in admin_users
+    window.location.href = nextPath;
   }
 
   return (
     <main className="mx-auto w-full max-w-md px-4 py-16">
       <h1 className="text-2xl font-semibold">Admin login</h1>
-      <p className="mt-2 text-sm text-neutral-400">Magic link via Supabase.</p>
+      <p className="mt-2 text-sm text-neutral-400">Sign in with email + password.</p>
 
-      {sent ? (
-        <div className="mt-6 rounded-lg border border-neutral-800 bg-neutral-950 p-4 text-sm text-neutral-300">
-          Check your email for the magic link.
-        </div>
-      ) : (
-        <form onSubmit={sendMagicLink} className="mt-6 space-y-3">
-          <input
-            className="w-full rounded bg-neutral-900 px-3 py-2 text-sm"
-            placeholder="you@domain.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            type="email"
-            required
-          />
-          <button
-            className="w-full rounded bg-neutral-100 px-3 py-2 text-sm font-medium text-neutral-950 hover:bg-white"
-            type="submit"
-          >
-            Send magic link
-          </button>
-          {error && <div className="text-sm text-red-400">{error}</div>}
-        </form>
-      )}
+      <form onSubmit={login} className="mt-6 space-y-3">
+        <input
+          className="w-full rounded bg-neutral-900 px-3 py-2 text-sm"
+          placeholder="you@domain.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          type="email"
+          required
+          autoComplete="email"
+        />
+        <input
+          className="w-full rounded bg-neutral-900 px-3 py-2 text-sm"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          type="password"
+          required
+          autoComplete="current-password"
+        />
+        <button
+          className="w-full rounded bg-neutral-100 px-3 py-2 text-sm font-medium text-neutral-950 hover:bg-white"
+          type="submit"
+          disabled={busy}
+        >
+          Sign in
+        </button>
+        {error && <div className="text-sm text-red-400">{error}</div>}
+      </form>
     </main>
   );
 }
