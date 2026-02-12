@@ -13,7 +13,7 @@ function Modal({ open, onClose, children }: { open: boolean; onClose: () => void
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 px-4">
-      <div className="w-full max-w-lg overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-subtle)] shadow-2xl">
+      <div className="flex w-full max-w-2xl max-h-[90vh] flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-subtle)] shadow-2xl">
         <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
           <div className="flex items-center gap-2 text-[var(--fg)]">
             <Megaphone className="h-4 w-4 text-[var(--fg-muted)]" aria-hidden />
@@ -27,7 +27,7 @@ function Modal({ open, onClose, children }: { open: boolean; onClose: () => void
             ✕
           </button>
         </div>
-        <div className="px-6 py-6">{children}</div>
+        <div className="flex-1 overflow-y-auto px-6 py-6">{children}</div>
       </div>
     </div>
   );
