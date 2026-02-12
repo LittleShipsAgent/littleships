@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { computeSponsorPriceCents } from "@/lib/sponsors/pricing";
 import { attachStripeSessionToOrder, createSponsorOrder, getSlotsSold } from "@/lib/db/sponsors";
+import { getSiteSettingInt } from "@/lib/db/settings-int";
 
 // Create an Embedded Checkout session (no redirect to stripe.com).
 // Client uses the returned client_secret with <EmbeddedCheckoutProvider />.
@@ -11,6 +12,12 @@ export async function POST(req: Request) {
   const body = (await req.json().catch(() => ({}))) as { returnUrl?: string };
 
   const slotsSold = await getSlotsSold();
+  const slotsTotal = await getSiteSettingInt("sponsor_slots_total", 10);
+
+  if (slotsTotal > 0 && slotsSold >= slotsTotal) {
+    return new NextResponse("Sold out", { status: 409 });
+  }
+
   const priceCents = computeSponsorPriceCents(slotsSold);
 
   // Create DB order first, so the Stripe session can reference it.
@@ -57,5 +64,8 @@ export async function POST(req: Request) {
     orderId: order.id,
     sessionId: session.id,
     clientSecret: session.client_secret,
+    slotsSold,
+    slotsTotal,
+    priceCents,
   });
 }
