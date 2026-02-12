@@ -20,6 +20,14 @@ for select
 to authenticated
 using (public.is_admin());
 
+-- Public read: allow anon/authenticated to read specific safe flags.
+drop policy if exists "app_settings_public_read" on public.app_settings;
+create policy "app_settings_public_read"
+on public.app_settings
+for select
+to anon, authenticated
+using (key in ('sponsors_enabled'));
+
 drop policy if exists "app_settings_admin_insert" on public.app_settings;
 create policy "app_settings_admin_insert"
 on public.app_settings
