@@ -232,19 +232,40 @@ export async function listSponsorOrdersWithCreativeByStatus(
   const db = getDb();
   if (!db) return [];
 
-  const { data, error } = await db
+  // NOTE: We intentionally do NOT rely on PostgREST embedded joins here because
+  // they require a FK relationship to be present in the database. In prod, that
+  // FK may not be applied yet; this code still works by doing a second query.
+
+  const { data: orders, error: e1 } = await db
     .from("sponsor_orders")
     .select(
-      "id,created_at,updated_at,stripe_checkout_session_id,stripe_customer_id,stripe_subscription_id,status,price_cents,slots_sold_at_purchase,purchaser_email,creative:sponsor_creatives(order_id,title,tagline,href,logo_text,logo_url,bg_color,created_at,updated_at)"
+      "id,created_at,updated_at,stripe_checkout_session_id,stripe_customer_id,stripe_subscription_id,status,price_cents,slots_sold_at_purchase,purchaser_email"
     )
     .eq("status", status)
     .order("created_at", { ascending: true })
     .limit(limit);
 
-  if (error) throw error;
+  if (e1) throw e1;
 
-  return (data ?? []).map((row: any) => ({
-    ...(row as SponsorOrderRow),
-    creative: (row?.creative as SponsorCreativeRow | null) ?? null,
+  const orderRows = (orders ?? []) as SponsorOrderRow[];
+  const orderIds = orderRows.map((o) => o.id);
+
+  let creativesByOrder: Record<string, SponsorCreativeRow> = {};
+  if (orderIds.length) {
+    const { data: creatives, error: e2 } = await db
+      .from("sponsor_creatives")
+      .select("order_id,title,tagline,href,logo_text,logo_url,bg_color,created_at,updated_at")
+      .in("order_id", orderIds);
+
+    if (e2) throw e2;
+
+    for (const c of (creatives ?? []) as SponsorCreativeRow[]) {
+      creativesByOrder[c.order_id] = c;
+    }
+  }
+
+  return orderRows.map((o) => ({
+    ...o,
+    creative: creativesByOrder[o.id] ?? null,
   }));
 }
