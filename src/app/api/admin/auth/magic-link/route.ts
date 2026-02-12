@@ -9,7 +9,9 @@ export async function POST(req: Request) {
   if (!email) return new NextResponse("Missing email", { status: 400 });
 
   const next = (body.next || "/admin").startsWith("/") ? body.next || "/admin" : "/admin";
-  const origin = new URL(req.url).origin;
+  const origin =
+    process.env.NEXT_PUBLIC_APP_URL ??
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : new URL(req.url).origin);
 
   const { error } = await supabase.auth.signInWithOtp({
     email,

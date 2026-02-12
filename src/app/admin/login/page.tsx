@@ -48,7 +48,7 @@ export default function AdminLoginPage() {
         <form onSubmit={sendMagicLink} className="mt-6 space-y-3">
           <input
             className="w-full rounded bg-neutral-900 px-3 py-2 text-sm"
-            placeholder="timallard@gmail.com"
+            placeholder="you@domain.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             type="email"
