@@ -106,9 +106,19 @@ export function SponsorRails({
   const effectiveSlotsTotal = slotsTotal ?? initialSlotsTotal ?? 10;
 
   const half = Math.ceil(effectiveSlotsTotal / 2);
-  const baseCards = cards ?? placeholderSponsors;
-  const left = baseCards.slice(0, half);
-  const right = baseCards.slice(half, effectiveSlotsTotal);
+
+  // Always pad to capacity so empty slots show as "Available".
+  const merged: SponsorCardData[] = [];
+  for (const c of cards ?? []) {
+    merged.push(c);
+  }
+  for (const p of placeholderSponsors) {
+    if (merged.length >= effectiveSlotsTotal) break;
+    merged.push(p);
+  }
+
+  const left = merged.slice(0, half);
+  const right = merged.slice(half, effectiveSlotsTotal);
 
   const railWidth = 240;
   const railPad = 24;
