@@ -52,6 +52,9 @@ export default function AdminArticlesIndex() {
           <Link href="/admin/articles/new" className="rounded bg-neutral-100 px-3 py-2 text-sm font-medium text-neutral-950">
             New article
           </Link>
+          <Link href="/admin/articles/authors" className="rounded bg-neutral-900 px-3 py-2 text-sm">
+            Authors
+          </Link>
           <button className="rounded bg-neutral-900 px-3 py-2 text-sm" onClick={refresh}>
             Refresh
           </button>
