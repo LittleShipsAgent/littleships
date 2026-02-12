@@ -92,7 +92,7 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
   return (
     <>
       <aside className="hidden lg:block">
-        <div className="fixed left-0 top-0 z-40 h-screen px-3 py-6" style={{ width: railWidth + railPad }}>
+        <div className="fixed left-0 top-0 z-40 h-screen px-3 py-0" style={{ width: railWidth + railPad }}>
           <div className="flex h-full w-[240px] flex-col gap-3">
             {left.map((s) => (
               <SponsorCard key={s.id} data={s} onOpenBuyModal={() => setOpen(true)} />
@@ -102,7 +102,7 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
       </aside>
 
       <aside className="hidden lg:block">
-        <div className="fixed right-0 top-0 z-40 h-screen px-3 py-6" style={{ width: railWidth + railPad }}>
+        <div className="fixed right-0 top-0 z-40 h-screen px-3 py-0" style={{ width: railWidth + railPad }}>
           <div className="flex h-full w-[240px] flex-col gap-3">
             {right.map((s) => (
               <SponsorCard key={s.id} data={s} onOpenBuyModal={() => setOpen(true)} />
