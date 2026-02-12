@@ -10,6 +10,9 @@ import { getSiteSettingInt } from "@/lib/db/settings-int";
 export async function POST(req: Request) {
   try {
     const stripe = getStripe();
+
+    // NOTE: For embedded Checkout with redirect_on_completion: 'never', Stripe forbids return_url.
+    // We accept returnUrl from older clients but intentionally ignore it.
     const body = (await req.json().catch(() => ({}))) as { returnUrl?: string };
 
     const slotsSold = await getSlotsSold();
@@ -24,7 +27,7 @@ export async function POST(req: Request) {
     // Create DB order first, so the Stripe session can reference it.
     const order = await createSponsorOrder({ priceCents, slotsSoldAtPurchase: slotsSold });
 
-    const returnBase = body.returnUrl ?? process.env.NEXT_PUBLIC_APP_URL ?? "https://littleships.dev";
+    // (ignored) const returnBase = body.returnUrl ?? process.env.NEXT_PUBLIC_APP_URL ?? "https://littleships.dev";
 
     const session = await stripe.checkout.sessions.create({
       ui_mode: "embedded",
@@ -44,8 +47,7 @@ export async function POST(req: Request) {
           },
         },
       ],
-      // Used for some payment methods; also handy for future flows.
-      return_url: `${returnBase}?sponsorReturn=1`,
+      // return_url not allowed for embedded Checkout when redirect_on_completion is 'never'
       metadata: {
         kind: "sponsor",
         sponsorOrderId: order.id,
