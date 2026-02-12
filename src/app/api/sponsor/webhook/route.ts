@@ -1,11 +1,9 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
+import { markOrderCanceledBySubscription, markOrderPendingApproval } from "@/lib/db/sponsors";
 
 // Force Node runtime (Stripe webhook verification uses Node crypto; Edge can be problematic)
 export const runtime = "nodejs";
-
-// v1: webhook just validates signature and returns 200.
-// Next PR: persist sponsor subscription + status transitions.
 
 function getStripeForWebhooks(): Stripe {
   // Webhook signature verification doesn't require calling Stripe APIs,
@@ -32,11 +30,40 @@ export async function POST(req: Request) {
     const stripe = getStripeForWebhooks();
     event = stripe.webhooks.constructEvent(rawBody, sig, secret);
   } catch (err: any) {
-    // Stripe CLI will show the response; keep it readable.
     return new NextResponse(`Webhook error: ${err?.message ?? "invalid"}`, { status: 400 });
   }
 
-  // TODO: handle checkout.session.completed, customer.subscription.updated/deleted, invoice.payment_failed
-  // For now, just ack.
+  try {
+    switch (event.type) {
+      case "checkout.session.completed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const orderId = session.metadata?.sponsorOrderId;
+        if (!orderId) break;
+
+        await markOrderPendingApproval({
+          orderId,
+          stripeCustomerId: typeof session.customer === "string" ? session.customer : session.customer?.id,
+          stripeSubscriptionId:
+            typeof session.subscription === "string" ? session.subscription : (session.subscription as any)?.id,
+          purchaserEmail: session.customer_details?.email ?? null,
+        });
+        break;
+      }
+
+      case "customer.subscription.deleted": {
+        const sub = event.data.object as Stripe.Subscription;
+        if (sub.id) {
+          await markOrderCanceledBySubscription({ stripeSubscriptionId: sub.id });
+        }
+        break;
+      }
+
+      default:
+        break;
+    }
+  } catch (err: any) {
+    return new NextResponse(`Webhook handler error: ${err?.message ?? "error"}`, { status: 500 });
+  }
+
   return NextResponse.json({ received: true, type: event.type });
 }
