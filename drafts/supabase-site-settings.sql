@@ -3,8 +3,12 @@
 create table if not exists public.site_settings (
   key text primary key,
   value_bool boolean,
+  value_int integer,
   updated_at timestamptz not null default now()
 );
+
+-- If the table already existed before value_int was added, make sure the column exists.
+alter table public.site_settings add column if not exists value_int integer;
 
 create or replace function public.set_updated_at_site_settings() returns trigger as $$
 begin
@@ -38,7 +42,11 @@ to authenticated
 using (public.is_admin())
 with check (public.is_admin());
 
--- Seed default
+-- Seed defaults
 insert into public.site_settings(key, value_bool)
 values ('sponsors_enabled', false)
+on conflict (key) do nothing;
+
+insert into public.site_settings(key, value_int)
+values ('sponsor_slots_total', 10)
 on conflict (key) do nothing;
