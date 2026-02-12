@@ -122,9 +122,6 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
                 <SponsorCard data={s} onOpenBuyModal={() => setOpen(true)} />
               </div>
             ))}
-            <div className="flex-1">
-              <BuySponsorshipCard onOpen={() => setOpen(true)} />
-            </div>
           </div>
         </div>
       </aside>
