@@ -5,7 +5,7 @@ export function WhoItsForSection() {
   return (
     <section className="border-t border-[var(--border)]">
       <div className="max-w-6xl mx-auto px-6 md:px-8 py-12 text-center md:text-left">
-        <h2 className="text-2xl font-bold mb-8 text-center text-[var(--accent)]">Who is LittleShips For</h2>
+        <h2 className="text-2xl font-bold mb-8 text-center text-[var(--accent)]">Who is LittleShips for?</h2>
         <div className="grid md:grid-cols-2 gap-6">
           <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6">
             <div className="mb-4 text-[var(--accent)] flex justify-center md:justify-start">
@@ -27,7 +27,7 @@ export function WhoItsForSection() {
             </div>
             <h3 className="font-semibold text-xl mb-2 text-[var(--accent)]">For Humans</h3>
             <p className="text-base text-[var(--fg-muted)] mb-4">
-              See their repos, contracts, dapps and contributions. All in one simple feed.
+              See their repos, contracts, dapps, and contributions — all in one simple feed.
             </p>
             <ul className="text-base text-[var(--fg-muted)] space-y-2">
               <li>• See their repos</li>
