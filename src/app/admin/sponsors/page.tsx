@@ -1,35 +1,19 @@
 import Link from "next/link";
+import { requireAdminUser } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminSponsorsPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const sp = await searchParams;
-  const token = typeof sp.token === "string" ? sp.token : "";
-
-  // This page is intentionally ultra-thin; it uses the token only to call the admin APIs.
-  // If the token is wrong, APIs return 401.
+export default async function AdminSponsorsPage() {
+  await requireAdminUser();
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-10">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold">Admin · Sponsorship approvals</h1>
-        <p className="mt-1 text-sm text-neutral-400">
-          Token-protected via <code className="rounded bg-neutral-900 px-1">?token=…</code> and the
-          <code className="rounded bg-neutral-900 px-1"> x-admin-token</code> header.
-        </p>
+        <h1 className="text-2xl font-semibold">Admin · Sponsorships</h1>
+        <p className="mt-1 text-sm text-neutral-400">Review pending sponsorships and approve them to go live.</p>
       </div>
 
-      {!token ? (
-        <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
-          <p className="text-sm">Missing token. Add <code>?token=YOUR_ADMIN_TOKEN</code> to the URL.</p>
-        </div>
-      ) : (
-        <AdminSponsorsClient token={token} />
-      )}
+      <AdminSponsorsClient />
 
       <div className="mt-10 text-sm text-neutral-500">
         <Link className="underline" href="/">Back to site</Link>
@@ -38,11 +22,11 @@ export default async function AdminSponsorsPage({
   );
 }
 
-function AdminSponsorsClient({ token }: { token: string }) {
+function AdminSponsorsClient() {
   // Client component (inline) to keep file count down.
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const React = require("react") as typeof import("react");
-  const { useEffect, useMemo, useState } = React;
+  const { useEffect, useState } = React;
 
   type Pending = {
     id: string;
@@ -56,15 +40,13 @@ function AdminSponsorsClient({ token }: { token: string }) {
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
-  const headers = useMemo(() => ({ "x-admin-token": token }), [token]);
-
   function money(cents: number) {
     return `$${(cents / 100).toFixed(0)}`;
   }
 
   async function refresh() {
     setErr(null);
-    const r = await fetch("/api/admin/sponsors/pending", { headers });
+    const r = await fetch("/api/admin/sponsors/pending");
     if (!r.ok) {
       setErr(await r.text());
       setPending([]);
@@ -84,7 +66,7 @@ function AdminSponsorsClient({ token }: { token: string }) {
     setErr(null);
     const r = await fetch("/api/admin/sponsors/approve", {
       method: "POST",
-      headers: { ...headers, "content-type": "application/json" },
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({ orderId, creative }),
     });
     if (!r.ok) setErr(await r.text());
@@ -97,7 +79,7 @@ function AdminSponsorsClient({ token }: { token: string }) {
     setErr(null);
     const r = await fetch("/api/admin/sponsors/reject", {
       method: "POST",
-      headers: { ...headers, "content-type": "application/json" },
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({ orderId }),
     });
     if (!r.ok) setErr(await r.text());

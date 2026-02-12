@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import { requireAdminToken } from "@/lib/admin";
+import { requireAdminUser } from "@/lib/admin-auth";
 import { approveSponsorOrder } from "@/lib/db/sponsors";
 
 export async function POST(req: Request) {
   try {
-    const token = req.headers.get("x-admin-token") ?? new URL(req.url).searchParams.get("token");
-    requireAdminToken(token);
+    await requireAdminUser();
 
     const body = (await req.json()) as {
       orderId: string;
@@ -39,7 +38,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   } catch (err: any) {
     const msg = err?.message ?? "error";
-    const status = msg === "Unauthorized" ? 401 : 500;
+    const status = msg === "Unauthorized" ? 401 : msg === "Forbidden" ? 403 : 500;
     return new NextResponse(msg, { status });
   }
 }
