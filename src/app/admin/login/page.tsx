@@ -19,8 +19,7 @@ export default function AdminLoginPage() {
     document.title = "Admin login | LittleShips";
   }, []);
 
-  async function login(e: React.FormEvent) {
-    e.preventDefault();
+  async function doLogin() {
     setError(null);
     setRecoverySent(false);
     setBusy(true);
@@ -41,6 +40,11 @@ export default function AdminLoginPage() {
     window.location.href = nextPath;
   }
 
+  async function login(e: React.FormEvent) {
+    e.preventDefault();
+    await doLogin();
+  }
+
   return (
     <main className="mx-auto w-full max-w-md px-4 py-16">
       <h1 className="text-2xl font-semibold">Admin login</h1>
@@ -52,6 +56,12 @@ export default function AdminLoginPage() {
           placeholder="you@domain.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              doLogin();
+            }
+          }}
           type="email"
           required
           autoComplete="email"
@@ -61,6 +71,12 @@ export default function AdminLoginPage() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              doLogin();
+            }
+          }}
           type="password"
           required
           autoComplete="current-password"
