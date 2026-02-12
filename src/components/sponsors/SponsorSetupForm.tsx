@@ -21,7 +21,7 @@ const PALETTE = [
   "#2a1020",
 ];
 
-export function SponsorSetupForm({ sessionId }: { sessionId: string }) {
+export function SponsorSetupForm({ sessionId, onSubmitted }: { sessionId: string; onSubmitted?: () => void }) {
   const [draft, setDraft] = useState<SponsorCreativeDraft>({
     name: "",
     tagline: "",
@@ -110,6 +110,7 @@ export function SponsorSetupForm({ sessionId }: { sessionId: string }) {
                   throw new Error(text || `HTTP ${res.status}`);
                 }
                 setStatus("saved");
+                onSubmitted?.();
               } catch (e: any) {
                 setStatus("error");
                 setError(e?.message ?? "Failed to save");

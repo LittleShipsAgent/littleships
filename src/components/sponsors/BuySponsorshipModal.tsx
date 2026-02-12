@@ -33,7 +33,7 @@ function Modal({ open, onClose, children }: { open: boolean; onClose: () => void
   );
 }
 
-type Step = "pitch" | "checkout" | "success";
+type Step = "pitch" | "checkout" | "success" | "pending";
 
 export function BuySponsorshipModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [step, setStep] = useState<Step>("pitch");
@@ -71,15 +71,39 @@ export function BuySponsorshipModal({ open, onClose }: { open: boolean; onClose:
       }}
     >
       <div className="flex flex-col items-center text-center">
-        {step === "success" && sessionId ? (
+        {step === "pending" ? (
+          <>
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--bg-muted)_55%,transparent)] text-[var(--fg-muted)]">
+              <Megaphone className="h-8 w-8" aria-hidden />
+            </div>
+            <h2 className="text-2xl font-semibold text-[var(--fg)]">Pending review</h2>
+            <p className="mt-2 text-sm text-[var(--fg-muted)]">
+              Thanks! Your sponsorship is pending approval. We’ll review it shortly.
+            </p>
+            <div className="mt-6 w-full">
+              <button
+                type="button"
+                onClick={onClose}
+                className="block w-full rounded-xl bg-[var(--fg)] px-4 py-3 text-center text-sm font-semibold text-black hover:opacity-90"
+              >
+                Done
+              </button>
+            </div>
+          </>
+        ) : step === "success" && sessionId ? (
           <>
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--bg-muted)_55%,transparent)] text-[var(--fg-muted)]">
               <Megaphone className="h-8 w-8" aria-hidden />
             </div>
             <h2 className="text-2xl font-semibold text-[var(--fg)]">Payment successful!</h2>
             <p className="mt-2 text-sm text-[var(--fg-muted)]">Now let’s set up your sponsor card.</p>
-            <div className="mt-6 w-full">
-              <SponsorSetupForm sessionId={sessionId} />
+            <div className="mt-6 w-full text-left">
+              <SponsorSetupForm
+                sessionId={sessionId}
+                onSubmitted={() => {
+                  setStep("pending");
+                }}
+              />
             </div>
           </>
         ) : step === "checkout" ? (
