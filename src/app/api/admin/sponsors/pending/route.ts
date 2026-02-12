@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { requireAdminUser } from "@/lib/admin-auth";
-import { listPendingSponsorOrders } from "@/lib/db/sponsors";
+import { listSponsorOrdersWithCreativeByStatus } from "@/lib/db/sponsors";
 
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
   try {
     await requireAdminUser();
 
-    const pending = await listPendingSponsorOrders(100);
+    const pending = await listSponsorOrdersWithCreativeByStatus("pending_approval", 100);
     return NextResponse.json({ pending });
   } catch (err: any) {
     const msg = err?.message ?? "error";
