@@ -16,7 +16,7 @@ export async function POST(req: Request) {
   // Create DB order first, so the Stripe session can reference it.
   const order = await createSponsorOrder({ priceCents, slotsSoldAtPurchase: slotsSold });
 
-  const returnBase = body.returnUrl ?? process.env.NEXT_PUBLIC_APP_URL ?? "https://littleships.dev";
+  // returnUrl intentionally ignored for embedded Checkout sessions with redirect_on_completion: "never".
 
   const session = await stripe.checkout.sessions.create({
     ui_mode: "embedded",
@@ -36,8 +36,7 @@ export async function POST(req: Request) {
         },
       },
     ],
-    // Used for some payment methods; also handy for future flows.
-    return_url: `${returnBase}?sponsorReturn=1`,
+    // return_url not allowed for embedded Checkout when redirect_on_completion is "never"
     metadata: {
       kind: "sponsor",
       sponsorOrderId: order.id,

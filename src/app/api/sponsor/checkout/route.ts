@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
+import { getReturnBaseUrl } from "@/lib/urls";
 
 // v1: dynamic price, single pool inventory.
 // NOTE: slotsSold is stubbed until DB is added.
@@ -24,7 +25,7 @@ export async function POST(req: Request) {
 
   // Create a monthly subscription Checkout Session with an ad-hoc price.
   // This keeps the pricing ladder server-authoritative.
-  const returnBase = body.returnUrl ?? process.env.NEXT_PUBLIC_APP_URL ?? "https://littleships.dev";
+  const returnBase = getReturnBaseUrl(body.returnUrl);
 
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
