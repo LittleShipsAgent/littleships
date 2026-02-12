@@ -3,6 +3,7 @@ import { Space_Grotesk } from "next/font/google";
 import Script from "next/script";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { SponsorRails } from "@/components/sponsors/SponsorRails";
+import { getSiteSettingBool } from "@/lib/db/settings";
 import { Suspense } from "react";
 import "./globals.css";
 
@@ -57,7 +58,7 @@ const jsonLd = [
   },
 ];
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -89,9 +90,13 @@ export default function RootLayout({
           </>
         )}
         <div className="relative z-10 min-h-screen">
-          <Suspense fallback={<>{children}</>}>
-            <SponsorRails>{children}</SponsorRails>
-          </Suspense>
+          {(await getSiteSettingBool("sponsors_enabled", false)) ? (
+            <Suspense fallback={<>{children}</>}>
+              <SponsorRails>{children}</SponsorRails>
+            </Suspense>
+          ) : (
+            children
+          )}
         </div>
       </body>
     </html>

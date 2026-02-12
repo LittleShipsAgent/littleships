@@ -694,6 +694,14 @@ input[type="reset"] {
   cursor: pointer;
 }
 
+/* Disabled buttons should not look clickable */
+button:disabled,
+input[type="button"]:disabled,
+input[type="submit"]:disabled,
+input[type="reset"]:disabled {
+  cursor: not-allowed;
+}
+
 /* Ship card title hover */
 .ship-card-title {
   transition: color 0.2s;
