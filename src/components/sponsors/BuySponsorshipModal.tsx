@@ -4,6 +4,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
 import { Megaphone } from "lucide-react";
 import { useCallback, useState } from "react";
+import { fireConfetti } from "@/lib/confetti";
 import { SponsorSetupForm } from "./SponsorSetupForm";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -94,7 +95,10 @@ export function BuySponsorshipModal({ open, onClose }: { open: boolean; onClose:
                 stripe={stripePromise}
                 options={{
                   fetchClientSecret,
-                  onComplete: () => setStep("success"),
+                  onComplete: () => {
+                    fireConfetti();
+                    setStep("success");
+                  },
                 }}
               >
                 <EmbeddedCheckout />

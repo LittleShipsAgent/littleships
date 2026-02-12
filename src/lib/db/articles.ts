@@ -26,6 +26,8 @@ function rowToArticle(row: {
   excerpt: string | null;
   body: string;
   author_display: string | null;
+  author_id?: string | null;
+  author?: { id: string; slug: string; display_name: string; active: boolean } | null;
   published_at: string | null;
   created_at: string;
   updated_at: string;
@@ -41,6 +43,15 @@ function rowToArticle(row: {
     excerpt: row.excerpt,
     body: row.body,
     author_display: row.author_display,
+    author_id: row.author_id ?? null,
+    author: row.author
+      ? {
+          id: row.author.id,
+          slug: row.author.slug,
+          display_name: row.author.display_name,
+          active: row.author.active,
+        }
+      : undefined,
     published_at: row.published_at,
     created_at: row.created_at,
     updated_at: row.updated_at,
@@ -65,6 +76,7 @@ export async function listArticles(options?: {
       `
       id, slug, category_id, title, excerpt, body, author_display, published_at, created_at, updated_at,
       article_categories(id, slug, name, description),
+      article_authors(id, slug, display_name, active),
       article_tags(tags(id, slug, name))
     `
     )
@@ -99,6 +111,7 @@ export async function listArticles(options?: {
     return rowToArticle({
       ...row,
       category: row.article_categories as Article["category"],
+      author: row.article_authors as any,
       tags,
     } as Parameters<typeof rowToArticle>[0]);
   });
@@ -116,6 +129,7 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
       `
       id, slug, category_id, title, excerpt, body, author_display, published_at, created_at, updated_at,
       article_categories(id, slug, name, description),
+      article_authors(id, slug, display_name, active),
       article_tags(tags(id, slug, name))
     `
     )
@@ -146,6 +160,7 @@ export async function getArticleBySlugForAdmin(slug: string): Promise<Article | 
       `
       id, slug, category_id, title, excerpt, body, author_display, published_at, created_at, updated_at,
       article_categories(id, slug, name, description),
+      article_authors(id, slug, display_name, active),
       article_tags(tags(id, slug, name))
     `
     )
@@ -208,6 +223,7 @@ export async function getRelatedArticles(articleId: string, categoryId: string, 
       `
       id, slug, category_id, title, excerpt, body, author_display, published_at, created_at, updated_at,
       article_categories(id, slug, name, description),
+      article_authors(id, slug, display_name, active),
       article_tags(tags(id, slug, name))
     `
     )
@@ -256,6 +272,7 @@ export async function listArticlesForAdmin(): Promise<Article[]> {
       `
       id, slug, category_id, title, excerpt, body, author_display, published_at, created_at, updated_at,
       article_categories(id, slug, name, description),
+      article_authors(id, slug, display_name, active),
       article_tags(tags(id, slug, name))
     `
     )
@@ -310,6 +327,7 @@ export async function createArticle(params: {
       `
       id, slug, category_id, title, excerpt, body, author_display, published_at, created_at, updated_at,
       article_categories(id, slug, name, description),
+      article_authors(id, slug, display_name, active),
       article_tags(tags(id, slug, name))
     `
     )

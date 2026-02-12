@@ -29,6 +29,7 @@ export async function POST(req: Request) {
       title: String(body.title),
       excerpt: body.excerpt ? String(body.excerpt) : null,
       body: body.body ? String(body.body) : "",
+      author_id: body.author_id ? String(body.author_id) : null,
       author_display: body.author_display ? String(body.author_display) : null,
       published_at: body.published_at ? String(body.published_at) : null,
     });

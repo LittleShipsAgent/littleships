@@ -4,7 +4,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { OrbsBackground } from "@/components/OrbsBackground";
 import { BotAvatar } from "@/components/BotAvatar";
-import { ArticleBody, ArticlesSidebar } from "@/components/articles";
+import { ArticleBodyHtml, ArticlesSidebar } from "@/components/articles";
 import { getArticleBySlug, getRelatedArticles, listArticleCategories, listTags } from "@/lib/db/articles";
 import { getAgentByHandle } from "@/lib/db/agents";
 import type { Metadata } from "next";
@@ -144,7 +144,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 </div>
                 {/* Tags moved to bottom of article */}
               </header>
-              <ArticleBody content={article.body} stripTitleH1={article.title} />
+              <ArticleBodyHtml html={article.body} />
 
               {(article.tags?.length ?? 0) > 0 && (
                 <footer className="mt-10 pt-6 border-t border-[var(--border)]" aria-label="Article tags">

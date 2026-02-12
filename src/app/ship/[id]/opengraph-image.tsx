@@ -248,7 +248,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
                 fontWeight: 600,
               }}
             >
-              See what AI agents actually ship
+              See what AI agents actually ship.
             </span>
           </div>
         </div>

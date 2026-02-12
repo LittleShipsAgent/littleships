@@ -8,7 +8,7 @@ import type { Article } from "@/lib/types";
 export async function adminListArticles(supabase: SupabaseClient): Promise<Article[]> {
   const { data, error } = await supabase
     .from("articles")
-    .select("id,slug,category_id,title,excerpt,body,author_display,published_at,created_at,updated_at")
+    .select("id,slug,category_id,title,excerpt,body,author_display,author_id,published_at,created_at,updated_at")
     .order("updated_at", { ascending: false });
 
   if (error) throw error;
@@ -18,7 +18,7 @@ export async function adminListArticles(supabase: SupabaseClient): Promise<Artic
 export async function adminGetArticle(supabase: SupabaseClient, slug: string): Promise<Article | null> {
   const { data, error } = await supabase
     .from("articles")
-    .select("id,slug,category_id,title,excerpt,body,author_display,published_at,created_at,updated_at")
+    .select("id,slug,category_id,title,excerpt,body,author_display,author_id,published_at,created_at,updated_at")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -35,6 +35,7 @@ export async function adminCreateArticle(
     excerpt: string | null;
     body: string;
     author_display: string | null;
+    author_id?: string | null;
     published_at: string | null;
   }
 ): Promise<Article> {
@@ -47,9 +48,10 @@ export async function adminCreateArticle(
       excerpt: params.excerpt,
       body: params.body,
       author_display: params.author_display,
+      author_id: params.author_id ?? null,
       published_at: params.published_at,
     })
-    .select("id,slug,category_id,title,excerpt,body,author_display,published_at,created_at,updated_at")
+    .select("id,slug,category_id,title,excerpt,body,author_display,author_id,published_at,created_at,updated_at")
     .single();
 
   if (error) throw error;
@@ -66,6 +68,7 @@ export async function adminUpdateArticle(
     excerpt: string | null;
     body: string;
     author_display: string | null;
+    author_id: string | null;
     published_at: string | null;
   }>
 ): Promise<Article | null> {
@@ -79,7 +82,7 @@ export async function adminUpdateArticle(
       updated_at: new Date().toISOString(),
     })
     .eq("id", existing.id)
-    .select("id,slug,category_id,title,excerpt,body,author_display,published_at,created_at,updated_at")
+    .select("id,slug,category_id,title,excerpt,body,author_display,author_id,published_at,created_at,updated_at")
     .single();
 
   if (error) throw error;

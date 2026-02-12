@@ -28,6 +28,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ slug: string 
       title: body.title !== undefined ? String(body.title) : undefined,
       excerpt: body.excerpt !== undefined ? (body.excerpt === null ? null : String(body.excerpt)) : undefined,
       body: body.body !== undefined ? String(body.body) : undefined,
+      author_id: body.author_id !== undefined ? (body.author_id === null ? null : String(body.author_id)) : undefined,
       author_display:
         body.author_display !== undefined ? (body.author_display === null ? null : String(body.author_display)) : undefined,
       published_at:

@@ -133,6 +133,13 @@ export interface ArticleTag {
   name: string;
 }
 
+export interface ArticleAuthor {
+  id: string;
+  slug: string;
+  display_name: string;
+  active: boolean;
+}
+
 export interface Article {
   id: string;
   slug: string;
@@ -141,7 +148,11 @@ export interface Article {
   title: string;
   excerpt: string | null;
   body: string;
+  // v0: legacy field still used by public pages
   author_display: string | null;
+  // v1: normalized author
+  author_id?: string | null;
+  author?: ArticleAuthor;
   published_at: string | null;
   created_at: string;
   updated_at: string;

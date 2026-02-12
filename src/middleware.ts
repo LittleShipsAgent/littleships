@@ -12,10 +12,11 @@ export async function middleware(request: NextRequest) {
   // Protect admin routes (except /admin/login).
   const isAdminRoute = request.nextUrl.pathname === "/admin" || request.nextUrl.pathname.startsWith("/admin/");
   const isLogin = request.nextUrl.pathname.startsWith("/admin/login");
+  const isReset = request.nextUrl.pathname.startsWith("/admin/reset");
 
   let response = NextResponse.next();
 
-  if (isAdminRoute && !isLogin) {
+  if (isAdminRoute && !isLogin && !isReset) {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
