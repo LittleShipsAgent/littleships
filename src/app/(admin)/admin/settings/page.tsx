@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 export default function AdminSettingsPage() {
   const [enabled, setEnabled] = useState<boolean | null>(null);
+  const [slotsTotal, setSlotsTotal] = useState<number | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -18,13 +19,14 @@ export default function AdminSettingsPage() {
     }
     const j = await r.json();
     setEnabled(!!j.enabled);
+    setSlotsTotal(typeof j.slotsTotal === "number" ? j.slotsTotal : 10);
   }
 
   useEffect(() => {
     refresh();
   }, []);
 
-  async function save(next: boolean) {
+  async function saveEnabled(next: boolean) {
     setBusy(true);
     setErr(null);
 
@@ -41,6 +43,26 @@ export default function AdminSettingsPage() {
     }
 
     setEnabled(next);
+    setBusy(false);
+  }
+
+  async function saveSlotsTotal(next: number) {
+    setBusy(true);
+    setErr(null);
+
+    const r = await fetch("/api/admin/settings/sponsors", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ slotsTotal: next }),
+    });
+
+    if (!r.ok) {
+      setErr(await r.text());
+      setBusy(false);
+      return;
+    }
+
+    setSlotsTotal(next);
     setBusy(false);
   }
 
@@ -69,13 +91,44 @@ export default function AdminSettingsPage() {
               type="checkbox"
               checked={!!enabled}
               disabled={busy || enabled === null}
-              onChange={(e) => save(e.target.checked)}
+              onChange={(e) => saveEnabled(e.target.checked)}
             />
             Enabled
           </label>
         </div>
 
         <div className="mt-3 text-xs text-neutral-500">Current: {enabled === null ? "…" : enabled ? "Enabled" : "Disabled"}</div>
+      </div>
+
+      <div className="mt-6 rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <div className="text-sm font-medium">Sponsor slots (total)</div>
+            <div className="mt-1 text-xs text-neutral-500">Controls how many sponsor modules can be active at once.</div>
+          </div>
+          <input
+            type="number"
+            min={0}
+            max={50}
+            step={1}
+            value={slotsTotal ?? ""}
+            disabled={busy || slotsTotal === null}
+            onChange={(e) => {
+              const n = Math.floor(Number(e.target.value));
+              if (!Number.isFinite(n)) return;
+              setSlotsTotal(n);
+            }}
+            onBlur={() => {
+              if (slotsTotal === null) return;
+              const clamped = Math.max(0, Math.min(50, Math.floor(slotsTotal)));
+              if (clamped !== slotsTotal) setSlotsTotal(clamped);
+              saveSlotsTotal(clamped);
+            }}
+            className="w-24 rounded bg-neutral-900 px-3 py-2 text-sm"
+          />
+        </div>
+
+        <div className="mt-3 text-xs text-neutral-500">Current: {slotsTotal === null ? "…" : slotsTotal}</div>
       </div>
     </main>
   );

@@ -3,7 +3,7 @@ import { Megaphone } from "lucide-react";
 import type { SponsorCardData } from "./sponsorConfig";
 
 const cardClassName = [
-  "group block w-full rounded-2xl border border-[var(--border)]",
+  "group block h-full w-full rounded-2xl border border-[var(--border)]",
   "bg-[color-mix(in_srgb,var(--bg-muted)_72%,transparent)]",
   "hover:bg-[var(--card)] hover:border-[var(--border-hover)]",
   "transition-colors",

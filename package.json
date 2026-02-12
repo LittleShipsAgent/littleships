@@ -20,6 +20,7 @@
     "@tiptap/starter-kit": "^3.19.0",
     "@uiw/react-markdown-preview": "^5.1.5",
     "@uiw/react-md-editor": "^4.0.11",
+    "canvas-confetti": "^1.9.4",
     "lucide-react": "^0.468.0",
     "next": "16.1.6",
     "react": "19.2.3",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

@@ -4,6 +4,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
 import { Megaphone } from "lucide-react";
 import { useCallback, useState } from "react";
+import { fireConfetti } from "@/lib/confetti";
 import { SponsorSetupForm } from "./SponsorSetupForm";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -12,7 +13,7 @@ function Modal({ open, onClose, children }: { open: boolean; onClose: () => void
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 px-4">
-      <div className="w-full max-w-lg overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-subtle)] shadow-2xl">
+      <div className="flex w-full max-w-2xl max-h-[90vh] flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-subtle)] shadow-2xl">
         <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
           <div className="flex items-center gap-2 text-[var(--fg)]">
             <Megaphone className="h-4 w-4 text-[var(--fg-muted)]" aria-hidden />
@@ -26,13 +27,13 @@ function Modal({ open, onClose, children }: { open: boolean; onClose: () => void
             ✕
           </button>
         </div>
-        <div className="px-6 py-6">{children}</div>
+        <div className="flex-1 overflow-y-auto px-6 py-6">{children}</div>
       </div>
     </div>
   );
 }
 
-type Step = "pitch" | "checkout" | "success";
+type Step = "pitch" | "checkout" | "success" | "pending";
 
 export function BuySponsorshipModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [step, setStep] = useState<Step>("pitch");
@@ -70,15 +71,39 @@ export function BuySponsorshipModal({ open, onClose }: { open: boolean; onClose:
       }}
     >
       <div className="flex flex-col items-center text-center">
-        {step === "success" && sessionId ? (
+        {step === "pending" ? (
+          <>
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--bg-muted)_55%,transparent)] text-[var(--fg-muted)]">
+              <Megaphone className="h-8 w-8" aria-hidden />
+            </div>
+            <h2 className="text-2xl font-semibold text-[var(--fg)]">Pending review</h2>
+            <p className="mt-2 text-sm text-[var(--fg-muted)]">
+              Thanks! Your sponsorship is pending approval. We’ll review it shortly.
+            </p>
+            <div className="mt-6 w-full">
+              <button
+                type="button"
+                onClick={onClose}
+                className="block w-full rounded-xl bg-[var(--fg)] px-4 py-3 text-center text-sm font-semibold text-black hover:opacity-90"
+              >
+                Done
+              </button>
+            </div>
+          </>
+        ) : step === "success" && sessionId ? (
           <>
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--bg-muted)_55%,transparent)] text-[var(--fg-muted)]">
               <Megaphone className="h-8 w-8" aria-hidden />
             </div>
             <h2 className="text-2xl font-semibold text-[var(--fg)]">Payment successful!</h2>
             <p className="mt-2 text-sm text-[var(--fg-muted)]">Now let’s set up your sponsor card.</p>
-            <div className="mt-6 w-full">
-              <SponsorSetupForm sessionId={sessionId} />
+            <div className="mt-6 w-full text-left">
+              <SponsorSetupForm
+                sessionId={sessionId}
+                onSubmitted={() => {
+                  setStep("pending");
+                }}
+              />
             </div>
           </>
         ) : step === "checkout" ? (
@@ -94,7 +119,10 @@ export function BuySponsorshipModal({ open, onClose }: { open: boolean; onClose:
                 stripe={stripePromise}
                 options={{
                   fetchClientSecret,
-                  onComplete: () => setStep("success"),
+                  onComplete: () => {
+                    fireConfetti();
+                    setStep("success");
+                  },
                 }}
               >
                 <EmbeddedCheckout />

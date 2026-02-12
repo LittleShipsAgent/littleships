@@ -1,17 +1,16 @@
 import { NextResponse } from "next/server";
-import { requireAdminToken } from "@/lib/admin";
+import { requireAdminUser } from "@/lib/admin-auth";
 import { listPendingSponsorOrders } from "@/lib/db/sponsors";
 
 export async function GET(req: Request) {
   try {
-    const token = req.headers.get("x-admin-token") ?? new URL(req.url).searchParams.get("token");
-    requireAdminToken(token);
+    await requireAdminUser();
 
     const pending = await listPendingSponsorOrders(100);
     return NextResponse.json({ pending });
   } catch (err: any) {
     const msg = err?.message ?? "error";
-    const status = msg === "Unauthorized" ? 401 : 500;
+    const status = msg === "Unauthorized" ? 401 : msg === "Forbidden" ? 403 : 500;
     return new NextResponse(msg, { status });
   }
 }

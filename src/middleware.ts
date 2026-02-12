@@ -9,14 +9,15 @@ import { createServerClient } from "@supabase/ssr";
 export async function middleware(request: NextRequest) {
   const requestId = request.headers.get("x-request-id") || generateRequestId();
 
-  // Protect admin routes (except /admin/login).
+  // Protect admin routes (except public auth pages).
   const isAdminRoute = request.nextUrl.pathname === "/admin" || request.nextUrl.pathname.startsWith("/admin/");
   const isLogin = request.nextUrl.pathname.startsWith("/admin/login");
   const isReset = request.nextUrl.pathname.startsWith("/admin/reset");
+  const isCallback = request.nextUrl.pathname.startsWith("/admin/auth/callback");
 
   let response = NextResponse.next();
 
-  if (isAdminRoute && !isLogin && !isReset) {
+  if (isAdminRoute && !isLogin && !isReset && !isCallback) {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 

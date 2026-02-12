@@ -32,8 +32,31 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
   if (!show) return <>{children}</>;
 
   const [cards, setCards] = useState<SponsorCardData[] | null>(null);
+  const [slotsTotal, setSlotsTotal] = useState<number | null>(null);
 
   useEffect(() => {
+    let alive = true;
+
+    // Load slot capacity (admin-configurable) first, so we don't render 19 placeholders then shrink.
+    fetch("/api/settings/sponsors")
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((json) => {
+        const n = typeof json?.slotsTotal === "number" ? Math.floor(json.slotsTotal) : 10;
+        if (!alive) return;
+        setSlotsTotal(Math.max(0, Math.min(50, Number.isFinite(n) ? n : 10)));
+      })
+      .catch(() => {
+        if (alive) setSlotsTotal(10);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (slotsTotal === null) return;
+
     let alive = true;
     fetch("/api/sponsor/cards")
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
@@ -51,23 +74,26 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
 
         const merged = [...active];
         for (const p of placeholderSponsors) {
-          if (merged.length >= 19) break;
+          if (merged.length >= slotsTotal) break;
           merged.push(p);
         }
 
-        if (alive) setCards(merged);
+        if (alive) setCards(merged.slice(0, slotsTotal));
       })
       .catch(() => {
-        if (alive) setCards(placeholderSponsors);
+        if (alive) setCards(placeholderSponsors.slice(0, slotsTotal));
       });
 
     return () => {
       alive = false;
     };
-  }, []);
+  }, [slotsTotal]);
 
-  const left = (cards ?? placeholderSponsors).slice(0, 10);
-  const right = (cards ?? placeholderSponsors).slice(10, 19);
+  const effectiveSlotsTotal = slotsTotal ?? 10;
+
+  const half = Math.ceil(effectiveSlotsTotal / 2);
+  const left = (cards ?? placeholderSponsors).slice(0, half);
+  const right = (cards ?? placeholderSponsors).slice(half, effectiveSlotsTotal);
 
   const railWidth = 240;
   const railPad = 24;
@@ -80,7 +106,9 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
         <div className="fixed left-0 top-0 z-40 h-screen px-3 py-6" style={{ width: railWidth + railPad }}>
           <div className="flex h-full w-[240px] flex-col gap-3">
             {left.map((s) => (
-              <SponsorCard key={s.id} data={s} onOpenBuyModal={() => setOpen(true)} />
+              <div key={s.id} className="flex-1">
+                <SponsorCard data={s} onOpenBuyModal={() => setOpen(true)} />
+              </div>
             ))}
           </div>
         </div>
@@ -90,11 +118,10 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
         <div className="fixed right-0 top-0 z-40 h-screen px-3 py-6" style={{ width: railWidth + railPad }}>
           <div className="flex h-full w-[240px] flex-col gap-3">
             {right.map((s) => (
-              <SponsorCard key={s.id} data={s} onOpenBuyModal={() => setOpen(true)} />
+              <div key={s.id} className="flex-1">
+                <SponsorCard data={s} onOpenBuyModal={() => setOpen(true)} />
+              </div>
             ))}
-            <div className="mt-auto">
-              <BuySponsorshipCard onOpen={() => setOpen(true)} />
-            </div>
           </div>
         </div>
       </aside>
