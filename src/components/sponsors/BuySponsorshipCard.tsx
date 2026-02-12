@@ -3,11 +3,7 @@
 import { useState } from "react";
 import { BuySponsorshipModal } from "./BuySponsorshipModal";
 
-export function BuySponsorshipCard({
-  onOpen,
-}: {
-  onOpen?: () => void;
-}) {
+export function BuySponsorshipCard({ onOpen }: { onOpen?: () => void }) {
   const [open, setOpen] = useState(false);
 
   return (

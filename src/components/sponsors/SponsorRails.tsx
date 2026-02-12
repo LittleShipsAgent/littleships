@@ -38,7 +38,6 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
     fetch("/api/sponsor/cards")
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then((json) => {
-        // Shape from API: { cards: SponsorCardRow[] }
         const active = (json?.cards ?? []).map((c: any) =>
           ({
             id: c.order_id,
@@ -50,7 +49,6 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
           }) satisfies SponsorCardData
         );
 
-        // Fill remaining inventory with placeholders (modal triggers).
         const merged = [...active];
         for (const p of placeholderSponsors) {
           if (merged.length >= 19) break;
@@ -69,22 +67,17 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
   }, []);
 
   const left = (cards ?? placeholderSponsors).slice(0, 10);
-  const right = (cards ?? placeholderSponsors).slice(10, 19); // 9 paid slots
+  const right = (cards ?? placeholderSponsors).slice(10, 19);
 
   const railWidth = 240;
-  const railPad = 24; // spacing between rails and body content
-  // Note: body padding is applied only at lg+ via Tailwind arbitrary values.
+  const railPad = 24;
 
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      {/* Fixed rails (desktop/tablet). Content should never be squashed. */}
       <aside className="hidden lg:block">
-        <div
-          className="fixed left-0 top-0 z-40 h-screen px-3 py-6"
-          style={{ width: railWidth + railPad }}
-        >
+        <div className="fixed left-0 top-0 z-40 h-screen px-3 py-6" style={{ width: railWidth + railPad }}>
           <div className="flex h-full w-[240px] flex-col gap-3">
             {left.map((s) => (
               <SponsorCard key={s.id} data={s} onOpenBuyModal={() => setOpen(true)} />
@@ -94,10 +87,7 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
       </aside>
 
       <aside className="hidden lg:block">
-        <div
-          className="fixed right-0 top-0 z-40 h-screen px-3 py-6"
-          style={{ width: railWidth + railPad }}
-        >
+        <div className="fixed right-0 top-0 z-40 h-screen px-3 py-6" style={{ width: railWidth + railPad }}>
           <div className="flex h-full w-[240px] flex-col gap-3">
             {right.map((s) => (
               <SponsorCard key={s.id} data={s} onOpenBuyModal={() => setOpen(true)} />
@@ -109,12 +99,10 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      {/* Body content */}
       <div className="w-full px-4 lg:px-8 lg:pl-[264px] lg:pr-[264px]">
         <div className="mx-auto w-full max-w-6xl min-w-0">{children}</div>
       </div>
 
-      {/* Single modal instance, shared across all rail modules */}
       <BuySponsorshipModal open={open} onClose={() => setOpen(false)} />
     </>
   );
