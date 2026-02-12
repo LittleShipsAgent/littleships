@@ -25,19 +25,30 @@ function shouldShowRails(pathname: string): boolean {
   return true;
 }
 
-export function SponsorRails({ children }: { children: React.ReactNode }) {
+export function SponsorRails({
+  children,
+  initialCards,
+  initialSlotsTotal,
+}: {
+  children: React.ReactNode;
+  initialCards?: SponsorCardData[];
+  initialSlotsTotal?: number;
+}) {
   const pathname = usePathname() ?? "/";
 
   const show = shouldShowRails(pathname);
   if (!show) return <>{children}</>;
 
-  const [cards, setCards] = useState<SponsorCardData[] | null>(null);
-  const [slotsTotal, setSlotsTotal] = useState<number | null>(null);
+  const [cards, setCards] = useState<SponsorCardData[] | null>(initialCards ?? null);
+  const [slotsTotal, setSlotsTotal] = useState<number | null>(
+    typeof initialSlotsTotal === "number" ? initialSlotsTotal : null
+  );
 
   useEffect(() => {
-    let alive = true;
+    // If server provided slotsTotal, avoid client refetch flicker.
+    if (slotsTotal !== null) return;
 
-    // Load slot capacity (admin-configurable) first, so we don't render 19 placeholders then shrink.
+    let alive = true;
     fetch("/api/settings/sponsors")
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then((json) => {
@@ -52,10 +63,13 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [slotsTotal]);
 
   useEffect(() => {
     if (slotsTotal === null) return;
+
+    // If server provided cards, avoid client refetch flicker.
+    if (cards !== null) return;
 
     let alive = true;
     fetch("/api/sponsor/cards")
@@ -87,13 +101,14 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
     return () => {
       alive = false;
     };
-  }, [slotsTotal]);
+  }, [slotsTotal, cards]);
 
-  const effectiveSlotsTotal = slotsTotal ?? 10;
+  const effectiveSlotsTotal = slotsTotal ?? initialSlotsTotal ?? 10;
 
   const half = Math.ceil(effectiveSlotsTotal / 2);
-  const left = (cards ?? placeholderSponsors).slice(0, half);
-  const right = (cards ?? placeholderSponsors).slice(half, effectiveSlotsTotal);
+  const baseCards = cards ?? placeholderSponsors;
+  const left = baseCards.slice(0, half);
+  const right = baseCards.slice(half, effectiveSlotsTotal);
 
   const railWidth = 240;
   const railPad = 24;
