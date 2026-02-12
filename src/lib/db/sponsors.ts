@@ -98,9 +98,7 @@ export async function markOrderPendingApproval(input: {
   if (error) throw error;
 }
 
-export async function markOrderCanceledBySubscription(input: {
-  stripeSubscriptionId: string;
-}): Promise<void> {
+export async function markOrderCanceledBySubscription(input: { stripeSubscriptionId: string }): Promise<void> {
   const db = getDb();
   if (!db) throw new Error("Database not configured");
 
@@ -137,12 +135,11 @@ export async function getActiveSponsorCards(limit = 19): Promise<SponsorCardRow[
   return (data ?? []) as SponsorCardRow[];
 }
 
-export async function listSponsorOrdersByStatus(
-  status: SponsorOrderStatus,
-  limit = 50
-): Promise<SponsorOrderRow[]> {
+export async function listSponsorOrdersByStatus(status: SponsorOrderStatus, limit = 50): Promise<SponsorOrderRow[]> {
   const db = getDb();
   if (!db) return [];
+
+  const ascending = status === "pending_approval";
 
   const { data, error } = await db
     .from("sponsor_orders")
@@ -150,16 +147,11 @@ export async function listSponsorOrdersByStatus(
       "id,created_at,updated_at,stripe_checkout_session_id,stripe_customer_id,stripe_subscription_id,status,price_cents,slots_sold_at_purchase,purchaser_email"
     )
     .eq("status", status)
-    .order("created_at", { ascending: status === "pending_approval" })
-    .order("created_at", { ascending: false })
+    .order("created_at", { ascending })
     .limit(limit);
 
   if (error) throw error;
   return (data ?? []) as SponsorOrderRow[];
-}
-
-export async function listPendingSponsorOrders(limit = 50): Promise<SponsorOrderRow[]> {
-  return listSponsorOrdersByStatus("pending_approval", limit);
 }
 
 export async function approveSponsorOrder(input: {
