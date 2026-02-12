@@ -137,7 +137,10 @@ export async function getActiveSponsorCards(limit = 19): Promise<SponsorCardRow[
   return (data ?? []) as SponsorCardRow[];
 }
 
-export async function listPendingSponsorOrders(limit = 50): Promise<SponsorOrderRow[]> {
+export async function listSponsorOrdersByStatus(
+  status: SponsorOrderStatus,
+  limit = 50
+): Promise<SponsorOrderRow[]> {
   const db = getDb();
   if (!db) return [];
 
@@ -146,12 +149,17 @@ export async function listPendingSponsorOrders(limit = 50): Promise<SponsorOrder
     .select(
       "id,created_at,updated_at,stripe_checkout_session_id,stripe_customer_id,stripe_subscription_id,status,price_cents,slots_sold_at_purchase,purchaser_email"
     )
-    .eq("status", "pending_approval")
-    .order("created_at", { ascending: true })
+    .eq("status", status)
+    .order("created_at", { ascending: status === "pending_approval" })
+    .order("created_at", { ascending: false })
     .limit(limit);
 
   if (error) throw error;
   return (data ?? []) as SponsorOrderRow[];
+}
+
+export async function listPendingSponsorOrders(limit = 50): Promise<SponsorOrderRow[]> {
+  return listSponsorOrdersByStatus("pending_approval", limit);
 }
 
 export async function approveSponsorOrder(input: {
@@ -207,4 +215,44 @@ export async function rejectSponsorOrder(input: { orderId: string }): Promise<vo
     .eq("id", input.orderId);
 
   if (error) throw error;
+}
+
+export type SponsorCreativeRow = {
+  order_id: string;
+  title: string;
+  tagline: string;
+  href: string;
+  logo_text: string | null;
+  logo_url: string | null;
+  bg_color: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type SponsorOrderWithCreativeRow = SponsorOrderRow & {
+  creative: SponsorCreativeRow | null;
+};
+
+export async function listSponsorOrdersWithCreativeByStatus(
+  status: Exclude<SponsorOrderStatus, "initiated">,
+  limit = 100
+): Promise<SponsorOrderWithCreativeRow[]> {
+  const db = getDb();
+  if (!db) return [];
+
+  const { data, error } = await db
+    .from("sponsor_orders")
+    .select(
+      "id,created_at,updated_at,stripe_checkout_session_id,stripe_customer_id,stripe_subscription_id,status,price_cents,slots_sold_at_purchase,purchaser_email,creative:sponsor_creatives(order_id,title,tagline,href,logo_text,logo_url,bg_color,created_at,updated_at)"
+    )
+    .eq("status", status)
+    .order("created_at", { ascending: true })
+    .limit(limit);
+
+  if (error) throw error;
+
+  return (data ?? []).map((row: any) => ({
+    ...(row as SponsorOrderRow),
+    creative: (row?.creative as SponsorCreativeRow | null) ?? null,
+  }));
 }

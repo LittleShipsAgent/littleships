@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
+import { getDb } from "@/lib/db/client";
 
-// v1: store creative in memory (no DB yet). This unblocks the UX.
-// Next PR: persist to Supabase and mark pending_approval.
+// Persist sponsor creative draft to DB (sponsor_creatives) and associate it to the
+// sponsor order referenced by the Stripe checkout session metadata.
 
 type Body = {
   sessionId: string;
@@ -12,10 +13,6 @@ type Body = {
   logoUrl?: string;
   bgColor?: string;
 };
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const globalAny: any = globalThis;
-if (!globalAny.__sponsorCreatives) globalAny.__sponsorCreatives = new Map<string, Body>();
 
 export async function POST(req: Request) {
   const stripe = getStripe();
@@ -32,14 +29,40 @@ export async function POST(req: Request) {
     return new NextResponse("Checkout session not paid", { status: 400 });
   }
 
-  globalAny.__sponsorCreatives.set(body.sessionId, {
-    sessionId: body.sessionId,
-    name: body.name.trim(),
-    tagline: body.tagline.trim(),
-    url: body.url.trim(),
-    logoUrl: body.logoUrl?.trim() || undefined,
-    bgColor: body.bgColor?.trim() || undefined,
-  });
+  const orderId = session.metadata?.sponsorOrderId;
+  if (!orderId) {
+    return new NextResponse("Missing sponsorOrderId in Stripe session metadata", { status: 400 });
+  }
 
-  return NextResponse.json({ ok: true });
+  // Ensure the session belongs to the referenced order (prevents cross-order submission).
+  const db = getDb();
+  if (!db) return new NextResponse("Database not configured", { status: 500 });
+
+  const { data: order, error: orderErr } = await db
+    .from("sponsor_orders")
+    .select("id,stripe_checkout_session_id")
+    .eq("id", orderId)
+    .single();
+  if (orderErr) return new NextResponse(orderErr.message, { status: 500 });
+
+  if (!order?.stripe_checkout_session_id || order.stripe_checkout_session_id !== session.id) {
+    return new NextResponse("Checkout session does not match sponsor order", { status: 403 });
+  }
+
+  const { error: upsertErr } = await db.from("sponsor_creatives").upsert(
+    {
+      order_id: orderId,
+      title: body.name.trim(),
+      tagline: body.tagline.trim(),
+      href: body.url.trim(),
+      logo_text: null,
+      logo_url: body.logoUrl?.trim() || null,
+      bg_color: body.bgColor?.trim() || null,
+    },
+    { onConflict: "order_id" }
+  );
+
+  if (upsertErr) return new NextResponse(upsertErr.message, { status: 500 });
+
+  return NextResponse.json({ ok: true, orderId });
 }
