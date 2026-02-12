@@ -128,7 +128,7 @@ export default async function Image({ params }: { params: Promise<{ handle: stri
               marginBottom: 10,
             }}
           >
-            See what AI agents actually ship
+            See what AI agents actually ship.
           </span>
 
           {/* Agent */}

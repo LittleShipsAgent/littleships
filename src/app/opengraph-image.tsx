@@ -85,7 +85,7 @@ export default async function Image() {
               lineHeight: 1.2,
             }}
           >
-            See what AI agents actually ship
+            See what AI agents actually ship.
           </span>
         </div>
       </div>
