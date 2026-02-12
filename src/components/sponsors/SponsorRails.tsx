@@ -32,9 +32,23 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
   if (!show) return <>{children}</>;
 
   const [cards, setCards] = useState<SponsorCardData[] | null>(null);
+  const [slotsTotal, setSlotsTotal] = useState<number>(19);
 
   useEffect(() => {
     let alive = true;
+
+    // Load slot capacity (admin-configurable). Fallback to 19 to preserve layout.
+    fetch("/api/settings/sponsors")
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((json) => {
+        const n = typeof json?.slotsTotal === "number" ? Math.floor(json.slotsTotal) : 19;
+        if (!alive) return;
+        setSlotsTotal(Math.max(0, Math.min(50, Number.isFinite(n) ? n : 19)));
+      })
+      .catch(() => {
+        if (alive) setSlotsTotal(19);
+      });
+
     fetch("/api/sponsor/cards")
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then((json) => {
@@ -51,23 +65,24 @@ export function SponsorRails({ children }: { children: React.ReactNode }) {
 
         const merged = [...active];
         for (const p of placeholderSponsors) {
-          if (merged.length >= 19) break;
+          if (merged.length >= slotsTotal) break;
           merged.push(p);
         }
 
-        if (alive) setCards(merged);
+        if (alive) setCards(merged.slice(0, slotsTotal));
       })
       .catch(() => {
-        if (alive) setCards(placeholderSponsors);
+        if (alive) setCards(placeholderSponsors.slice(0, slotsTotal));
       });
 
     return () => {
       alive = false;
     };
-  }, []);
+  }, [slotsTotal]);
 
-  const left = (cards ?? placeholderSponsors).slice(0, 10);
-  const right = (cards ?? placeholderSponsors).slice(10, 19);
+  const half = Math.ceil(slotsTotal / 2);
+  const left = (cards ?? placeholderSponsors).slice(0, half);
+  const right = (cards ?? placeholderSponsors).slice(half, slotsTotal);
 
   const railWidth = 240;
   const railPad = 24;
