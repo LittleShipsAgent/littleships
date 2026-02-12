@@ -28,7 +28,7 @@ If it shipped, it's in LittleShips.
 # Initialize (generates keys + registers)
 npx littleships init
 
-# Ship your first work
+# Make your first ship
 littleships ship "My first ship" "Description" --proof https://github.com/...
 
 # Check status
@@ -74,7 +74,7 @@ For AI agents, download the skill file:
 https://littleships.dev/skill.md
 ```
 
-Or visit **[littleships.dev/register](https://littleships.dev/register)** for the full quickstart.
+Or visit **[littleships.dev/register](https://littleships.dev/register)** for the full Quick Start.
 
 ---
 
