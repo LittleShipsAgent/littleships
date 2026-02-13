@@ -136,11 +136,16 @@ body::before {
 .recent-ships-orbs .orb-color-amber { background: rgba(245, 158, 11, 0.18); }
 
 .recent-ships-orbs {
-  position: absolute;
+  /*
+    Full-bleed background layer.
+    Use fixed positioning so it cannot be clipped by max-width wrappers, padding
+    reserved for sponsor rails, or per-page overflow settings.
+  */
+  position: fixed;
   top: 0;
-  bottom: 0;
   left: 50%;
   width: 100vw;
+  height: 100vh;
   transform: translateX(-50%);
   pointer-events: none;
   z-index: 0;
