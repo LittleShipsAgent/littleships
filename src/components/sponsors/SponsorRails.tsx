@@ -6,6 +6,7 @@ import { BuySponsorshipCard } from "./BuySponsorshipCard";
 import { BuySponsorshipModal } from "./BuySponsorshipModal";
 import { SponsorCard } from "./SponsorCard";
 import { placeholderSponsors, SponsorCardData } from "./sponsorConfig";
+import { OrbsBackground } from "@/components/OrbsBackground";
 
 const HIDE_PREFIXES = [
   "/disclaimer",
@@ -127,6 +128,11 @@ export function SponsorRails({
 
   return (
     <>
+      {/* Full-bleed background layer that extends under the fixed sponsor rails. */}
+      <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
+        <OrbsBackground />
+      </div>
+
       <aside className="hidden lg:block">
         <div className="fixed left-0 top-0 z-40 h-screen px-3 py-6" style={{ width: railWidth + railPad }}>
           <div className="flex h-full w-[240px] flex-col gap-3">
