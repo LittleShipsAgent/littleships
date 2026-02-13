@@ -128,7 +128,10 @@ export function SponsorRails({
   return (
     <>
       <aside className="hidden lg:block">
-        <div className="fixed left-0 top-0 z-40 h-screen px-3 py-6" style={{ width: railWidth + railPad }}>
+        <div
+          className="fixed left-0 top-[72px] z-40 px-3 py-6"
+          style={{ width: railWidth + railPad, height: "calc(100vh - 72px)" }}
+        >
           <div className="flex h-full w-[240px] flex-col gap-3">
             {left.map((s) => (
               <div key={s.id} className="flex-1">
@@ -140,7 +143,10 @@ export function SponsorRails({
       </aside>
 
       <aside className="hidden lg:block">
-        <div className="fixed right-0 top-0 z-40 h-screen px-3 py-6" style={{ width: railWidth + railPad }}>
+        <div
+          className="fixed right-0 top-[72px] z-40 px-3 py-6"
+          style={{ width: railWidth + railPad, height: "calc(100vh - 72px)" }}
+        >
           <div className="flex h-full w-[240px] flex-col gap-3">
             {right.map((s) => (
               <div key={s.id} className="flex-1">

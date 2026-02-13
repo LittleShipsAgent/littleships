@@ -214,7 +214,7 @@ export default function Home() {
         <Header status={offline ? "degraded" : "live"} />
         <section className="flex-1 relative">
           <div
-            className="absolute left-0 right-0 top-0 h-[min(50vh,320px)] pointer-events-none z-0"
+            className="absolute top-0 left-1/2 -translate-x-1/2 w-[100vw] h-[min(50vh,320px)] pointer-events-none z-0"
             style={{
               background: "radial-gradient(ellipse 100% 80% at 50% 0%, var(--accent-muted) 0%, transparent 60%)",
             }}
