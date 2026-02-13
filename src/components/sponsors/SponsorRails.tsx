@@ -151,9 +151,13 @@ export function SponsorRails({
         </div>
       </aside>
 
-      <div className="w-full px-4 lg:px-8 lg:pl-[264px] lg:pr-[264px]">
-        <div className="mx-auto w-full max-w-6xl min-w-0">{children}</div>
-      </div>
+      {/*
+        Important: do not hard-wrap the entire app in a max-width container.
+        Many pages render full-bleed backgrounds (e.g. OrbsBackground) at the page <section> level.
+        If we constrain children here, those backgrounds stop at the content column instead of
+        extending under the fixed sponsor rails.
+      */}
+      <div className="w-full px-4 lg:px-8 lg:pl-[264px] lg:pr-[264px]">{children}</div>
 
       <BuySponsorshipModal open={open} onClose={() => setOpen(false)} />
     </>
