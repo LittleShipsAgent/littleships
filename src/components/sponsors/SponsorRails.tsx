@@ -127,10 +127,10 @@ export function SponsorRails({
   const [open, setOpen] = useState(false);
 
   return (
-    <>
+    <div data-has-global-orbs>
       {/* Full-bleed background layer that extends under the fixed sponsor rails. */}
       <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
-        <OrbsBackground />
+        <OrbsBackground className="global-orbs" />
       </div>
 
       <aside className="hidden lg:block">
@@ -166,6 +166,6 @@ export function SponsorRails({
       <div className="w-full px-4 lg:px-8 lg:pl-[264px] lg:pr-[264px]">{children}</div>
 
       <BuySponsorshipModal open={open} onClose={() => setOpen(false)} />
-    </>
+    </div>
   );
 }
