@@ -3,8 +3,6 @@ import { Footer } from "@/components/Footer";
 import { OrbsBackground } from "@/components/OrbsBackground";
 import { ArticlesListClient } from "./ArticlesListClient";
 import { listArticles, listArticleCategories, listTags } from "@/lib/db/articles";
-import { getSponsorsEnabled } from "@/lib/db/settings-public";
-import { PageWithRails } from "@/components/PageWithRails";
 
 interface ArticlesPageProps {
   searchParams: Promise<{ category?: string; tag?: string }>;
@@ -15,11 +13,10 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
   const categorySlug = typeof params.category === "string" ? params.category : undefined;
   const tagSlug = typeof params.tag === "string" ? params.tag : undefined;
 
-  const [articles, categories, tags, sponsorsEnabled] = await Promise.all([
+  const [articles, categories, tags] = await Promise.all([
     listArticles({ categorySlug, tagSlug }),
     listArticleCategories(),
     listTags(true),
-    getSponsorsEnabled(),
   ]);
 
   return (
@@ -34,16 +31,9 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
           }}
           aria-hidden
         />
-        {/** Rails wrapper lives at the page level to keep sidebar layout intact. */}
-        {sponsorsEnabled ? (
-          <PageWithRails>
-            <ArticlesListClient articles={articles} categories={categories} tags={tags} />
-          </PageWithRails>
-        ) : (
-          <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 lg:px-8 py-12">
-            <ArticlesListClient articles={articles} categories={categories} tags={tags} />
-          </div>
-        )}
+        <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 lg:px-8 py-12">
+          <ArticlesListClient articles={articles} categories={categories} tags={tags} />
+        </div>
       </section>
       <Footer />
     </div>

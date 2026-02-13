@@ -137,7 +137,11 @@ body::before {
 
 .recent-ships-orbs {
   position: absolute;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
   pointer-events: none;
   z-index: 0;
 }
