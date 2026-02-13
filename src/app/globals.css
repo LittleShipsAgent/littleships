@@ -82,6 +82,56 @@ body::before {
   );
 }
 
+/* Article body fallback styling (in case Tailwind typography "prose" styles are not present). */
+.article-body h2 {
+  margin-top: 1.6em;
+  margin-bottom: 0.6em;
+  font-size: 1.25rem;
+  line-height: 1.3;
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.article-body h3 {
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  font-size: 1.1rem;
+  line-height: 1.35;
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.article-body p {
+  margin: 0.75em 0;
+}
+
+.article-body ul,
+.article-body ol {
+  margin: 0.75em 0;
+  padding-left: 1.25rem;
+}
+
+.article-body ul {
+  list-style: disc;
+}
+
+.article-body ol {
+  list-style: decimal;
+}
+
+.article-body li {
+  margin: 0.35em 0;
+}
+
+.article-body a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.article-body a:hover {
+  text-decoration: underline;
+}
+
 /* Hero — subtle repeating dot pattern so it’s less flat */
 .hero-pattern {
   background-color: var(--bg);

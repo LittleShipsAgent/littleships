@@ -50,7 +50,7 @@ function clean(html: string): string {
 }
 
 const proseClasses =
-  "prose prose-neutral dark:prose-invert max-w-none prose-headings:font-semibold prose-p:text-[var(--fg)] prose-a:text-[var(--accent)] prose-a:no-underline hover:prose-a:underline prose-code:bg-[var(--card)] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-pre:bg-[var(--card)] prose-pre:border prose-pre:border-[var(--border)]";
+  "article-body prose prose-neutral dark:prose-invert max-w-none prose-headings:font-semibold prose-p:text-[var(--fg)] prose-a:text-[var(--accent)] prose-a:no-underline hover:prose-a:underline prose-code:bg-[var(--card)] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-pre:bg-[var(--card)] prose-pre:border prose-pre:border-[var(--border)]";
 
 export function ArticleBodyHtml({ html }: { html: string }) {
   const safe = clean(html);
