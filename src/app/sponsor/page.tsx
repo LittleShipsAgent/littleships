@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Megaphone, ShieldCheck, Link2, Sparkles, TrendingUp } from "lucide-react";
 import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 
 export const metadata = {
   title: "Sponsor",
@@ -100,6 +101,8 @@ export default function SponsorPage() {
         </Link>
       </div>
     </div>
+
+      <Footer />
     </>
   );
 }
