@@ -158,14 +158,7 @@ body::before {
   opacity: 0.52;
 }
 
-/*
-  When sponsor rails are enabled we render a single, global OrbsBackground behind everything.
-  Pages may still include their own OrbsBackground; hide those to avoid double layers that
-  start animations at different times (which looks like a mismatch).
-*/
-[data-has-global-orbs] .recent-ships-orbs:not(.global-orbs) {
-  display: none;
-}
+/* (removed) previously hid per-page orbs when rails enabled */
 
 /* Home page Recent Ships only — slightly subtler orbs, still visible by default */
 .recent-ships-dots .recent-ships-orbs .orb {
