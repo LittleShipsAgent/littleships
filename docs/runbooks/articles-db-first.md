@@ -48,6 +48,10 @@ Options:
   ```bash
   npm run article:draft -- --json /path/to.json --category product
   ```
+- If the slug already exists, fail by default (guardrail). To auto-suffix:
+  ```bash
+  npm run article:draft -- --json /path/to.json --suffix-if-exists
+  ```
 
 The script prints the created `id`, `slug`, and the URL path.
 

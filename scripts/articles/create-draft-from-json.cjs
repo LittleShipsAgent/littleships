@@ -30,13 +30,14 @@ const path = require("path");
 const { createClient } = require("@supabase/supabase-js");
 
 function parseArgs(argv) {
-  const out = { json: null, publish: false, category: null, authorDisplay: "LittleShips" };
+  const out = { json: null, publish: false, category: null, authorDisplay: "LittleShips", suffixIfExists: false };
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--json") out.json = argv[++i];
     else if (a === "--publish") out.publish = true;
     else if (a === "--category") out.category = argv[++i];
     else if (a === "--author-display") out.authorDisplay = argv[++i];
+    else if (a === "--suffix-if-exists") out.suffixIfExists = true;
     else if (a === "-h" || a === "--help") out.help = true;
     else throw new Error(`Unknown arg: ${a}`);
   }
@@ -72,7 +73,7 @@ function coerceFromJson(json) {
 (async () => {
   const args = parseArgs(process.argv);
   if (args.help || !args.json) {
-    console.log("Usage: node scripts/articles/create-draft-from-json.cjs --json <path> [--publish] [--category <slug>] [--author-display <name>]");
+    console.log("Usage: node scripts/articles/create-draft-from-json.cjs --json <path> [--publish] [--category <slug>] [--author-display <name>] [--suffix-if-exists]");
     process.exit(args.help ? 0 : 1);
   }
 
@@ -104,7 +105,8 @@ function coerceFromJson(json) {
     category = cats.find((c) => preferredSlugs.includes(c.slug)) || cats[0];
   }
 
-  // Ensure unique slug
+  // Duplicate guardrail: do not silently create multiple drafts with the same slug.
+  // If you really want auto-suffix behavior, pass --suffix-if-exists.
   let finalSlug = articleIn.slug;
   const { data: existing, error: existErr } = await supabase
     .from("articles")
@@ -113,7 +115,11 @@ function coerceFromJson(json) {
     .maybeSingle();
   if (existErr) throw existErr;
   if (existing?.id) {
-    finalSlug = `${finalSlug}-${Date.now().toString().slice(-6)}`;
+    if (args.suffixIfExists) {
+      finalSlug = `${finalSlug}-${Date.now().toString().slice(-6)}`;
+    } else {
+      throw new Error(`Slug already exists: ${finalSlug} (pass --suffix-if-exists to auto-suffix)`);
+    }
   }
 
   const now = new Date().toISOString();
