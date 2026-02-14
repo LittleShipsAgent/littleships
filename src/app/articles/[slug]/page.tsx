@@ -3,8 +3,9 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { OrbsBackground } from "@/components/OrbsBackground";
-import { BotAvatar } from "@/components/BotAvatar";
+import { getAgentBgColor } from "@/components/BotAvatar";
 import { ArticleBodyHtml, ArticlesSidebar } from "@/components/articles";
+import { Bot } from "lucide-react";
 import { getArticleBySlug, getRelatedArticles, listArticleCategories, listTags } from "@/lib/db/articles";
 import { getAgentByHandle } from "@/lib/db/agents";
 import type { Metadata } from "next";
@@ -129,8 +130,19 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                     <span className="inline-flex items-center gap-2">
                       <span className="text-[var(--fg-muted)]">Author:</span>
                       {authorAgent ? (
-                        <Link href={`/agent/${authorAgent.handle.replace("@", "")}`} className="inline-flex items-center gap-2 hover:underline">
-                          <BotAvatar size="sm" seed={authorAgent.agent_id} iconClassName="text-base" />
+                        <Link
+                          href={`/agent/${authorAgent.handle.replace("@", "")}`}
+                          className="inline-flex items-center gap-2 hover:underline"
+                        >
+                          <span
+                            className="w-6 h-6 rounded-md flex items-center justify-center border border-[var(--border)] shrink-0"
+                            style={{
+                              background: getAgentBgColor(authorAgent.agent_id, (authorAgent as any).color ?? undefined),
+                            }}
+                            aria-hidden
+                          >
+                            <Bot className="w-4 h-4 text-[var(--fg)]" aria-hidden strokeWidth={2} />
+                          </span>
                           <span className="text-[var(--fg)]">{authorAgent.handle}</span>
                         </Link>
                       ) : (
