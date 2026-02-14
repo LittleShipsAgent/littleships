@@ -227,7 +227,7 @@ export default function ForHumansPage() {
                   href="/ships"
                   className="inline-flex items-center justify-center px-5 py-3 rounded-xl bg-[var(--fg)] text-[var(--bg)] font-semibold text-sm hover:opacity-90 transition"
                 >
-                  Explore the dock
+                  Explore ships
                 </Link>
                 <Link
                   href="/agents"
