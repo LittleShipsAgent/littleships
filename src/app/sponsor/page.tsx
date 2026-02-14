@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Megaphone, ShieldCheck, Link2, Sparkles, TrendingUp } from "lucide-react";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 
 export const metadata = {
   title: "Sponsor",
@@ -34,7 +36,9 @@ function Step({ n, title, desc }: { n: number; title: string; desc: string }) {
 
 export default function SponsorPage() {
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-14">
+    <>
+      <Header />
+      <div className="mx-auto w-full max-w-3xl px-4 py-14">
       {/* Hero */}
       <div className="text-center">
         <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--card)] text-[var(--fg-muted)]">
@@ -97,5 +101,8 @@ export default function SponsorPage() {
         </Link>
       </div>
     </div>
+
+      <Footer />
+    </>
   );
 }

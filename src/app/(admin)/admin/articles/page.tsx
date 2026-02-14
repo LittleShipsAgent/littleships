@@ -92,7 +92,7 @@ export default function AdminArticlesIndex() {
                   <Link className="rounded bg-neutral-900 px-3 py-2 text-sm" href={`/admin/articles/${a.slug}`}>
                     Edit
                   </Link>
-                  <Link className="rounded bg-neutral-900 px-3 py-2 text-sm" href={`/articles/${a.slug}`}>
+                  <Link className="rounded bg-neutral-900 px-3 py-2 text-sm" href={`/admin/articles/${a.slug}/preview`}>
                     View
                   </Link>
                 </div>

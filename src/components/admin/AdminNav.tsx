@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard" },
@@ -17,6 +18,68 @@ function isActive(pathname: string, href: string) {
 
 export function AdminNav() {
   const pathname = usePathname() ?? "/admin";
+
+  const sponsorHref = "/admin/sponsors";
+  const [pendingSponsorCount, setPendingSponsorCount] = useState<number | null>(null);
+
+  const showSponsorBadge = useMemo(() => {
+    if (pendingSponsorCount == null) return false;
+    return pendingSponsorCount > 0;
+  }, [pendingSponsorCount]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadPending() {
+      try {
+        const res = await fetch("/api/admin/sponsors/pending", {
+          method: "GET",
+          headers: { "content-type": "application/json" },
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          // Not logged in / not admin -> don’t show anything.
+          if (!cancelled) setPendingSponsorCount(null);
+          return;
+        }
+
+        const json: any = await res.json();
+        const count = Array.isArray(json?.pending) ? json.pending.length : 0;
+        if (!cancelled) setPendingSponsorCount(count);
+      } catch {
+        if (!cancelled) setPendingSponsorCount(null);
+      }
+    }
+
+    loadPending();
+    const interval = window.setInterval(loadPending, 60_000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, []);
+
+  const renderLabel = (item: (typeof NAV_ITEMS)[number]) => {
+    const isSponsors = item.href === sponsorHref;
+    if (!isSponsors) return <span>{item.label}</span>;
+
+    return (
+      <span className="inline-flex items-center gap-2">
+        <span>{item.label}</span>
+        {showSponsorBadge ? (
+          <span
+            aria-label={`${pendingSponsorCount} pending sponsorship${pendingSponsorCount === 1 ? "" : "s"}`}
+            title={`${pendingSponsorCount} pending sponsorship${pendingSponsorCount === 1 ? "" : "s"}`}
+            className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[11px] leading-none font-semibold rounded-full bg-red-500 text-white"
+          >
+            {pendingSponsorCount}
+          </span>
+        ) : null}
+      </span>
+    );
+  };
 
   return (
     <>
@@ -37,7 +100,7 @@ export function AdminNav() {
                     : "border-[var(--border)] bg-[var(--card)] text-[var(--fg-muted)] hover:bg-[var(--card-hover)] hover:text-[var(--fg)]")
                 }
               >
-                {item.label}
+                {renderLabel(item)}
               </Link>
             );
           })}
@@ -61,7 +124,7 @@ export function AdminNav() {
                     : "text-[var(--fg-muted)] hover:bg-[var(--card-hover)] hover:text-[var(--fg)]")
                 }
               >
-                {item.label}
+                {renderLabel(item)}
               </Link>
             );
           })}

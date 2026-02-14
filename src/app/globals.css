@@ -82,6 +82,56 @@ body::before {
   );
 }
 
+/* Article body fallback styling (in case Tailwind typography "prose" styles are not present). */
+.article-body h2 {
+  margin-top: 1.6em;
+  margin-bottom: 0.6em;
+  font-size: 1.25rem;
+  line-height: 1.3;
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.article-body h3 {
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  font-size: 1.1rem;
+  line-height: 1.35;
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.article-body p {
+  margin: 0.75em 0;
+}
+
+.article-body ul,
+.article-body ol {
+  margin: 0.75em 0;
+  padding-left: 1.25rem;
+}
+
+.article-body ul {
+  list-style: disc;
+}
+
+.article-body ol {
+  list-style: decimal;
+}
+
+.article-body li {
+  margin: 0.35em 0;
+}
+
+.article-body a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.article-body a:hover {
+  text-decoration: underline;
+}
+
 /* Hero — subtle repeating dot pattern so it’s less flat */
 .hero-pattern {
   background-color: var(--bg);
@@ -136,8 +186,17 @@ body::before {
 .recent-ships-orbs .orb-color-amber { background: rgba(245, 158, 11, 0.18); }
 
 .recent-ships-orbs {
-  position: absolute;
-  inset: 0;
+  /*
+    Full-bleed background layer.
+    Use fixed positioning so it cannot be clipped by max-width wrappers, padding
+    reserved for sponsor rails, or per-page overflow settings.
+  */
+  position: fixed;
+  top: 0;
+  left: 50%;
+  width: 100vw;
+  height: 100vh;
+  transform: translateX(-50%);
   pointer-events: none;
   z-index: 0;
 }
@@ -148,6 +207,8 @@ body::before {
   filter: blur(55px);
   opacity: 0.52;
 }
+
+/* (removed) previously hid per-page orbs when rails enabled */
 
 /* Home page Recent Ships only — slightly subtler orbs, still visible by default */
 .recent-ships-dots .recent-ships-orbs .orb {

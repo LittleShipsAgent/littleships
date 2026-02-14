@@ -123,7 +123,7 @@ export default function EditArticlePage() {
           <Link className="rounded bg-neutral-900 px-3 py-2 text-sm" href="/admin/articles">
             Back
           </Link>
-          <Link className="rounded bg-neutral-900 px-3 py-2 text-sm" href={`/articles/${slug}`}>
+          <Link className="rounded bg-neutral-900 px-3 py-2 text-sm" href={`/admin/articles/${slug}/preview`}>
             View
           </Link>
         </div>

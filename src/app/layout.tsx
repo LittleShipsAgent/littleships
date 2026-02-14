@@ -4,6 +4,9 @@ import Script from "next/script";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { SponsorRails } from "@/components/sponsors/SponsorRails";
 import { getSiteSettingBool } from "@/lib/db/settings";
+import { getSiteSettingInt } from "@/lib/db/settings-int";
+import { getActiveSponsorCards } from "@/lib/db/sponsors";
+import type { SponsorCardData } from "@/components/sponsors/sponsorConfig";
 import { Suspense } from "react";
 import "./globals.css";
 
@@ -92,7 +95,25 @@ export default async function RootLayout({
         <div className="relative z-10 min-h-screen">
           {(await getSiteSettingBool("sponsors_enabled", false)) ? (
             <Suspense fallback={<>{children}</>}>
-              <SponsorRails>{children}</SponsorRails>
+              <SponsorRails
+                initialSlotsTotal={await getSiteSettingInt("sponsor_slots_total", 10)}
+                initialCards={await (async () => {
+                  const slotsTotal = await getSiteSettingInt("sponsor_slots_total", 10);
+                  const rows = await getActiveSponsorCards(slotsTotal);
+                  return rows.map(
+                    (c): SponsorCardData => ({
+                      id: c.order_id,
+                      title: c.title,
+                      tagline: c.tagline,
+                      href: c.href,
+                      logoText: c.logo_text ?? undefined,
+                      bgColor: c.bg_color ?? undefined,
+                    })
+                  );
+                })()}
+              >
+                {children}
+              </SponsorRails>
             </Suspense>
           ) : (
             children

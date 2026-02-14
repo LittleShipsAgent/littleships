@@ -3,7 +3,7 @@
 import { loadStripe } from "@stripe/stripe-js";
 import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
 import { Megaphone } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { fireConfetti } from "@/lib/confetti";
 import { SponsorSetupForm } from "./SponsorSetupForm";
 
@@ -35,9 +35,50 @@ function Modal({ open, onClose, children }: { open: boolean; onClose: () => void
 
 type Step = "pitch" | "checkout" | "success" | "pending";
 
+type Quote = {
+  slotsSold: number;
+  slotsTotal: number;
+  slotsAvailable: number;
+  soldOut: boolean;
+  priceCents: number;
+};
+
+function formatUsdMonthly(cents: number) {
+  const dollars = cents / 100;
+  return `$${dollars.toFixed(0)}/mo`;
+}
+
 export function BuySponsorshipModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [step, setStep] = useState<Step>("pitch");
   const [sessionId, setSessionId] = useState<string | null>(null);
+
+  const [quote, setQuote] = useState<Quote | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quoteErr, setQuoteErr] = useState<string | null>(null);
+
+  const refreshQuote = useCallback(async () => {
+    setQuoteLoading(true);
+    setQuoteErr(null);
+    try {
+      const res = await fetch("/api/sponsor/quote", { cache: "no-store" });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `HTTP ${res.status}`);
+      }
+      const data = (await res.json()) as Quote;
+      setQuote(data);
+    } catch (e: any) {
+      setQuote(null);
+      setQuoteErr(e?.message ?? "Failed to load pricing");
+    } finally {
+      setQuoteLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    refreshQuote();
+  }, [open, refreshQuote]);
 
   const fetchClientSecret = useCallback(async () => {
     const returnUrl = window.location.origin + window.location.pathname;
@@ -135,17 +176,34 @@ export function BuySponsorshipModal({ open, onClose }: { open: boolean; onClose:
               <Megaphone className="h-8 w-8" aria-hidden />
             </div>
             <h2 className="text-2xl font-semibold text-[var(--fg)]">Get your product in front of builders</h2>
-            <p className="mt-2 text-sm text-[var(--fg-muted)]">Sitewide placement on LittleShips main pages. Pending approval before going live.</p>
+            <p className="mt-2 text-sm text-[var(--fg-muted)]">
+              Sitewide placement on LittleShips main pages. Pending approval before going live.
+            </p>
 
             <div className="mt-6 w-full rounded-2xl border border-[var(--border)] bg-[color-mix(in_srgb,var(--bg-muted)_60%,transparent)] px-4 py-4">
               <div className="flex items-baseline justify-between">
                 <div className="text-sm text-[var(--fg-muted)]">Monthly rate</div>
-                <div className="text-3xl font-semibold text-[var(--fg)]">$599/mo</div>
+                <div className="text-3xl font-semibold text-[var(--fg)]">
+                  {quoteLoading ? "…" : quote ? formatUsdMonthly(quote.priceCents) : "$—/mo"}
+                </div>
               </div>
               <div className="mt-2 flex items-baseline justify-between">
                 <div className="text-sm text-[var(--fg-muted)]">Spots available</div>
-                <div className="text-sm text-[var(--fg)]">20 total</div>
+                <div className="text-sm text-[var(--fg)]">
+                  {quoteLoading ? (
+                    "…"
+                  ) : quote ? (
+                    quote.soldOut ? (
+                      <span className="font-semibold text-red-300">Sold out</span>
+                    ) : (
+                      `${quote.slotsAvailable} of ${quote.slotsTotal}`
+                    )
+                  ) : (
+                    "—"
+                  )}
+                </div>
               </div>
+              {quoteErr && <div className="mt-2 text-left text-xs text-red-300">{quoteErr}</div>}
             </div>
 
             <ul className="mt-6 w-full space-y-2 text-left text-sm text-[var(--fg)]">
@@ -158,14 +216,22 @@ export function BuySponsorshipModal({ open, onClose }: { open: boolean; onClose:
             <div className="mt-6 w-full">
               <button
                 type="button"
+                disabled={quoteLoading || !!quote?.soldOut}
                 onClick={() => setStep("checkout")}
-                className="block w-full rounded-xl bg-[var(--fg)] px-4 py-3 text-center text-sm font-semibold text-black hover:opacity-90"
+                className="block w-full rounded-xl bg-[var(--fg)] px-4 py-3 text-center text-sm font-semibold text-black hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Continue to checkout
+                {quote?.soldOut ? "Sold out" : quoteLoading ? "Loading…" : "Continue to checkout"}
               </button>
-              <p className="mt-3 text-xs text-[var(--fg-subtle)]">
-                You’ll be charged today. Your sponsorship goes live after approval (typically within 1 business day). If we can’t approve it, we’ll refund.
-              </p>
+              {quote?.soldOut ? (
+                <p className="mt-3 text-xs text-[var(--fg-subtle)]">
+                  All sponsorship slots are currently filled. Check back soon — cancellations and new inventory may open up.
+                </p>
+              ) : (
+                <p className="mt-3 text-xs text-[var(--fg-subtle)]">
+                  You’ll be charged today. Your sponsorship goes live after approval (typically within 1 business day). If we
+                  can’t approve it, we’ll refund.
+                </p>
+              )}
             </div>
           </>
         )}

@@ -113,6 +113,12 @@ export function RichTextEditor({
           <button type="button" className="rounded bg-neutral-900 px-2 py-1 text-xs" onClick={() => can?.chain().focus().toggleBlockquote().run()}>
             Quote
           </button>
+          <button type="button" className="rounded bg-neutral-900 px-2 py-1 text-xs" onClick={() => can?.chain().focus().toggleCode().run()}>
+            Code
+          </button>
+          <button type="button" className="rounded bg-neutral-900 px-2 py-1 text-xs" onClick={() => can?.chain().focus().toggleCodeBlock().run()}>
+            Code block
+          </button>
           <button type="button" className="rounded bg-neutral-900 px-2 py-1 text-xs" onClick={() => can?.chain().focus().toggleHeading({ level: 2 }).run()}>
             H2
           </button>

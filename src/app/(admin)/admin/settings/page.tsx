@@ -9,8 +9,19 @@ export default function AdminSettingsPage() {
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  const [stats, setStats] = useState<null | {
+    slotsTotal: number;
+    slotsSold: number;
+    slotsAvailable: number;
+    nextPriceCents: number;
+    collectedCents: number;
+    remainingPotentialCents: number;
+    totalPotentialCents: number;
+  }>(null);
+
   async function refresh() {
     setErr(null);
+
     const r = await fetch("/api/settings/sponsors");
     if (!r.ok) {
       setErr(await r.text());
@@ -20,6 +31,17 @@ export default function AdminSettingsPage() {
     const j = await r.json();
     setEnabled(!!j.enabled);
     setSlotsTotal(typeof j.slotsTotal === "number" ? j.slotsTotal : 10);
+
+    // admin-only stats
+    try {
+      const s = await fetch("/api/admin/sponsors/stats", { cache: "no-store" });
+      if (s.ok) {
+        const sj = await s.json();
+        setStats(sj);
+      }
+    } catch {
+      // ignore
+    }
   }
 
   useEffect(() => {
@@ -79,6 +101,26 @@ export default function AdminSettingsPage() {
       </div>
 
       {err && <div className="mt-6 rounded border border-red-900 bg-red-950 p-3 text-sm">{err}</div>}
+
+      {stats && (
+        <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-3">
+          <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+            <div className="text-xs text-neutral-500">Revenue potential (MRR)</div>
+            <div className="mt-1 text-2xl font-semibold">${(stats.totalPotentialCents / 100).toFixed(0)}</div>
+            <div className="mt-1 text-xs text-neutral-500">If all {stats.slotsTotal} slots sold at current ladder</div>
+          </div>
+          <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+            <div className="text-xs text-neutral-500">Revenue sold (pending + active)</div>
+            <div className="mt-1 text-2xl font-semibold">${(stats.collectedCents / 100).toFixed(0)}</div>
+            <div className="mt-1 text-xs text-neutral-500">{stats.slotsSold} / {stats.slotsTotal} occupied</div>
+          </div>
+          <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+            <div className="text-xs text-neutral-500">Next sponsor price</div>
+            <div className="mt-1 text-2xl font-semibold">${(stats.nextPriceCents / 100).toFixed(0)}/mo</div>
+            <div className="mt-1 text-xs text-neutral-500">{stats.slotsAvailable} slots available</div>
+          </div>
+        </div>
+      )}
 
       <div className="mt-6 rounded-lg border border-neutral-800 bg-neutral-950 p-4">
         <div className="flex items-center justify-between gap-4">

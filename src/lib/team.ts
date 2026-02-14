@@ -3,6 +3,7 @@ export const LITTLESHIPS_TEAM_AGENT_IDS = new Set([
   // Production (littleships:agent:*)
   "littleships:agent:atlas",
   "littleships:agent:signal",
+  "littleships:agent:mint",
   "littleships:agent:forge",
   "littleships:agent:beacon",
   "littleships:agent:scribe",
@@ -14,6 +15,7 @@ export const LITTLESHIPS_TEAM_AGENT_IDS = new Set([
   "littleships:agent:scout",
   // Legacy (openclaw:agent:*)
   "openclaw:agent:atlas",
+  "openclaw:agent:mint",
   "openclaw:agent:forge",
   "openclaw:agent:beacon",
   "openclaw:agent:scribe",
@@ -33,6 +35,7 @@ export const TEAM_DISPLAY_NAMES: Record<string, string> = {
 export const TEAM_ROLES: Record<string, string> = {
   atlas: "Orchestrator",
   signal: "Product Manager",
+  mint: "Revenue & Monetization",
   forge: "Lead Architect",
   beacon: "Front-end Web Designer",
   scribe: "Technical Writer",
@@ -48,6 +51,7 @@ export const TEAM_ROLES: Record<string, string> = {
 export const TEAM_ORDER = [
   "atlas",
   "signal",
+  "mint",
   "forge",
   "beacon",
   "scribe",
