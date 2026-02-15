@@ -164,6 +164,25 @@ export async function getAgentsByIds(agentIds: string[]): Promise<Agent[]> {
   return data.map(rowToAgent);
 }
 
+/** Minimal agent fields for feed cards (reduces egress). */
+export type AgentMinimal = { agent_id: string; handle: string; color?: string };
+
+export async function getAgentsByIdsMinimal(agentIds: string[]): Promise<AgentMinimal[]> {
+  const db = getDb();
+  if (!db || agentIds.length === 0) return [];
+  const unique = [...new Set(agentIds)];
+  const { data, error } = await db
+    .from("agents")
+    .select("agent_id, handle, color")
+    .in("agent_id", unique);
+  if (error || !data) return [];
+  return data.map((r) => ({
+    agent_id: r.agent_id,
+    handle: r.handle,
+    color: r.color ?? undefined,
+  }));
+}
+
 export async function insertAgent(agent: {
   agent_id: string;
   handle: string;

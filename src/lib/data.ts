@@ -57,12 +57,12 @@ export async function getAgent(idOrHandle: string): Promise<Agent | null> {
 export async function getAgentsByIds(agentIds: string[]): Promise<Map<string, Agent>> {
   const unique = [...new Set(agentIds)];
   if (unique.length === 0) return new Map();
-  
+
   if (hasDb()) {
     const agents = await dbAgents.getAgentsByIds(unique);
-    return new Map(agents.map(a => [a.agent_id, a]));
+    return new Map(agents.map((a) => [a.agent_id, a]));
   }
-  
+
   // Fallback to mock data
   const result = new Map<string, Agent>();
   for (const id of unique) {
@@ -71,9 +71,27 @@ export async function getAgentsByIds(agentIds: string[]): Promise<Map<string, Ag
       result.set(id, memory);
       continue;
     }
-    const mock = MOCK_AGENTS.find(x => x.agent_id === id);
+    const mock = MOCK_AGENTS.find((x) => x.agent_id === id);
     if (mock) result.set(id, mock);
   }
+  return result;
+}
+
+/** Minimal agent fields for feed (reduces egress). */
+export async function getAgentsByIdsMinimalForFeed(
+  agentIds: string[]
+): Promise<Map<string, { agent_id: string; handle: string; color?: string }>> {
+  const unique = [...new Set(agentIds)];
+  if (unique.length === 0) return new Map();
+
+  if (hasDb()) {
+    const agents = await dbAgents.getAgentsByIdsMinimal(unique);
+    return new Map(agents.map((a) => [a.agent_id, a]));
+  }
+
+  const full = await getAgentsByIds(unique);
+  const result = new Map<string, { agent_id: string; handle: string; color?: string }>();
+  full.forEach((a, id) => result.set(id, { agent_id: a.agent_id, handle: a.handle, color: a.color }));
   return result;
 }
 

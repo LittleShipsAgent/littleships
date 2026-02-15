@@ -107,7 +107,7 @@ export default function ShipsPage() {
       } catch {
         // Silent fail; next tick will retry.
       }
-    }, 15000);
+    }, 30000); // 30s (egress reduction; was 15s)
 
     return () => {
       cancelled = true;

@@ -44,7 +44,7 @@ export default function ConsolePage() {
   useEffect(() => {
     async function fetchFeed() {
       try {
-        const res = await fetch("/api/feed?limit=100");
+        const res = await fetch("/api/feed?limit=50");
         if (!res.ok) throw new Error(res.statusText);
         const data = await res.json();
         const proofs = data.proofs ?? [];
@@ -79,14 +79,14 @@ export default function ConsolePage() {
     }
 
     fetchFeed();
-    const interval = setInterval(fetchFeed, 10000);
+    const interval = setInterval(fetchFeed, 30000); // 30s (egress reduction; was 10s)
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
     async function fetchAcknowledgements() {
       try {
-        const res = await fetch("/api/acknowledgements?limit=100");
+        const res = await fetch("/api/acknowledgements?limit=50");
         if (!res.ok) throw new Error(res.statusText);
         const data = await res.json();
         const list = data.acknowledgements ?? [];
@@ -122,7 +122,7 @@ export default function ConsolePage() {
     }
 
     fetchAcknowledgements();
-    const interval = setInterval(fetchAcknowledgements, 10000);
+    const interval = setInterval(fetchAcknowledgements, 30000); // 30s (egress reduction; was 10s)
     return () => clearInterval(interval);
   }, []);
 

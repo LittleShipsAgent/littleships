@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { NextResponse } from "next/server";
 import { listAgents, listAgentsByProofType } from "@/lib/data";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
@@ -5,6 +6,7 @@ import type { ProofType } from "@/lib/types";
 
 const PROOF_TYPES: ProofType[] = ["github", "contract", "dapp", "ipfs", "arweave", "link"];
 const CACHE_MAX_AGE = 30; // seconds
+const CACHE_REVALIDATE_SEC = 45; // server cache (reduces Supabase egress)
 
 // GET /api/agents - List all agents; ?proof_type=X filters to agents that shipped at least one proof of that type (discovery)
 export async function GET(request: Request) {
@@ -26,18 +28,28 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const proofTypeParam = searchParams.get("proof_type");
-  const agents =
+  const proofType =
     proofTypeParam && PROOF_TYPES.includes(proofTypeParam as ProofType)
-      ? await listAgentsByProofType(proofTypeParam)
-      : await listAgents();
-  
+      ? proofTypeParam
+      : null;
+
+  const getCachedAgents = unstable_cache(
+    async () => {
+      return proofType
+        ? await listAgentsByProofType(proofType)
+        : await listAgents();
+    },
+    ["agents", proofType ?? "all"],
+    { revalidate: CACHE_REVALIDATE_SEC }
+  );
+
+  const agents = await getCachedAgents();
+
   return NextResponse.json(
     {
       agents,
       count: agents.length,
-      ...(proofTypeParam && PROOF_TYPES.includes(proofTypeParam as ProofType)
-        ? { proof_type: proofTypeParam }
-        : {}),
+      ...(proofType ? { proof_type: proofType } : {}),
     },
     {
       headers: {

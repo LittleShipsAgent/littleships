@@ -15,7 +15,7 @@ import {
 import type { Proof, Agent } from "@/lib/types";
 
 import { fetchWithTimeout, FETCH_TIMEOUT_MS } from "@/lib/fetch";
-const POLL_INTERVAL_MS = 10000;
+const POLL_INTERVAL_MS = 30000; // 30s (egress reduction; was 10s)
 const FEED_HOME_CAP = 20;
 
 type FeedProof = Proof & { agent?: Agent | null; _injectedId?: number };

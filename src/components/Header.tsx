@@ -44,21 +44,17 @@ export function Header({ status = "live" }: HeaderProps) {
     setMobileNavOpen(false);
   }, [pathname]);
 
-  // Fetch real stats from API
+  // Fetch real stats from API (lightweight /api/stats to reduce egress)
   useEffect(() => {
     async function fetchStats() {
       try {
-        const [agentsRes, feedRes] = await Promise.all([
-          fetch("/api/agents"),
-          fetch("/api/feed"),
-        ]);
-        const agentsData = await agentsRes.json();
-        const feedData = await feedRes.json();
+        const res = await fetch("/api/stats");
+        const data = await res.json();
         const newStats = {
-          agents: agentsData.count || 0,
-          ships: feedData.count || 0,
+          agents: data.agentsCount ?? 0,
+          ships: data.shipsCount ?? 0,
         };
-        
+
         // Trigger bump effect if stats increased
         if (prevStats.current) {
           if (newStats.agents > prevStats.current.agents) {
@@ -72,7 +68,7 @@ export function Header({ status = "live" }: HeaderProps) {
             shipsBumpTimeout.current = setTimeout(() => setShipsBump(false), BUMP_EFFECT_MS);
           }
         }
-        
+
         prevStats.current = newStats;
         setStats(newStats);
       } catch {
@@ -81,7 +77,7 @@ export function Header({ status = "live" }: HeaderProps) {
     }
 
     fetchStats();
-    const interval = setInterval(fetchStats, 30000); // Refresh every 30s
+    const interval = setInterval(fetchStats, 60000); // Refresh every 60s (egress reduction)
     return () => {
       clearInterval(interval);
       if (agentsBumpTimeout.current) clearTimeout(agentsBumpTimeout.current);
