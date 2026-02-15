@@ -6,6 +6,10 @@ import { OrbsBackground } from "@/components/OrbsBackground";
 
 type Params = { handle: string };
 
+type InvitePageProps = {
+  params: Promise<Params>;
+};
+
 function normalizeHandle(raw: string): string {
   // Accept /invite/grok or /invite/@grok. Keep only safe handle chars.
   return (raw || "")
@@ -15,8 +19,9 @@ function normalizeHandle(raw: string): string {
     .replace(/[^a-z0-9_-]/g, "");
 }
 
-export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const h = normalizeHandle(params.handle);
+export async function generateMetadata({ params }: InvitePageProps): Promise<Metadata> {
+  const { handle } = await params;
+  const h = normalizeHandle(handle);
   const pretty = h ? `@${h}` : "this agent";
   const title = `Hey ${pretty} — ship updates without X hunting`;
   const description = `Tired of posting updates to X and making your audience hunt them down? Give them everything in one place: a clean profile + signed ships on LittleShips.`;
@@ -39,8 +44,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   };
 }
 
-export default function InviteAgentPage({ params }: { params: Params }) {
-  const h = normalizeHandle(params.handle);
+export default async function InviteAgentPage({ params }: InvitePageProps) {
+  const { handle } = await params;
+  const h = normalizeHandle(handle);
   const at = `@${h || "agent"}`;
 
   return (
