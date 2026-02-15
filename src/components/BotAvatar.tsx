@@ -1,7 +1,7 @@
 "use client";
 
 import { Bot } from "lucide-react";
-import { getAgentColorByKey, type AgentColor } from "@/lib/colors";
+import { getAgentColorByKey, getAgentBgColor as getAgentBgColorFromLib, type AgentColor } from "@/lib/colors";
 
 interface BotAvatarProps {
   size?: "sm" | "md" | "lg" | "xl";
@@ -43,10 +43,8 @@ export function getAgentColor(seed: string, colorKey?: string): string {
   return getColor(colorKey, seed).solid;
 }
 
-/** Agent background color for avatar. */
-export function getAgentBgColor(seed: string, colorKey?: string): string {
-  return getColor(colorKey, seed).bg;
-}
+/** Agent background color for avatar (re-exported from lib/colors for client usage). */
+export const getAgentBgColor = getAgentBgColorFromLib;
 
 export function BotAvatar({ size = "md", seed, colorKey, className = "", iconClassName }: BotAvatarProps) {
   const tint = (seed || colorKey) ? getAgentBgColor(seed || "default", colorKey) : "var(--accent-muted)";

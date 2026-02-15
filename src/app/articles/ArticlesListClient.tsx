@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArticlesSidebar } from "@/components/articles";
+import { Pagination } from "@/components/Pagination";
 import type { Article, ArticleCategory, ArticleTag } from "@/lib/types";
 
 function formatDate(iso: string | null): string {
@@ -18,12 +20,34 @@ export function ArticlesListClient({
   articles,
   categories,
   tags,
+  totalArticles,
+  currentPage,
+  totalPages,
+  articlesPerPage,
 }: {
   articles: Article[];
   categories: ArticleCategory[];
   tags: ArticleTag[];
+  totalArticles: number;
+  currentPage: number;
+  totalPages: number;
+  articlesPerPage: number;
 }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  function buildArticlesUrl(page: number): string {
+    const params = new URLSearchParams(searchParams.toString());
+    if (page <= 1) params.delete("page");
+    else params.set("page", String(page));
+    const q = params.toString();
+    return q ? `/articles?${q}` : "/articles";
+  }
+
+  function handlePageChange(page: number) {
+    router.push(buildArticlesUrl(page));
+  }
 
   return (
     <div className="relative z-10 flex flex-col lg:flex-row gap-0 w-full max-w-6xl py-12">
@@ -42,46 +66,57 @@ export function ArticlesListClient({
         {articles.length === 0 ? (
           <p className="text-[var(--fg-muted)]">No articles yet. Check back soon.</p>
         ) : (
-          <ul className="space-y-6" aria-label="Article list">
-            {articles.map((article) => (
-              <li key={article.id}>
-                <article className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6">
-                  <h2 className="text-lg font-semibold mb-2 text-[var(--fg)]">
-                    <Link href={`/articles/${article.slug}`} className="text-[var(--accent)] hover:underline">
-                      {article.title}
-                    </Link>
-                  </h2>
-                  {article.excerpt && (
-                    <p className="text-sm text-[var(--fg-muted)] mb-3 line-clamp-2">{article.excerpt}</p>
-                  )}
-                  <div className="flex flex-wrap items-center gap-2 text-xs">
-                    {article.category && (
-                      <Link
-                        href={`/articles?category=${encodeURIComponent(article.category.slug)}`}
-                        className="px-2 py-0.5 rounded-md bg-[var(--accent-muted)] text-[var(--accent)]"
-                      >
-                        {article.category.name}
+          <>
+            <ul className="space-y-6" aria-label="Article list">
+              {articles.map((article) => (
+                <li key={article.id}>
+                  <article className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6">
+                    <h2 className="text-lg font-semibold mb-2 text-[var(--fg)]">
+                      <Link href={`/articles/${article.slug}`} className="text-[var(--accent)] hover:underline">
+                        {article.title}
                       </Link>
+                    </h2>
+                    {article.excerpt && (
+                      <p className="text-sm text-[var(--fg-muted)] mb-3 line-clamp-2">{article.excerpt}</p>
                     )}
-                    {article.tags?.map((tag) => (
-                      <Link
-                        key={tag.id}
-                        href={`/articles?tag=${encodeURIComponent(tag.slug)}`}
-                        className="px-2 py-0.5 rounded-md border border-[var(--border)] text-[var(--fg-muted)] hover:text-[var(--fg)]"
-                      >
-                        {tag.name}
-                      </Link>
-                    ))}
-                    {article.published_at && (
-                      <time dateTime={article.published_at} className="text-[var(--fg-muted)]">
-                        {formatDate(article.published_at)}
-                      </time>
-                    )}
-                  </div>
-                </article>
-              </li>
-            ))}
-          </ul>
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      {article.category && (
+                        <Link
+                          href={`/articles?category=${encodeURIComponent(article.category.slug)}`}
+                          className="px-2 py-0.5 rounded-md bg-[var(--accent-muted)] text-[var(--accent)]"
+                        >
+                          {article.category.name}
+                        </Link>
+                      )}
+                      {article.tags?.map((tag) => (
+                        <Link
+                          key={tag.id}
+                          href={`/articles?tag=${encodeURIComponent(tag.slug)}`}
+                          className="px-2 py-0.5 rounded-md border border-[var(--border)] text-[var(--fg-muted)] hover:text-[var(--fg)]"
+                        >
+                          {tag.name}
+                        </Link>
+                      ))}
+                      {article.published_at && (
+                        <time dateTime={article.published_at} className="text-[var(--fg-muted)]">
+                          {formatDate(article.published_at)}
+                        </time>
+                      )}
+                    </div>
+                  </article>
+                </li>
+              ))}
+            </ul>
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalArticles}
+                itemsPerPage={articlesPerPage}
+                onPageChange={handlePageChange}
+              />
+            )}
+          </>
         )}
       </div>
     </div>

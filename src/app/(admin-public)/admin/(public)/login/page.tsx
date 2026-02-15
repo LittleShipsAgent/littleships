@@ -7,7 +7,6 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [recoverySent, setRecoverySent] = useState(false);
 
   const nextPath = useMemo(() => {
     if (typeof window === "undefined") return "/admin";
@@ -21,7 +20,6 @@ export default function AdminLoginPage() {
 
   async function doLogin() {
     setError(null);
-    setRecoverySent(false);
     setBusy(true);
 
     const r = await fetch("/api/admin/auth/login", {
@@ -89,33 +87,6 @@ export default function AdminLoginPage() {
           Sign in
         </button>
 
-        <button
-          type="button"
-          className="w-full rounded bg-neutral-900 px-3 py-2 text-sm text-neutral-200 hover:bg-neutral-800 disabled:opacity-60"
-          disabled={busy || !email}
-          onClick={async () => {
-            setBusy(true);
-            setError(null);
-            setRecoverySent(false);
-            try {
-              const r = await fetch("/api/admin/auth/recover", {
-                method: "POST",
-                headers: { "content-type": "application/json" },
-                body: JSON.stringify({ email }),
-              });
-              if (!r.ok) throw new Error(await r.text());
-              setRecoverySent(true);
-            } catch (e: any) {
-              setError(e?.message ?? "Failed to send reset email");
-            } finally {
-              setBusy(false);
-            }
-          }}
-        >
-          Forgot password
-        </button>
-
-        {recoverySent && <div className="text-sm text-neutral-400">Password reset email sent.</div>}
         {error && <div className="text-sm text-red-400">{error}</div>}
       </form>
     </main>
