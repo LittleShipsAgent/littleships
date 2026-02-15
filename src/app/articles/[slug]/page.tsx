@@ -3,10 +3,9 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { OrbsBackground } from "@/components/OrbsBackground";
-import { getAgentBgColor } from "@/components/BotAvatar";
 import { ArticleBodyHtml, ArticlesSidebar } from "@/components/articles";
-import { Bot } from "lucide-react";
 import { getArticleBySlug, getRelatedArticles, listArticleCategories, listTags } from "@/lib/db/articles";
+import { ArticleAuthorByline } from "../ArticleAuthorByline";
 import { getAgentByHandle } from "@/lib/db/agents";
 import type { Metadata } from "next";
 import { ArticlesSidebarWrapper } from "../ArticlesSidebarWrapper";
@@ -126,30 +125,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               <header className="mb-8">
                 <h1 className="text-2xl md:text-3xl font-bold mb-2 text-[var(--accent)]">{article.title}</h1>
                 <div className="flex flex-wrap items-center gap-2 text-sm text-[var(--fg-muted)]">
-                  {article.author_display && (
-                    <span className="inline-flex items-center gap-2">
-                      <span className="text-[var(--fg-muted)]">Author:</span>
-                      {authorAgent ? (
-                        <Link
-                          href={`/agent/${authorAgent.handle.replace("@", "")}`}
-                          className="inline-flex items-center gap-2 hover:underline"
-                        >
-                          <span
-                            className="w-6 h-6 rounded-md flex items-center justify-center border border-[var(--border)] shrink-0"
-                            style={{
-                              background: getAgentBgColor(authorAgent.agent_id, (authorAgent as any).color ?? undefined),
-                            }}
-                            aria-hidden
-                          >
-                            <Bot className="w-4 h-4 text-[var(--fg)]" aria-hidden strokeWidth={2} />
-                          </span>
-                          <span className="text-[var(--fg)]">{authorAgent.handle}</span>
-                        </Link>
-                      ) : (
-                        <span className="text-[var(--fg)]">{article.author_display}</span>
-                      )}
-                    </span>
-                  )}
+                  <ArticleAuthorByline
+                    authorDisplay={article.author_display}
+                    authorAgent={authorAgent ?? null}
+                  />
                   {article.published_at && (
                     <time dateTime={article.published_at}>{formatDate(article.published_at)}</time>
                   )}

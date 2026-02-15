@@ -97,6 +97,11 @@ export function getAgentColorByKey(key: string | undefined | null, fallbackSeed:
   return AGENT_COLORS[COLOR_KEYS[index]];
 }
 
+/** Agent background color for avatar (safe to use in server components). */
+export function getAgentBgColor(seed: string, colorKey?: string): string {
+  return getAgentColorByKey(colorKey ?? undefined, seed).bg;
+}
+
 function hashString(str: string): number {
   let h = 0;
   for (let i = 0; i < str.length; i++) {

@@ -59,15 +59,54 @@ function rowToArticle(row: {
   };
 }
 
+/** Count published articles with same filters as listArticles. */
+export async function countArticles(options?: {
+  categorySlug?: string;
+  tagSlug?: string;
+}): Promise<number> {
+  const db = getDb();
+  if (!db) return 0;
+  const now = new Date().toISOString();
+
+  let query = db
+    .from("articles")
+    .select("id", { count: "exact", head: true })
+    .not("published_at", "is", null)
+    .lte("published_at", now);
+
+  if (options?.categorySlug) {
+    const { data: catRows } = await db.from("article_categories").select("id").eq("slug", options.categorySlug).limit(1);
+    const categoryId = catRows?.[0]?.id;
+    if (categoryId) query = query.eq("category_id", categoryId);
+  }
+
+  if (options?.tagSlug) {
+    const { data: tagRows } = await db.from("tags").select("id").eq("slug", options.tagSlug).limit(1);
+    const tagId = tagRows?.[0]?.id;
+    if (tagId) {
+      const { data: articleIds } = await db.from("article_tags").select("article_id").eq("tag_id", tagId);
+      const ids = articleIds?.map((r) => r.article_id) ?? [];
+      if (ids.length === 0) return 0;
+      query = query.in("id", ids);
+    }
+  }
+
+  const { count, error } = await query;
+  if (error) return 0;
+  return typeof count === "number" ? count : 0;
+}
+
 /** List published articles, optionally filtered by category or tag. Only returns rows where published_at is set and in the past. */
 export async function listArticles(options?: {
   categorySlug?: string;
   tagSlug?: string;
   limit?: number;
+  offset?: number;
 }): Promise<Article[]> {
   const db = getDb();
   if (!db) return [];
   const limit = options?.limit ?? 100;
+  const offset = options?.offset ?? 0;
   const now = new Date().toISOString();
 
   let query = db
@@ -83,7 +122,7 @@ export async function listArticles(options?: {
     .not("published_at", "is", null)
     .lte("published_at", now)
     .order("published_at", { ascending: false })
-    .limit(limit);
+    .range(offset, offset + limit - 1);
 
   if (options?.categorySlug) {
     const { data: catRows } = await db.from("article_categories").select("id").eq("slug", options.categorySlug).limit(1);
