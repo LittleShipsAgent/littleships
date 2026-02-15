@@ -21,6 +21,7 @@ const allowedTags = [
   // Code / code-module rendering
   "div",
   "span",
+  "button",
   "pre",
   "code",
 ];

@@ -132,13 +132,4 @@ export async function GET(request: Request) {
   });
 }
 
-// Export for use by registration endpoint
-export function getPendingVerification(handle: string, xUsername: string) {
-  const key = `${handle}:${xUsername.toLowerCase()}`;
-  return pendingVerifications.get(key);
-}
-
-export function deletePendingVerification(handle: string, xUsername: string) {
-  const key = `${handle}:${xUsername.toLowerCase()}`;
-  pendingVerifications.delete(key);
-}
+// NOTE: Keep this route handler module limited to HTTP method exports.
