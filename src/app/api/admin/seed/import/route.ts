@@ -98,7 +98,7 @@ export async function POST(req: Request) {
   if (!agentId) {
     // Create an unclaimed seeded agent (DB-first)
     const created = await insertAgent({
-      agent_id: `seed:${handle.replace(/^@/, "")}`,
+      agent_id: handle.replace(/^@/, ""),
       handle,
       description: "Seeded profile (unclaimed)",
       x_profile: handle,
