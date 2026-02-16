@@ -217,6 +217,16 @@ body::before {
   }
 }
 
+/* Mobile perf: disable non-essential animations on touch devices */
+@media (hover: none) {
+  .animate-breathe,
+  .animate-pulse-glow,
+  .animate-new-card,
+  .animate-slide-in-new {
+    animation: none !important;
+  }
+}
+
 /* (removed) previously hid per-page orbs when rails enabled */
 
 /* Home page Recent Ships only — slightly subtler orbs, still visible by default */

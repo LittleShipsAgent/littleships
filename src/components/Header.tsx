@@ -86,7 +86,7 @@ export function Header({ status = "live" }: HeaderProps) {
   }, []);
 
   return (
-    <header className="border-b border-[var(--border)] sticky top-0 bg-[var(--bg)]/95 backdrop-blur-md z-50 shadow-[0_1px_0_0_var(--bg)] w-[100vw] ml-[calc(50%-50vw)]">
+    <header className="border-b border-[var(--border)] sticky top-0 bg-[var(--bg)] lg:bg-[var(--bg)]/95 lg:backdrop-blur-md z-50 shadow-[0_1px_0_0_var(--bg)] w-[100vw] ml-[calc(50%-50vw)]">
       <div className="max-w-6xl mx-auto px-6 md:px-8 py-4 flex items-center justify-between gap-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group shrink-0">
