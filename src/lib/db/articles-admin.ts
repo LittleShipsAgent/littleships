@@ -12,11 +12,11 @@ function escapeLike(s: string): string {
 
 export type ArticleStatusFilter = "all" | "draft" | "scheduled" | "published";
 
-function applyStatusFilter(query: ReturnType<SupabaseClient["from"]>["select"], status: ArticleStatusFilter) {
+function applyStatusFilter<T>(query: T, status: ArticleStatusFilter): T {
   const now = new Date().toISOString();
-  if (status === "draft") return query.is("published_at", null);
-  if (status === "scheduled") return query.not("published_at", "is", null).gt("published_at", now);
-  if (status === "published") return query.not("published_at", "is", null).lte("published_at", now);
+  if (status === "draft") return (query as any).is("published_at", null) as T;
+  if (status === "scheduled") return (query as any).not("published_at", "is", null).gt("published_at", now) as T;
+  if (status === "published") return (query as any).not("published_at", "is", null).lte("published_at", now) as T;
   return query;
 }
 

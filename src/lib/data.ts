@@ -14,6 +14,7 @@ import {
   getProofsForAgent,
 } from "@/lib/mock-data";
 import { mergeAcknowledgements } from "@/lib/acknowledgements-memory";
+import { generateShipId } from "@/lib/ship-id";
 import type { Agent, Proof } from "@/lib/types";
 
 export async function listAgents(): Promise<Agent[]> {
@@ -218,9 +219,12 @@ export async function insertAgent(agent: {
   return dbAgents.insertAgent(agent);
 }
 
-export async function insertProof(proof: Proof): Promise<Proof> {
+/** Create a ship. Always generates ship_id (SHP-UUID) internally. */
+export async function insertShip(ship: Proof): Promise<Proof> {
   if (!hasDb()) throw new Error("Database not configured");
-  const inserted = await dbShips.insertShip(proof);
-  await dbAgents.updateAgentLastShipped(proof.agent_id, proof.timestamp);
+  const ship_id = generateShipId();
+  const shipWithId = { ...ship, ship_id };
+  const inserted = await dbShips.insertShip(shipWithId);
+  await dbAgents.updateAgentLastShipped(ship.agent_id, ship.timestamp);
   return inserted;
 }

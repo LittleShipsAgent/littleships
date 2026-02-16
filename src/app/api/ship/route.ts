@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
-import { SubmitProofPayload } from "@/lib/types";
+import { SubmitProofPayload, type Proof } from "@/lib/types";
 import { getCollectionBySlug } from "@/lib/collections";
 import { enrichProof } from "@/lib/enrich";
-import { insertProof, getAgent, addAcknowledgement } from "@/lib/data";
+import { insertShip, getAgent, addAcknowledgement } from "@/lib/data";
 import { hasDb } from "@/lib/db/client";
 import { inferShipTypeFromProof } from "@/lib/utils";
 import { verifyProofSignature } from "@/lib/auth";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { sanitizeTitle, sanitizeString, detectPromptInjection } from "@/lib/sanitize";
 import { isUrlSafe } from "@/lib/url-security";
+import { generateShipId } from "@/lib/ship-id";
 import { createRequestLogger } from "@/lib/request-context";
 import { pickAckAgents } from "@/lib/team-ack";
 import type { ArtifactType } from "@/lib/types";
@@ -218,30 +219,33 @@ export async function POST(request: Request) {
       sanitizedTitle
     );
 
-    const ship_id = `SHP-${crypto.randomUUID()}`;
     const changelog = payload.changelog
       .filter((s): s is string => typeof s === "string" && s.trim().length > 0)
       .slice(0, 20)
       .map((s) => sanitizeString(s, { maxLength: MAX_CHANGELOG_ITEM_LENGTH, stripHtml: true, allowNewlines: false }).clean);
-    const proof = {
-      ship_id,
-      agent_id: payload.agent_id,
-      title: sanitizedTitle,
-      description: sanitizedDescription,
-      ship_type,
-      proof_type: primaryType,
-      proof: proofItems,
-      timestamp: new Date().toISOString(),
-      status,
-      enriched_card,
-      changelog: changelog.length ? changelog : undefined,
-      collections,
-    };
+
+    let proof: Proof;
+    let ship_id: string;
 
     if (hasDb()) {
       try {
-        await insertProof(proof);
-        
+        const draft = {
+          ship_id: "",
+          agent_id: payload.agent_id,
+          title: sanitizedTitle,
+          description: sanitizedDescription,
+          ship_type,
+          proof_type: primaryType,
+          proof: proofItems,
+          timestamp: new Date().toISOString(),
+          status,
+          enriched_card,
+          changelog: changelog.length ? changelog : undefined,
+          collections,
+        };
+        proof = await insertShip(draft);
+        ship_id = proof.ship_id;
+
         // Team acknowledgements - pick 2-3 agents based on ship type (fire and forget)
         const ackAgents = pickAckAgents(primaryType, ship_type, payload.agent_id);
         for (const { agentId, emoji } of ackAgents) {
@@ -255,6 +259,22 @@ export async function POST(request: Request) {
           { status: 500 }
         );
       }
+    } else {
+      ship_id = generateShipId();
+      proof = {
+        ship_id,
+        agent_id: payload.agent_id,
+        title: sanitizedTitle,
+        description: sanitizedDescription,
+        ship_type,
+        proof_type: primaryType,
+        proof: proofItems,
+        timestamp: new Date().toISOString(),
+        status,
+        enriched_card,
+        changelog: changelog.length ? changelog : undefined,
+        collections,
+      };
     }
 
     const baseUrl = new URL(request.url).origin;
