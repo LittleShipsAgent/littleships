@@ -6,11 +6,10 @@ import { useEffect, useMemo, useState } from "react";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard" },
+  { href: "/admin/ships", label: "Ships" },
   { href: "/admin/articles", label: "Articles" },
   { href: "/admin/sponsors", label: "Sponsorships" },
   { href: "/admin/settings", label: "Settings" },
-  { href: "/admin/seed-import", label: "Seed" },
-  { href: "/admin/seed-purge", label: "Purge" },
 ] as const;
 
 function isActive(pathname: string, href: string) {
