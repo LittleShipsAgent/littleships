@@ -85,9 +85,9 @@ export function ShipCard({ ship, agent, showAgent = true, showAgentAvatar = true
 
         {/* Content: what + who + proof count + acknowledgments */}
         <div className="flex-1 min-w-0">
-          {/* What they shipped + type label; on small screens status pill stacks below */}
+          {/* What they shipped + type label; pill top-right (absolute, no space reserved so title gets full width) */}
           <div className="relative mb-1">
-            <div className="min-w-0 pr-10 sm:pr-[160px] pt-0.5">
+            <div className="min-w-0 pt-0.5">
               <span className="text-sm font-medium uppercase tracking-wider" style={{ color: categoryColor }}>
                 {label}
               </span>
@@ -131,7 +131,7 @@ export function ShipCard({ ship, agent, showAgent = true, showAgentAvatar = true
             </span>
           </div>
 
-          {/* Proof count + link; acknowledgments; on small stack vertically */}
+          {/* Proof count + link; acknowledgments */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-[var(--fg-subtle)]">
             <span className="inline-flex items-center gap-1.5 flex-wrap">
               <Bot className="w-3.5 h-3.5 shrink-0 text-[var(--fg-subtle)]" aria-hidden />
@@ -152,7 +152,14 @@ export function ShipCard({ ship, agent, showAgent = true, showAgentAvatar = true
                   </span>
                 )
               ) : (
-                "—"
+                <Link
+                  href={`/agent/${ship.agent_id.replace(/^littleships:agent:/, "") || ship.agent_id}`}
+                  className="font-medium hover:underline transition"
+                  style={{ color: agentColor ?? "var(--card-accent, var(--accent))" }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  @{ship.agent_id.replace(/^littleships:agent:/, "") || ship.agent_id}
+                </Link>
               )}{" "}
               {timeAgo(ship.timestamp)}
             </span>
@@ -162,7 +169,8 @@ export function ShipCard({ ship, agent, showAgent = true, showAgentAvatar = true
                   {reactionEmojis.map((emoji, i) => (
                     <AckReactionIcon key={i} emoji={emoji} className="text-[var(--fg)]" size={18} />
                   ))}
-                  <span className="hidden sm:inline font-medium">{ackCount} agent ack{ackCount !== 1 ? "s" : ""}</span>
+                  <span className="xl:hidden font-medium">{ackCount} ack{ackCount !== 1 ? "s" : ""}</span>
+                  <span className="hidden xl:inline font-medium">{ackCount} agent ack{ackCount !== 1 ? "s" : ""}</span>
                 </span>
               )}
               {ship.collections && ship.collections.length > 0 && (
@@ -187,7 +195,8 @@ export function ShipCard({ ship, agent, showAgent = true, showAgentAvatar = true
                 onClick={(e) => e.stopPropagation()}
                 className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[var(--card-hover)] border border-[var(--border)] text-[var(--fg-muted)] font-medium hover:text-[var(--card-accent,var(--fg))] hover:bg-[var(--bg-subtle)] hover:border-[var(--border-hover)] transition"
               >
-                {pluralize(proofCount, "proof", "proofs")} →
+                <span className="xl:hidden">proof</span>
+                <span className="hidden xl:inline">{pluralize(proofCount, "proof", "proofs")}</span> →
               </Link>
             </div>
           </div>

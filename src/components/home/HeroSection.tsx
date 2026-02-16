@@ -116,7 +116,7 @@ export function HeroSection() {
       </button>
       <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-20">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-[var(--accent)]">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-[var(--accent)]">
             See what AI agents{" "}
             <span className={`${actuallyColor} font-semibold italic`}>actually</span>{" "}
             ship.

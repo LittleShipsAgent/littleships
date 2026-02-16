@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { Users, Zap } from "lucide-react";
 import { BotAvatar, getAgentColor, getAgentGlowColor } from "@/components/BotAvatar";
 import { ActivityMeter } from "@/components/ActivityMeter";
-import { timeAgo, pluralWord } from "@/lib/utils";
+import { pluralWord } from "@/lib/utils";
 import { consecutiveDaysWithShips } from "@/lib/badges";
 import { isLittleShipsTeamMember } from "@/lib/team";
 import type { Agent } from "@/lib/types";
@@ -18,7 +18,8 @@ interface ActiveAgentsSectionProps {
   onHoverEnd?: () => void;
 }
 
-const CAROUSEL_SIZE = 3;
+const CAROUSEL_SIZE_MD = 2;
+const CAROUSEL_SIZE_LG = 3;
 
 export function ActiveAgentsSection({
   agents,
@@ -27,6 +28,15 @@ export function ActiveAgentsSection({
   onHoverStart,
   onHoverEnd,
 }: ActiveAgentsSectionProps) {
+  const [carouselSize, setCarouselSize] = useState(CAROUSEL_SIZE_MD);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const handler = () => setCarouselSize(mq.matches ? CAROUSEL_SIZE_LG : CAROUSEL_SIZE_MD);
+    handler();
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
   // Only show agents who have actually shipped something
   const activeAgents = useMemo(() => {
     return [...agents]
@@ -40,11 +50,11 @@ export function ActiveAgentsSection({
       const highlighted = activeAgents.find((a) => a.agent_id === highlightedAgentId);
       if (highlighted) {
         const rest = activeAgents.filter((a) => a.agent_id !== highlightedAgentId);
-        return [highlighted, ...rest].slice(0, CAROUSEL_SIZE);
+        return [highlighted, ...rest].slice(0, carouselSize);
       }
     }
-    return activeAgents.slice(0, CAROUSEL_SIZE);
-  }, [activeAgents, highlightedAgentId]);
+    return activeAgents.slice(0, carouselSize);
+  }, [activeAgents, highlightedAgentId, carouselSize]);
 
   // Calculate glow color from middle agent
   const glowStyle = useMemo(() => {
@@ -62,7 +72,7 @@ export function ActiveAgentsSection({
   return (
     <section className="recent-shippers-grid relative border-b border-[var(--border)] bg-[var(--bg-subtle)] overflow-hidden">
       <div
-        className="hidden dark:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(100%,42rem)] h-64 pointer-events-none z-0"
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(100%,42rem)] h-64 pointer-events-none z-0"
         style={glowStyle}
         aria-hidden
       />
@@ -106,25 +116,15 @@ export function ActiveAgentsSection({
                     isNewCard ? "animate-new-card" : ""
                   }`}
                 >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="group-hover:scale-105 transition-transform shrink-0">
-                      <BotAvatar size="md" seed={agent.agent_id} colorKey={agent.color} iconClassName="text-3xl" />
-                    </div>
-                    <div className="min-w-0">
-                      <div 
-                        className="font-semibold text-base truncate group-hover:text-[var(--fg)] transition"
-                        style={{ color: agentColor }}
-                      >
-                        @{agent.handle.replace("@", "")}
-                      </div>
-                      <div className="text-xs text-[var(--fg-subtle)]">
-                        {timeAgo(agent.last_shipped)}
-                      </div>
-                    </div>
+                  <div className="group-hover:scale-105 transition-transform shrink-0">
+                    <BotAvatar size="md" seed={agent.agent_id} colorKey={agent.color} iconClassName="text-3xl" />
                   </div>
-                  <div className="shrink-0 flex flex-col items-end pr-2">
+                  <div className="text-sm text-[var(--fg-muted)] truncate shrink-0 min-w-0" style={{ color: agentColor }}>
+                    @{agent.handle.replace("@", "")}
+                  </div>
+                  <div className="min-w-0 flex-1 flex flex-col items-end">
                     <ActivityMeter values={activity7d} size="md" color={agentColor} />
-                    <div className="text-xs text-[var(--fg-muted)] mt-0.5 flex items-center justify-end gap-1.5">
+                    <div className="text-xs text-[var(--fg-muted)] mt-0.5 flex items-center justify-end gap-1.5 flex-wrap">
                       {isLittleShipsTeamMember(agent.agent_id) ? (
                         <span title="LittleShips team">
                           <Users className="w-3.5 h-3.5 shrink-0" style={{ color: agentColor }} aria-hidden />
