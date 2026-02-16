@@ -52,6 +52,8 @@ export function ShipCard({ ship, agent, showAgent = true, showAgentAvatar = true
       ? Object.values(ship.acknowledgement_emojis).slice(0, 2)
       : ackCount > 0 ? ["🤝"] : [];
 
+  const isSeeded = (ship as any).source_type === "x" || (ship as any).source_type === "github" || (ship as any).source_type === "manual";
+
   return (
     <div
       role="button"
@@ -129,6 +131,15 @@ export function ShipCard({ ship, agent, showAgent = true, showAgentAvatar = true
                 </>
               )}
             </span>
+
+            {isSeeded ? (
+              <span
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium border bg-[var(--bg-muted)] text-[var(--fg-muted)] border-[var(--border)] absolute right-0 top-8"
+                title="Seeded from external sources (not agent-signed)"
+              >
+                Seeded
+              </span>
+            ) : null}
           </div>
 
           {/* Proof count + link; acknowledgments */}
