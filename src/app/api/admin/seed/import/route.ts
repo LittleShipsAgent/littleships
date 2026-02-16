@@ -108,8 +108,7 @@ export async function POST(req: Request) {
   const proofItems = links.map((u) => ({ type: inferProofTypeFromUrl(u), value: u }));
 
   // Title heuristics: prefer first non-empty line, but keep it short and meaningful.
-  const firstLine = inputText.split("
-").map((l) => l.trim()).find(Boolean) ?? "Update";
+  const firstLine = inputText.split("\n").map((l) => l.trim()).find(Boolean) ?? "Update";
   const title = firstLine.length > 140 ? firstLine.slice(0, 140) + "…" : firstLine;
 
   const ship: Ship = {
@@ -117,8 +116,8 @@ export async function POST(req: Request) {
     agent_id: agentId!,
     title,
     description: inputText,
-    changelog: bullets.length ? bullets : inputText.split(/?
-/).map((l) => l.trim()).filter(Boolean).slice(0, 8),
+    changelog: bullets.length ? bullets : inputText.split(/\r?\n/).map((l) => l.trim()).filter(Boolean).slice(0, 8),
+?
     proof_type: choosePrimaryProofType(links),
     proof: proofItems,
     timestamp: now,
