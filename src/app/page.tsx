@@ -16,9 +16,13 @@ import type { Proof, Agent } from "@/lib/types";
 
 import { fetchWithTimeout, FETCH_TIMEOUT_MS } from "@/lib/fetch";
 const POLL_INTERVAL_MS = 30000; // 30s (egress reduction; was 10s)
-const FEED_HOME_CAP = 20;
+const DEFAULT_FEED_LIMIT = 20;
 
 type FeedProof = Proof & { agent?: Agent | null; _injectedId?: number };
+
+function clampLimit(n: number): number {
+  return Math.max(5, Math.min(100, Math.floor(n)));
+}
 
 
 export default function Home() {
@@ -28,6 +32,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [offline, setOffline] = useState(false);
 
+  const [feedLimit, setFeedLimit] = useState<number>(DEFAULT_FEED_LIMIT);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
 
@@ -48,24 +53,30 @@ export default function Home() {
     agentsRef.current = agents;
   }, [agents]);
 
-  // Initial data fetch
+  // Initial data fetch: get limit + agents in parallel, then feed with that limit
   useEffect(() => {
-    Promise.all([
-      fetchWithTimeout(`/api/feed?limit=${FEED_HOME_CAP}`, FETCH_TIMEOUT_MS).then((r) => r.json()),
-      fetchWithTimeout("/api/agents", FETCH_TIMEOUT_MS).then((r) => r.json()),
-    ])
-      .then(([feedRes, agentsRes]) => {
+    (async () => {
+      try {
+        const [settingsRes, agentsRes] = await Promise.all([
+          fetchWithTimeout("/api/settings/home-feed", FETCH_TIMEOUT_MS).then((r) => r.json()).catch(() => ({ limit: DEFAULT_FEED_LIMIT })),
+          fetchWithTimeout("/api/agents", FETCH_TIMEOUT_MS).then((r) => r.json()),
+        ]);
+        const limit = typeof settingsRes?.limit === "number" ? clampLimit(settingsRes.limit) : DEFAULT_FEED_LIMIT;
+        setFeedLimit(limit);
+        setAgents(agentsRes.agents ?? []);
+
+        const feedRes = await fetchWithTimeout(`/api/feed?limit=${limit}`, FETCH_TIMEOUT_MS).then((r) => r.json());
         setProofs(feedRes.proofs ?? []);
         setNextCursor(feedRes.nextCursor ?? null);
-        setAgents(agentsRes.agents ?? []);
         setOffline(false);
-      })
-      .catch(() => {
+      } catch {
         setOffline(true);
         setProofs([]);
         setAgents([]);
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
   // Scroll to top when loading finishes
@@ -91,7 +102,7 @@ export default function Home() {
     
     const pollForUpdates = async () => {
       const [feedRes, agentsRes] = await Promise.all([
-        fetchWithTimeout(`/api/feed?limit=${FEED_HOME_CAP}`, FETCH_TIMEOUT_MS).catch(() => null),
+        fetchWithTimeout(`/api/feed?limit=${feedLimit}`, FETCH_TIMEOUT_MS).catch(() => null),
         fetchWithTimeout("/api/agents", FETCH_TIMEOUT_MS).catch(() => null),
       ]);
 
@@ -171,14 +182,14 @@ export default function Home() {
     
     const intervalId = setInterval(pollForUpdates, POLL_INTERVAL_MS);
     return () => clearInterval(intervalId);
-  }, [loading]);
+  }, [loading, feedLimit]);
 
   const onLoadMore = async () => {
     if (!nextCursor || loadingMore) return;
     setLoadingMore(true);
     try {
       const res = await fetchWithTimeout(
-        `/api/feed?limit=${FEED_HOME_CAP}&cursor=${encodeURIComponent(nextCursor)}`,
+        `/api/feed?limit=${feedLimit}&cursor=${encodeURIComponent(nextCursor)}`,
         FETCH_TIMEOUT_MS
       );
       const data = await res.json();
@@ -261,7 +272,7 @@ export default function Home() {
 
       <RecentShipsSection
         proofs={proofs}
-        showViewMore={proofs.length >= FEED_HOME_CAP}
+        showViewMore={proofs.length >= feedLimit}
         showLoadMore={!!nextCursor}
         loadingMore={loadingMore}
         onLoadMore={onLoadMore}

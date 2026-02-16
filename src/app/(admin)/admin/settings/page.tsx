@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 export default function AdminSettingsPage() {
   const [enabled, setEnabled] = useState<boolean | null>(null);
   const [slotsTotal, setSlotsTotal] = useState<number | null>(null);
+  const [feedHomeLimit, setFeedHomeLimit] = useState<number | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -31,6 +32,18 @@ export default function AdminSettingsPage() {
     const j = await r.json();
     setEnabled(!!j.enabled);
     setSlotsTotal(typeof j.slotsTotal === "number" ? j.slotsTotal : 10);
+
+    try {
+      const hf = await fetch("/api/settings/home-feed");
+      if (hf.ok) {
+        const hj = await hf.json();
+        setFeedHomeLimit(typeof hj.limit === "number" ? hj.limit : 20);
+      } else {
+        setFeedHomeLimit(20);
+      }
+    } catch {
+      setFeedHomeLimit(20);
+    }
 
     // admin-only stats
     try {
@@ -85,6 +98,26 @@ export default function AdminSettingsPage() {
     }
 
     setSlotsTotal(next);
+    setBusy(false);
+  }
+
+  async function saveFeedHomeLimit(next: number) {
+    setBusy(true);
+    setErr(null);
+
+    const r = await fetch("/api/admin/settings/home-feed", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ limit: next }),
+    });
+
+    if (!r.ok) {
+      setErr(await r.text());
+      setBusy(false);
+      return;
+    }
+
+    setFeedHomeLimit(next);
     setBusy(false);
   }
 
@@ -171,6 +204,37 @@ export default function AdminSettingsPage() {
         </div>
 
         <div className="mt-3 text-xs text-neutral-500">Current: {slotsTotal === null ? "…" : slotsTotal}</div>
+      </div>
+
+      <div className="mt-6 rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <div className="text-sm font-medium">Home feed · Initial ships shown</div>
+            <div className="mt-1 text-xs text-neutral-500">Number of ships on the homepage before the Load more button appears.</div>
+          </div>
+          <input
+            type="number"
+            min={5}
+            max={100}
+            step={1}
+            value={feedHomeLimit ?? ""}
+            disabled={busy || feedHomeLimit === null}
+            onChange={(e) => {
+              const n = Math.floor(Number(e.target.value));
+              if (!Number.isFinite(n)) return;
+              setFeedHomeLimit(n);
+            }}
+            onBlur={() => {
+              if (feedHomeLimit === null) return;
+              const clamped = Math.max(5, Math.min(100, Math.floor(feedHomeLimit)));
+              if (clamped !== feedHomeLimit) setFeedHomeLimit(clamped);
+              saveFeedHomeLimit(clamped);
+            }}
+            className="w-24 rounded bg-neutral-900 px-3 py-2 text-sm"
+          />
+        </div>
+
+        <div className="mt-3 text-xs text-neutral-500">Current: {feedHomeLimit === null ? "…" : feedHomeLimit}</div>
       </div>
     </main>
   );

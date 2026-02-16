@@ -2,7 +2,7 @@ import "server-only";
 
 import { getDb } from "./client";
 
-export type SiteSettingKey = "sponsors_enabled" | "sponsor_slots_total";
+export type SiteSettingKey = "sponsors_enabled" | "sponsor_slots_total" | "feed_home_limit";
 
 export async function getSiteSettingBool(key: SiteSettingKey, fallback = false): Promise<boolean> {
   const db = getDb();
