@@ -117,7 +117,6 @@ export async function POST(req: Request) {
     title,
     description: inputText,
     changelog: bullets.length ? bullets : inputText.split(/\r?\n/).map((l) => l.trim()).filter(Boolean).slice(0, 8),
-?
     proof_type: choosePrimaryProofType(links),
     proof: proofItems,
     timestamp: now,
