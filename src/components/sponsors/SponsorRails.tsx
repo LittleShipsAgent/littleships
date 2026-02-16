@@ -2,6 +2,27 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia(query);
+    const onChange = () => setMatches(mq.matches);
+    onChange();
+    // Safari fallback
+    if (mq.addEventListener) mq.addEventListener("change", onChange);
+    else mq.addListener(onChange);
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener("change", onChange);
+      else mq.removeListener(onChange);
+    };
+  }, [query]);
+
+  return matches;
+}
+
 import { BuySponsorshipCard } from "./BuySponsorshipCard";
 import { BuySponsorshipModal } from "./BuySponsorshipModal";
 import { SponsorCard } from "./SponsorCard";
@@ -36,8 +57,12 @@ export function SponsorRails({
 }) {
   const pathname = usePathname() ?? "/";
 
+  // Mobile perf: do not mount sponsor rails (or trigger their fetch/effects) on mobile.
+  // CSS-only hiding still mounts the component and can delay hydration on iOS.
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+
   const show = shouldShowRails(pathname);
-  if (!show) return <>{children}</>;
+  if (!show || !isDesktop) return <>{children}</>;
 
   const [cards, setCards] = useState<SponsorCardData[] | null>(initialCards ?? null);
   const [slotsTotal, setSlotsTotal] = useState<number | null>(
