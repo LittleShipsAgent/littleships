@@ -110,8 +110,21 @@ export async function POST(req: Request) {
     .eq("source_ref", sourceRef)
     .maybeSingle();
   if (existingShip?.ship_id) {
+    // Update the existing seeded ship in-place (idempotent + refreshable).
+    const row = {
+      title: ship.title,
+      description: ship.description ?? null,
+      changelog: ship.changelog ?? null,
+      proof_type: ship.proof_type,
+      proof: ship.proof,
+      timestamp: ship.timestamp,
+      status: ship.status,
+      seeded_import_run_id: run.id,
+      seeded_at: new Date().toISOString(),
+    };
+    await db.from("ships").update(row).eq("ship_id", existingShip.ship_id);
     await db.from("seed_import_runs").update({ status: "applied", applied_at: new Date().toISOString() }).eq("id", run.id);
-    return NextResponse.json({ ok: true, run_id: run.id, ship_id: existingShip.ship_id, agent_id: agentId });
+    return NextResponse.json({ ok: true, run_id: run.id, ship_id: existingShip.ship_id, agent_id: agentId, updated: true });
   }
   const now = new Date().toISOString();
   const proofItems = links.map((u) => ({ type: inferProofTypeFromUrl(u), value: u }));
