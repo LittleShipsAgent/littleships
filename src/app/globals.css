@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 /* Prevent thin band at top: html and body top strip use solid bg */
 html {
@@ -98,6 +99,15 @@ body::before {
   font-size: 1.1rem;
   line-height: 1.35;
   font-weight: 700;
+  color: var(--fg);
+}
+
+.article-body h4 {
+  margin-top: 1em;
+  margin-bottom: 0.4em;
+  font-size: 1rem;
+  line-height: 1.4;
+  font-weight: 600;
   color: var(--fg);
 }
 

@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 
-type Author = { id: string; slug: string; display_name: string; active: boolean };
+type ArticleAuthor = { id: string; slug: string; display_name: string; active: boolean };
+type AgentOption = { agent_id: string; handle: string };
 type Category = { id: string; slug: string; name: string; description: string | null };
 
 type Article = {
@@ -26,7 +27,8 @@ export default function EditArticlePage() {
   const slug = params.slug;
 
   const [a, setA] = useState<Article | null>(null);
-  const [authors, setAuthors] = useState<Author[] | null>(null);
+  const [articleAuthors, setArticleAuthors] = useState<ArticleAuthor[] | null>(null);
+  const [agents, setAgents] = useState<AgentOption[] | null>(null);
   const [categories, setCategories] = useState<Category[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -45,10 +47,16 @@ export default function EditArticlePage() {
 
   useEffect(() => {
     load();
-    fetch("/api/admin/article-authors")
+    fetch("/api/admin/articles/author-options")
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((j) => setAuthors((j.authors ?? []) as Author[]))
-      .catch(() => setAuthors([]));
+      .then((j) => {
+        setArticleAuthors((j.articleAuthors ?? []) as ArticleAuthor[]);
+        setAgents((j.agents ?? []) as AgentOption[]);
+      })
+      .catch(() => {
+        setArticleAuthors([]);
+        setAgents([]);
+      });
 
     fetch("/api/admin/article-categories")
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
@@ -57,12 +65,30 @@ export default function EditArticlePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
+  const authorSelectValue = useMemo(() => {
+    if (!a) return "";
+    const val = a.author_id ?? "";
+    if (val && (val.startsWith("agent:") || val.length >= 36)) return val;
+    if (a.author_display && agents?.length) {
+      const ag = agents.find((x) => x.handle === a.author_display);
+      if (ag) return `agent:${ag.agent_id}`;
+    }
+    return val || "";
+  }, [a, agents]);
+
   async function save() {
     if (!a) return;
     setBusy(true);
     setErr(null);
 
-    const authorDisplay = authors?.find((x) => x.id === (a.author_id ?? null))?.display_name ?? a.author_display ?? null;
+    const authorDisplay = (() => {
+      const val = a.author_id ?? "";
+      if (val.startsWith("agent:")) {
+        const aid = val.slice(6);
+        return agents?.find((x) => x.agent_id === aid)?.handle ?? a.author_display ?? null;
+      }
+      return articleAuthors?.find((x) => x.id === (a.author_id ?? null))?.display_name ?? a.author_display ?? null;
+    })();
 
     const r = await fetch(`/api/admin/articles/${slug}`, {
       method: "PATCH",
@@ -72,7 +98,11 @@ export default function EditArticlePage() {
         title: a.title,
         excerpt: a.excerpt,
         body: a.body,
-        author_id: a.author_id ?? null,
+        author_id: (() => {
+          const val = a.author_id ?? "";
+          if (val.startsWith("agent:")) return null;
+          return val || null;
+        })(),
         author_display: authorDisplay,
         category_id: a.category_id,
         published_at: a.published_at,
@@ -169,13 +199,22 @@ export default function EditArticlePage() {
                 Manage authors
               </Link>
             </div>
-            <select className="mt-2 w-full rounded bg-neutral-900 px-3 py-2 text-sm" value={a.author_id ?? ""} onChange={(e) => setA({ ...a, author_id: e.target.value || null })}>
+            <select className="mt-2 w-full rounded bg-neutral-900 px-3 py-2 text-sm" value={authorSelectValue} onChange={(e) => setA({ ...a, author_id: e.target.value || null })}>
               <option value="">(none)</option>
-              {(authors ?? []).filter((x) => x.active).map((x) => (
-                <option key={x.id} value={x.id}>
-                  {x.display_name}
-                </option>
-              ))}
+              <optgroup label="Article authors">
+                {(articleAuthors ?? []).filter((x) => x.active).map((x) => (
+                  <option key={`author-${x.id}`} value={x.id}>
+                    {x.display_name}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="Agents">
+                {(agents ?? []).map((x) => (
+                  <option key={`agent-${x.agent_id}`} value={`agent:${x.agent_id}`}>
+                    {x.handle}
+                  </option>
+                ))}
+              </optgroup>
             </select>
           </div>
 

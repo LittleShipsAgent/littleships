@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 
-type Author = { id: string; slug: string; display_name: string; active: boolean };
+type ArticleAuthor = { id: string; slug: string; display_name: string; active: boolean };
+type AgentOption = { agent_id: string; handle: string };
 type Category = { id: string; slug: string; name: string; description: string | null };
 
 export default function NewArticlePage() {
@@ -18,7 +19,8 @@ export default function NewArticlePage() {
   const [body, setBody] = useState("");
   const [authorId, setAuthorId] = useState<string>("");
 
-  const [authors, setAuthors] = useState<Author[] | null>(null);
+  const [articleAuthors, setArticleAuthors] = useState<ArticleAuthor[] | null>(null);
+  const [agents, setAgents] = useState<AgentOption[] | null>(null);
   const [categories, setCategories] = useState<Category[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -26,15 +28,20 @@ export default function NewArticlePage() {
   useEffect(() => {
     document.title = "New article | Admin";
 
-    fetch("/api/admin/article-authors")
+    fetch("/api/admin/articles/author-options")
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then((j) => {
-        const list = (j.authors ?? []) as Author[];
-        setAuthors(list);
-        const signal = list.find((a) => a.slug === "signal")?.id;
+        const authors = (j.articleAuthors ?? []) as ArticleAuthor[];
+        const agentList = (j.agents ?? []) as AgentOption[];
+        setArticleAuthors(authors);
+        setAgents(agentList);
+        const signal = authors.find((x) => x.slug === "signal")?.id;
         if (signal) setAuthorId(signal);
       })
-      .catch(() => setAuthors([]));
+      .catch(() => {
+        setArticleAuthors([]);
+        setAgents([]);
+      });
 
     fetch("/api/admin/article-categories")
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
@@ -51,7 +58,13 @@ export default function NewArticlePage() {
     setBusy(true);
     setErr(null);
 
-    const authorDisplay = authors?.find((a) => a.id === authorId)?.display_name ?? null;
+    const authorDisplay = (() => {
+      if (authorId.startsWith("agent:")) {
+        const aid = authorId.slice(6);
+        return agents?.find((x) => x.agent_id === aid)?.handle ?? null;
+      }
+      return articleAuthors?.find((x) => x.id === authorId)?.display_name ?? null;
+    })();
 
     const r = await fetch("/api/admin/articles", {
       method: "POST",
@@ -62,7 +75,7 @@ export default function NewArticlePage() {
         category_id: categoryId,
         excerpt: excerpt || null,
         body: body || "",
-        author_id: authorId || null,
+        author_id: authorId.startsWith("agent:") ? null : authorId || null,
         author_display: authorDisplay,
       }),
     });
@@ -125,11 +138,21 @@ export default function NewArticlePage() {
             </Link>
           </div>
           <select className="mt-2 w-full rounded bg-neutral-900 px-3 py-2 text-sm" value={authorId} onChange={(e) => setAuthorId(e.target.value)}>
-            {(authors ?? []).filter((a) => a.active).map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.display_name}
-              </option>
-            ))}
+            <option value="">(none)</option>
+            <optgroup label="Article authors">
+              {(articleAuthors ?? []).filter((x) => x.active).map((x) => (
+                <option key={`author-${x.id}`} value={x.id}>
+                  {x.display_name}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Agents">
+              {(agents ?? []).map((x) => (
+                <option key={`agent-${x.agent_id}`} value={`agent:${x.agent_id}`}>
+                  {x.handle}
+                </option>
+              ))}
+            </optgroup>
           </select>
         </div>
 

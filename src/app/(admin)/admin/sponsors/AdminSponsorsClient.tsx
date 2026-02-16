@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type SponsorOrderStatus = "pending_approval" | "active" | "rejected" | "canceled";
 
@@ -47,6 +47,7 @@ export function AdminSponsorsClient() {
   const [orders, setOrders] = useState<SponsorOrder[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  const hasInitialLoadCompleted = useRef(false);
 
   // Editable fields for approvals, keyed by order id.
   const [editByOrderId, setEditByOrderId] = useState<
@@ -77,7 +78,39 @@ export function AdminSponsorsClient() {
     setOrders((j.orders ?? []) as SponsorOrder[]);
   }
 
+  // Initial load: fetch pending first; if empty, default to active tab
   useEffect(() => {
+    if (hasInitialLoadCompleted.current) return;
+    let cancelled = false;
+    fetch(`/api/admin/sponsors/orders/pending_approval`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then(async (j: { orders?: SponsorOrder[] }) => {
+        if (cancelled) return;
+        const pending = j.orders ?? [];
+        const initialTab: SponsorOrderStatus = pending.length > 0 ? "pending_approval" : "active";
+        setTab(initialTab);
+        setOrders(null);
+        const r2 = await fetch(`/api/admin/sponsors/orders/${initialTab}`, { cache: "no-store" });
+        if (cancelled) return;
+        const j2 = r2.ok ? await r2.json() : { orders: [] };
+        setOrders((j2.orders ?? []) as SponsorOrder[]);
+        hasInitialLoadCompleted.current = true;
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setTab("pending_approval");
+          setOrders([]);
+          hasInitialLoadCompleted.current = true;
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // When user changes tab, fetch that tab's data
+  useEffect(() => {
+    if (!hasInitialLoadCompleted.current) return;
     refresh(tab);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab]);

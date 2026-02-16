@@ -51,7 +51,7 @@ export function RichTextEditor({
     editorProps: {
       attributes: {
         class:
-          "prose prose-invert max-w-none focus:outline-none prose-headings:font-semibold prose-a:text-[var(--accent)]",
+          "article-body prose prose-invert max-w-none focus:outline-none prose-headings:font-semibold prose-a:text-[var(--accent)]",
       },
     },
     onUpdate: ({ editor }) => {

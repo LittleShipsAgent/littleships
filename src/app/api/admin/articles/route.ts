@@ -1,12 +1,28 @@
 import { NextResponse } from "next/server";
 import { requireAdminUser } from "@/lib/admin-auth";
-import { adminCreateArticle, adminListArticles } from "@/lib/db/articles-admin";
+import { adminCreateArticle, adminListArticles, adminCountArticles } from "@/lib/db/articles-admin";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const { supabase } = await requireAdminUser();
-    const articles = await adminListArticles(supabase);
-    return NextResponse.json({ articles });
+    const { searchParams } = new URL(request.url);
+    const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
+    const search = (searchParams.get("search") ?? "").trim() || undefined;
+    const statusParam = searchParams.get("status");
+    const status =
+      statusParam === "draft" || statusParam === "scheduled" || statusParam === "published"
+        ? statusParam
+        : undefined;
+    const perPage = 10;
+    const offset = (page - 1) * perPage;
+
+    const [articles, count] = await Promise.all([
+      adminListArticles(supabase, { limit: perPage, offset, search, status }),
+      adminCountArticles(supabase, { search, status }),
+    ]);
+
+    const totalPages = Math.max(1, Math.ceil(count / perPage));
+    return NextResponse.json({ articles, count, totalPages, page });
   } catch (err: any) {
     const msg = err?.message ?? "error";
     const status = msg === "Unauthorized" ? 401 : msg === "Forbidden" ? 403 : 500;

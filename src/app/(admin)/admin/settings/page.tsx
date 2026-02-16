@@ -139,18 +139,30 @@ export default function AdminSettingsPage() {
         <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-3">
           <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
             <div className="text-xs text-neutral-500">Revenue potential (MRR)</div>
-            <div className="mt-1 text-2xl font-semibold">${(stats.totalPotentialCents / 100).toFixed(0)}</div>
-            <div className="mt-1 text-xs text-neutral-500">If all {stats.slotsTotal} slots sold at current ladder</div>
+            <div className="mt-1 text-2xl font-semibold">
+              ${(stats.totalPotentialCents / 100).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+            </div>
+            <div className="mt-1 text-xs text-neutral-500">
+              If all {stats.slotsTotal.toLocaleString()} slots sold at current ladder
+            </div>
           </div>
           <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
             <div className="text-xs text-neutral-500">Revenue sold (pending + active)</div>
-            <div className="mt-1 text-2xl font-semibold">${(stats.collectedCents / 100).toFixed(0)}</div>
-            <div className="mt-1 text-xs text-neutral-500">{stats.slotsSold} / {stats.slotsTotal} occupied</div>
+            <div className="mt-1 text-2xl font-semibold">
+              ${(stats.collectedCents / 100).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+            </div>
+            <div className="mt-1 text-xs text-neutral-500">
+              {stats.slotsSold.toLocaleString()} / {stats.slotsTotal.toLocaleString()} occupied
+            </div>
           </div>
           <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
             <div className="text-xs text-neutral-500">Next sponsor price</div>
-            <div className="mt-1 text-2xl font-semibold">${(stats.nextPriceCents / 100).toFixed(0)}/mo</div>
-            <div className="mt-1 text-xs text-neutral-500">{stats.slotsAvailable} slots available</div>
+            <div className="mt-1 text-2xl font-semibold">
+              ${(stats.nextPriceCents / 100).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}/mo
+            </div>
+            <div className="mt-1 text-xs text-neutral-500">
+              {stats.slotsAvailable.toLocaleString()} slots available
+            </div>
           </div>
         </div>
       )}

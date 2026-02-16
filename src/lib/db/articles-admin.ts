@@ -5,12 +5,57 @@ import type { Article } from "@/lib/types";
 
 // NOTE: These helpers intentionally use a user-session Supabase client so RLS applies.
 
-export async function adminListArticles(supabase: SupabaseClient): Promise<Article[]> {
-  const { data, error } = await supabase
+/** Escape LIKE special chars (%, _) in user input to avoid pattern injection. */
+function escapeLike(s: string): string {
+  return s.replace(/[\\%_]/g, (c) => `\\${c}`);
+}
+
+export type ArticleStatusFilter = "all" | "draft" | "scheduled" | "published";
+
+function applyStatusFilter(query: ReturnType<SupabaseClient["from"]>["select"], status: ArticleStatusFilter) {
+  const now = new Date().toISOString();
+  if (status === "draft") return query.is("published_at", null);
+  if (status === "scheduled") return query.not("published_at", "is", null).gt("published_at", now);
+  if (status === "published") return query.not("published_at", "is", null).lte("published_at", now);
+  return query;
+}
+
+export async function adminCountArticles(
+  supabase: SupabaseClient,
+  options?: { search?: string; status?: ArticleStatusFilter }
+): Promise<number> {
+  let query = supabase.from("articles").select("id", { count: "exact", head: true });
+  query = applyStatusFilter(query, options?.status ?? "all");
+  const q = (options?.search ?? "").trim();
+  if (q) {
+    const esc = escapeLike(q);
+    query = query.or(`title.ilike.%${esc}%,slug.ilike.%${esc}%`);
+  }
+  const { count, error } = await query;
+  if (error) throw error;
+  return typeof count === "number" ? count : 0;
+}
+
+export async function adminListArticles(
+  supabase: SupabaseClient,
+  options?: { limit?: number; offset?: number; search?: string; status?: ArticleStatusFilter }
+): Promise<Article[]> {
+  const limit = options?.limit ?? 50;
+  const offset = options?.offset ?? 0;
+  let query = supabase
     .from("articles")
     .select("id,slug,category_id,title,excerpt,body,author_display,author_id,published_at,created_at,updated_at")
-    .order("updated_at", { ascending: false });
+    .order("updated_at", { ascending: false })
+    .range(offset, offset + limit - 1);
 
+  query = applyStatusFilter(query, options?.status ?? "all");
+  const q = (options?.search ?? "").trim();
+  if (q) {
+    const esc = escapeLike(q);
+    query = query.or(`title.ilike.%${esc}%,slug.ilike.%${esc}%`);
+  }
+
+  const { data, error } = await query;
   if (error) throw error;
   return (data ?? []) as Article[];
 }
