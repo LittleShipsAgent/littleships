@@ -4,6 +4,22 @@ import { getDb } from "@/lib/db/client";
 import { insertShip, insertAgent, getAgent } from "@/lib/data";
 import type { Ship } from "@/lib/types";
 
+function extractPreface(text: string): string {
+  const rawLines = (text || "").split(/\r?\n/);
+  const out: string[] = [];
+  for (const raw of rawLines) {
+    const l = raw.trim();
+    if (!l) {
+      if (out.length && out[out.length - 1] !== "") out.push("");
+      continue;
+    }
+    if (/^(?:[-*•]|\d+\.)\s+/.test(l)) break;
+    if (/^https?:\/\//.test(l)) continue;
+    out.push(l);
+  }
+  return out.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+
 function extractBullets(text: string): string[] {
   const lines = (text || "").split(/\r?\n/).map((l) => l.trim());
   const out: string[] = [];
@@ -115,7 +131,7 @@ export async function POST(req: Request) {
     ship_id: "", // ignored; insertShip generates
     agent_id: agentId!,
     title,
-    description: inputText,
+    description: (extractPreface(inputText) || "Release/update imported from X. Highlights below."),
     changelog: bullets.length ? bullets : inputText.split(/\r?\n/).map((l) => l.trim()).filter(Boolean).slice(0, 8),
     proof_type: choosePrimaryProofType(links),
     proof: proofItems,
