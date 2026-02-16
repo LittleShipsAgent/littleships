@@ -56,21 +56,18 @@ export function SponsorRails({
   initialSlotsTotal?: number;
 }) {
   const pathname = usePathname() ?? "/";
-
-  // Mobile perf: do not mount sponsor rails (or trigger their fetch/effects) on mobile.
-  // CSS-only hiding still mounts the component and can delay hydration on iOS.
   const isDesktop = useMediaQuery("(min-width: 1024px)");
-
-  const show = shouldShowRails(pathname);
-  if (!show || !isDesktop) return <>{children}</>;
 
   const [cards, setCards] = useState<SponsorCardData[] | null>(initialCards ?? null);
   const [slotsTotal, setSlotsTotal] = useState<number | null>(
     typeof initialSlotsTotal === "number" ? initialSlotsTotal : null
   );
+  const [open, setOpen] = useState(false);
+
+  const show = shouldShowRails(pathname);
 
   useEffect(() => {
-    // If server provided slotsTotal, avoid client refetch flicker.
+    if (!show || !isDesktop) return;
     if (slotsTotal !== null) return;
 
     let alive = true;
@@ -88,12 +85,11 @@ export function SponsorRails({
     return () => {
       alive = false;
     };
-  }, [slotsTotal]);
+  }, [show, isDesktop, slotsTotal]);
 
   useEffect(() => {
+    if (!show || !isDesktop) return;
     if (slotsTotal === null) return;
-
-    // If server provided cards, avoid client refetch flicker.
     if (cards !== null) return;
 
     let alive = true;
@@ -126,7 +122,9 @@ export function SponsorRails({
     return () => {
       alive = false;
     };
-  }, [slotsTotal, cards]);
+  }, [show, isDesktop, slotsTotal, cards]);
+
+  if (!show || !isDesktop) return <>{children}</>;
 
   const effectiveSlotsTotal = slotsTotal ?? initialSlotsTotal ?? 10;
 
@@ -147,8 +145,6 @@ export function SponsorRails({
 
   const railWidth = 240;
   const railPad = 24;
-
-  const [open, setOpen] = useState(false);
 
   return (
     <>
