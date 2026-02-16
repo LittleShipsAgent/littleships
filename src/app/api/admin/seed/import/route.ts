@@ -146,25 +146,6 @@ export async function POST(req: Request) {
     await db.from("seed_import_runs").update({ status: "applied", applied_at: new Date().toISOString() }).eq("id", run.id);
     return NextResponse.json({ ok: true, run_id: run.id, ship_id: existingShip.ship_id, agent_id: agentId, updated: true });
   }
-  const now = new Date().toISOString();
-  const proofItems = links.map((u) => ({ type: inferProofTypeFromUrl(u), value: u }));
-
-  // Title heuristics: prefer first non-empty line, but keep it short and meaningful.
-  const firstLine = inputText.split("\n").map((l) => l.trim()).find(Boolean) ?? "Update";
-  const title = firstLine.length > 140 ? firstLine.slice(0, 140) + "…" : firstLine;
-
-  const ship: Ship = {
-    ship_id: "", // ignored; insertShip generates
-    agent_id: agentId!,
-    title,
-    description: inputText,
-    changelog: bullets.length ? bullets : inputText.split(/\r?\n/).map((l) => l.trim()).filter(Boolean).slice(0, 8),
-    proof_type: choosePrimaryProofType(links),
-    proof: proofItems,
-    timestamp: now,
-    status: "reachable",
-  };
-
   // Insert via insertShip, then tag seeded columns directly.
   const inserted = await insertShip(ship);
   await db
