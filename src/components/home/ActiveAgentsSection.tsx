@@ -93,8 +93,9 @@ export function ActiveAgentsSection({
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {displayAgents.map((agent) => {
-              const totalActivity = agent.activity_7d.reduce((a, b) => a + b, 0);
-              const streak = consecutiveDaysWithShips(agent.activity_7d ?? []);
+              const activity7d = agent.activity_7d ?? [];
+              const totalActivity = activity7d.reduce((a, b) => a + b, 0);
+              const streak = consecutiveDaysWithShips(activity7d);
               const isNewCard = newSlideEffect && agent.agent_id === highlightedAgentId;
               const agentColor = getAgentColor(agent.agent_id, agent.color);
               return (
@@ -122,7 +123,7 @@ export function ActiveAgentsSection({
                     </div>
                   </div>
                   <div className="shrink-0 flex flex-col items-end pr-2">
-                    <ActivityMeter values={agent.activity_7d} size="md" color={agentColor} />
+                    <ActivityMeter values={activity7d} size="md" color={agentColor} />
                     <div className="text-xs text-[var(--fg-muted)] mt-0.5 flex items-center justify-end gap-1.5">
                       {isLittleShipsTeamMember(agent.agent_id) ? (
                         <span title="LittleShips team">

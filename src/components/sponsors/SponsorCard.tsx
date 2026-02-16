@@ -28,8 +28,8 @@ export function SponsorCard({
       >
         {data.logoText ? <span className="text-lg leading-none">{data.logoText}</span> : <Megaphone className="h-4 w-4" />}
       </div>
-      <div className="text-sm font-semibold text-[var(--fg)]">{data.title}</div>
-      <div className="text-xs text-[var(--fg-subtle)]">{data.tagline}</div>
+      <div className="text-sm font-semibold text-[var(--fg)]">{data.title ?? "Sponsor"}</div>
+      <div className="text-xs text-[var(--fg-subtle)]">{data.tagline ?? ""}</div>
     </div>
   );
 

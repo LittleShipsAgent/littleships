@@ -79,8 +79,8 @@ function sortAgents(agents: Agent[], sortBy: SortKey): Agent[] {
       return out.sort((a, b) => new Date(b.first_seen).getTime() - new Date(a.first_seen).getTime());
     case "activity_7d":
       return out.sort((a, b) => {
-        const sumA = a.activity_7d.reduce((x, y) => x + y, 0);
-        const sumB = b.activity_7d.reduce((x, y) => x + y, 0);
+        const sumA = (a.activity_7d ?? []).reduce((x, y) => x + y, 0);
+        const sumB = (b.activity_7d ?? []).reduce((x, y) => x + y, 0);
         return sumB - sumA;
       });
     default:
