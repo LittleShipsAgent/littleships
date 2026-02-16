@@ -15,8 +15,8 @@ export default function AdminShipsPage() {
           href="/admin/seed-import"
           className="rounded-xl border border-neutral-800 bg-neutral-950 p-5 hover:bg-neutral-900"
         >
-          <div className="text-sm font-semibold">Seed</div>
-          <div className="mt-1 text-xs text-neutral-500">Import seeded ships from X/GitHub URLs.</div>
+          <div className="text-sm font-semibold">Import</div>
+          <div className="mt-1 text-xs text-neutral-500">Import ships from X/GitHub URLs.</div>
         </Link>
 
         <Link
