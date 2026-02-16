@@ -208,6 +208,15 @@ body::before {
   opacity: 0.52;
 }
 
+/* Mobile perf: large fixed, blurred layers are expensive to paint on iOS.
+   Hide the animated orb layer on small screens to keep TTI < 2s.
+*/
+@media (max-width: 768px) {
+  .recent-ships-orbs {
+    display: none;
+  }
+}
+
 /* (removed) previously hid per-page orbs when rails enabled */
 
 /* Home page Recent Ships only — slightly subtler orbs, still visible by default */
