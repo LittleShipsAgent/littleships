@@ -102,7 +102,29 @@ export async function POST(req: Request) {
   }
 
   // Create seeded ship (idempotent). If it already exists, return existing ship_id.
+  // Create seeded ship (idempotent + refreshable).
   const sourceRef = `x:status:${tweetId}`;
+  const now = new Date().toISOString();
+  const proofItems = links.map((u) => ({ type: inferProofTypeFromUrl(u), value: u }));
+
+  // Title heuristics: prefer first non-empty line, but keep it short and meaningful.
+  const firstLine = inputText.split("
+").map((l) => l.trim()).find(Boolean) ?? "Update";
+  const title = firstLine.length > 140 ? firstLine.slice(0, 140) + "…" : firstLine;
+
+  const ship: Ship = {
+    ship_id: "", // ignored; insertShip generates
+    agent_id: agentId!,
+    title,
+    description: inputText,
+    changelog: bullets.length ? bullets : inputText.split(/?
+/).map((l) => l.trim()).filter(Boolean).slice(0, 8),
+    proof_type: choosePrimaryProofType(links),
+    proof: proofItems,
+    timestamp: now,
+    status: "reachable",
+  };
+
   const { data: existingShip } = await db
     .from("ships")
     .select("ship_id")
