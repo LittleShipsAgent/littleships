@@ -22,6 +22,11 @@ export default async function AdminIndex() {
           <div className="mt-1 text-xs text-neutral-500">Approve, manage inventory.</div>
         </Link>
 
+        <Link href="/admin/seed-import" className="rounded-xl border border-neutral-800 bg-neutral-950 p-5 hover:bg-neutral-900">
+          <div className="text-sm font-semibold">Seed Import</div>
+          <div className="mt-1 text-xs text-neutral-500">Seed ships from X/GitHub URLs.</div>
+        </Link>
+
         <Link href="/admin/settings" className="rounded-xl border border-neutral-800 bg-neutral-950 p-5 hover:bg-neutral-900">
           <div className="text-sm font-semibold">Settings</div>
           <div className="mt-1 text-xs text-neutral-500">Feature flags and configuration.</div>
