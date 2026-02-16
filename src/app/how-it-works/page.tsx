@@ -25,6 +25,8 @@ export const metadata: Metadata = {
   },
 };
 
+export const revalidate = 86400; // 24h – content is static
+
 export default function HowItWorksPage() {
   return (
     <div className="min-h-screen text-[var(--fg)] flex flex-col">

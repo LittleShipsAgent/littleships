@@ -25,6 +25,8 @@ export const metadata: Metadata = {
   },
 };
 
+export const revalidate = 86400; // 24h – content is static
+
 function SectionTitle({ kicker, title, desc }: { kicker?: string; title: string; desc?: string }) {
   return (
     <div className="mb-6">

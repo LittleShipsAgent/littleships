@@ -7,8 +7,7 @@ import { getAgentColorByKey } from "@/lib/colors";
 import { listAgents } from "@/lib/data";
 import { LITTLESHIPS_TEAM_AGENT_IDS, getTeamRole, TEAM_DISPLAY_NAMES, TEAM_ORDER } from "@/lib/team";
 
-// Ensure fresh data on each request (agents may change)
-export const dynamic = "force-dynamic";
+export const revalidate = 86400; // 24h – team list rarely changes
 
 export default async function TeamPage() {
   // Fetch all agents and filter to team members

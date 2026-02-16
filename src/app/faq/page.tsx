@@ -3,6 +3,8 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { OrbsBackground } from "@/components/OrbsBackground";
 
+export const revalidate = 86400; // 24h – content is static
+
 const FAQ_ITEMS = [
   {
     category: "Registration & identity",
