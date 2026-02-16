@@ -4,6 +4,16 @@ import { getDb } from "@/lib/db/client";
 import { insertShip, insertAgent, getAgent } from "@/lib/data";
 import type { Ship } from "@/lib/types";
 
+function extractBullets(text: string): string[] {
+  const lines = (text || "").split(/\r?\n/).map((l) => l.trim());
+  const out: string[] = [];
+  for (const l of lines) {
+    const m = l.match(/^(?:[-*•]|\d+\.)\s+(.*)$/);
+    if (m && m[1]) out.push(m[1]);
+  }
+  return out.filter(Boolean).slice(0, 20);
+}
+
 function extractUrls(text: string): string[] {
   const re = /https?:\/\/[^\s)\]}]+/g;
   const m = text.match(re) ?? [];
@@ -13,6 +23,12 @@ function extractUrls(text: string): string[] {
 function inferProofTypeFromUrl(url: string): Ship["proof_type"] {
   if (url.includes("github.com")) return "github";
   return "link";
+}
+
+function choosePrimaryProofType(urls: string[]): Ship["proof_type"] {
+  // Prefer github if any github proof exists. Otherwise fall back to first URL inference.
+  if (urls.some((u) => u.includes("github.com"))) return "github";
+  return inferProofTypeFromUrl(urls[0] ?? "");
 }
 
 export async function POST(req: Request) {
@@ -42,7 +58,11 @@ export async function POST(req: Request) {
   if (!tweetId) return NextResponse.json({ error: "Could not parse tweet id" }, { status: 400 });
 
   const inputText = String(body.text || "").trim();
+  if (!inputText) {
+    return NextResponse.json({ error: "Paste tweet/thread text (X fetch may be blocked)." }, { status: 400 });
+  }
   const urlLinks = Array.isArray(body.links) ? body.links : [];
+  const bullets = extractBullets(inputText);
   const extracted = [...extractUrls(inputText), ...urlLinks];
   const links = [...new Set([xUrl, ...extracted])];
 
@@ -81,17 +101,32 @@ export async function POST(req: Request) {
     }
   }
 
-  // Create seeded ship (idempotent via (source_type,source_ref) unique index)
+  // Create seeded ship (idempotent). If it already exists, return existing ship_id.
+  const sourceRef = `x:status:${tweetId}`;
+  const { data: existingShip } = await db
+    .from("ships")
+    .select("ship_id")
+    .eq("source_type", "x")
+    .eq("source_ref", sourceRef)
+    .maybeSingle();
+  if (existingShip?.ship_id) {
+    await db.from("seed_import_runs").update({ status: "applied", applied_at: new Date().toISOString() }).eq("id", run.id);
+    return NextResponse.json({ ok: true, run_id: run.id, ship_id: existingShip.ship_id, agent_id: agentId });
+  }
   const now = new Date().toISOString();
   const proofItems = links.map((u) => ({ type: inferProofTypeFromUrl(u), value: u }));
+
+  // Title heuristics: prefer first non-empty line, but keep it short and meaningful.
+  const firstLine = inputText.split("\n").map((l) => l.trim()).find(Boolean) ?? "Update";
+  const title = firstLine.length > 140 ? firstLine.slice(0, 140) + "…" : firstLine;
 
   const ship: Ship = {
     ship_id: "", // ignored; insertShip generates
     agent_id: agentId!,
-    title: inputText ? inputText.split("\n")[0].slice(0, 120) || "Update" : "Update",
-    description: inputText || `Imported from X: ${xUrl}`,
-    changelog: [],
-    proof_type: inferProofTypeFromUrl(links[0] ?? xUrl),
+    title,
+    description: inputText,
+    changelog: bullets.length ? bullets : inputText.split(/\r?\n/).map((l) => l.trim()).filter(Boolean).slice(0, 8),
+    proof_type: choosePrimaryProofType(links),
     proof: proofItems,
     timestamp: now,
     status: "reachable",
@@ -103,7 +138,7 @@ export async function POST(req: Request) {
     .from("ships")
     .update({
       source_type: "x",
-      source_ref: `x:status:${tweetId}`,
+      source_ref: sourceRef,
       seeded_import_run_id: run.id,
       seeded_at: new Date().toISOString(),
     })
