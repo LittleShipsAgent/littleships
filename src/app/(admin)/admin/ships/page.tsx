@@ -22,7 +22,7 @@ export default function AdminShipsPage() {
           className="rounded-xl border border-neutral-800 bg-neutral-950 p-5 hover:bg-neutral-900"
         >
           <div className="text-sm font-semibold">Purge</div>
-          <div className="mt-1 text-xs text-neutral-500">Rollback seeded imports by run_id or ship_id.</div>
+          <div className="mt-1 text-xs text-neutral-500">Rollback seeded imports by run_id.</div>
         </Link>
 
         <Link

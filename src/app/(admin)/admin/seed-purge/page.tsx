@@ -29,7 +29,7 @@ export default function SeedPurgePage() {
     setBusy(true);
     setOut("");
 
-    const r = await fetch("/api/admin/seed/purge-ship", {
+    const r = await fetch("/api/admin/ships/delete", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ ship_id: shipId.trim() }),
@@ -53,14 +53,14 @@ export default function SeedPurgePage() {
 
       <div className="mt-8 grid grid-cols-1 gap-6">
         <form onSubmit={purgeShip} className="space-y-3 rounded-xl border border-neutral-800 bg-neutral-950 p-5">
-          <div className="text-sm font-semibold">Purge by ship_id</div>
+          <div className="text-sm font-semibold">Delete by ship_id</div>
           <div>
             <label className="text-sm text-neutral-300">ship_id</label>
             <input className="mt-2 w-full rounded bg-neutral-900 px-3 py-2 text-sm" value={shipId} onChange={(e) => setShipId(e.target.value)} placeholder="SHP-..." required />
-            <div className="mt-1 text-xs text-neutral-500">Only deletes seeded ships (refuses verified/non-seeded).</div>
+            <div className="mt-1 text-xs text-neutral-500">Deletes any ship by ship_id (admin-only).</div>
           </div>
           <button className="rounded bg-red-500 px-3 py-2 text-sm font-medium text-white disabled:opacity-60" disabled={busy} type="submit">
-            Purge ship
+            Delete ship
           </button>
         </form>
 
