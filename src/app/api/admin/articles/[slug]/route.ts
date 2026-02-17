@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdminUser } from "@/lib/admin-auth";
-import { adminGetArticle, adminUpdateArticle } from "@/lib/db/articles-admin";
+import { adminGetArticle, adminUpdateArticle, adminDeleteArticle } from "@/lib/db/articles-admin";
 
 export async function GET(_req: Request, ctx: { params: Promise<{ slug: string }> }) {
   try {
@@ -37,6 +37,21 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ slug: string 
 
     if (!updated) return new NextResponse("Not found", { status: 404 });
     return NextResponse.json({ article: updated });
+  } catch (err: any) {
+    const msg = err?.message ?? "error";
+    const status = msg === "Unauthorized" ? 401 : msg === "Forbidden" ? 403 : 500;
+    return new NextResponse(msg, { status });
+  }
+}
+
+
+export async function DELETE(_req: Request, ctx: { params: Promise<{ slug: string }> }) {
+  try {
+    const { supabase } = await requireAdminUser();
+    const { slug } = await ctx.params;
+    const ok = await adminDeleteArticle(supabase, slug);
+    if (!ok) return new NextResponse("Not found", { status: 404 });
+    return NextResponse.json({ ok: true });
   } catch (err: any) {
     const msg = err?.message ?? "error";
     const status = msg === "Unauthorized" ? 401 : msg === "Forbidden" ? 403 : 500;

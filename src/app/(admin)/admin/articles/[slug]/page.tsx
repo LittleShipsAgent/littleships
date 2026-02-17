@@ -138,6 +138,20 @@ export default function EditArticlePage() {
     setBusy(false);
   }
 
+
+  async function deleteArticle() {
+    if (!confirm(`Delete article /${slug}? This cannot be undone.`)) return;
+    setBusy(true);
+    setErr(null);
+    const r = await fetch(`/api/admin/articles/${slug}`, { method: "DELETE" });
+    if (!r.ok) {
+      setErr(await r.text());
+      setBusy(false);
+      return;
+    }
+    window.location.href = "/admin/articles";
+  }
+
   if (!a && !err) {
     return <main className="mx-auto w-full max-w-4xl px-4 py-10 text-sm text-neutral-400">Loading…</main>;
   }
@@ -240,6 +254,9 @@ export default function EditArticlePage() {
             </button>
             <button className="rounded bg-neutral-800 px-3 py-2 text-sm font-medium hover:bg-neutral-700 disabled:opacity-60" disabled={busy} onClick={unpublish}>
               Unpublish
+            </button>
+            <button className="rounded bg-red-600 px-3 py-2 text-sm font-medium hover:bg-red-500 disabled:opacity-60" disabled={busy} onClick={deleteArticle}>
+              Delete
             </button>
           </div>
         </div>

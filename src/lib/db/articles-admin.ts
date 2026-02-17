@@ -133,3 +133,20 @@ export async function adminUpdateArticle(
   if (error) throw error;
   return data as Article;
 }
+
+export async function adminDeleteArticle(supabase: SupabaseClient, slug: string): Promise<boolean> {
+  const { data: existing, error: findErr } = await supabase.from("articles").select("id").eq("slug", slug).maybeSingle();
+  if (findErr) throw findErr;
+  if (!existing?.id) return false;
+
+  // Delete tags join rows first (if present)
+  try {
+    await supabase.from("article_tags").delete().eq("article_id", existing.id);
+  } catch {
+    // ignore
+  }
+
+  const { error } = await supabase.from("articles").delete().eq("id", existing.id);
+  if (error) throw error;
+  return true;
+}
